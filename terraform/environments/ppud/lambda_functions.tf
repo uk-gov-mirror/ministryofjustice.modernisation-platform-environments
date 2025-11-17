@@ -256,9 +256,9 @@ resource "aws_lambda_function" "lambda_functions" {
   layers = try(each.value.config.layers, null) != null ? [
     for layer in each.value.config.layers :
     contains(keys(local.lambda_layers), layer) ?
-      aws_lambda_layer_version.lambda_layers[layer].arn :
+    aws_lambda_layer_version.lambda_layers[layer].arn :
     contains(keys(local.layer_arns), layer) ?
-      local.layer_arns[layer] :
+    local.layer_arns[layer] :
     null
   ] : null
 
