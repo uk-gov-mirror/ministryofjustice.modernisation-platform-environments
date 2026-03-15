@@ -31,7 +31,6 @@ resource "null_resource" "ssm_pick_backend" {
       "--document-name", "AWS-RunShellScript",
       "--instance-ids", "${data.aws_instance.ssogen_primary_details[0].id}",
       "--region", "${data.aws_region.current.id}",
-      "--comment", "tf select backend",
       "--parameters",
       "'commands=[\"set -euo pipefail",
       "check_tcp() { nc -z -w2 $1 $2; }",
