@@ -140,11 +140,6 @@ module "karpenter" {
   node_iam_role_additional_policies = {
     AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   }
-
-  tags = local.tags
-  depends_on = [
-    module.eks
-  ]
 }
 
 
@@ -188,13 +183,12 @@ data "kubectl_path_documents" "manifests" {
     alias_version = "v20260304"
     cluster_name = module.eks[0].cluster_name
   }
-  depends_on = [
-    helm_release.karpenter
-  ]
 }
 
 resource "kubectl_manifest" "deploy_manifest" {
-  # for_each  = data.kubectl_path_documents.manifests.manifests
-  # yaml_body = each.value
-  yaml_body = data.kubectl_path_documents.manifests[0].manifests
+  for_each  = data.kubectl_path_documents.manifests.manifests
+  yaml_body = each.value
+  depends_on = [
+    helm_release.karpenter
+  ]
 }
