@@ -156,11 +156,11 @@ locals {
 
   db_backup_config_dev = {
     object_lock_days             = 3
-    expire_current_after_days    = 28
+    expire_current_after_days    = 60
     expire_noncurrent_after_days = 10
     transition = [
         {
-          days          = 10
+          days          = 30
           storage_class = "STANDARD_IA"
         }
       ]
