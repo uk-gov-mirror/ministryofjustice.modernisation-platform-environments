@@ -66,6 +66,19 @@ module "s3_bucket_oracledb_backups" {
   tags = var.tags
 }
 
+resource "aws_s3_bucket_object_lock_configuration" "oracledb_backup_lock_configuration" {
+  count = try(var.db_backup_config.object_lock_days, null) != null ? 1 : 0
+  bucket = module.s3_bucket_oracledb_backups.bucket.id
+
+  rule {
+    default_retention {
+      mode = "COMPLIANCE"
+      days = var.db_backup_config.object_lock_days
+    }
+  }
+}
+
+
 #trivy:ignore:AVD-AWS-0345
 data "aws_iam_policy_document" "oracledb_backup_bucket_access" {
   #checkov:skip=CKV_AWS_108 "ignore"
@@ -213,6 +226,7 @@ module "s3_bucket_oracledb_backups_inventory" {
     aws.bucket-replication = aws.bucket-replication
   }
 
+  # Lifecycle Rules for the Backup Inventory should match those of the Backup it is tracking
   lifecycle_rule = [
     {
       id      = "main"
@@ -224,16 +238,16 @@ module "s3_bucket_oracledb_backups_inventory" {
         autoclean = "true"
       }
 
-      transition = [
-        {
-          days          = 90
-          storage_class = "STANDARD_IA"
-        }
-      ]
+      transition = try(var.db_backup_config.transition, [])
 
       expiration = {
-        days = local.oracle_backup_bucket_expiration
+        days = var.db_backup_config.expire_current_after_days
       }
+
+      noncurrent_version_expiration = {
+        days = var.db_backup_config.expire_noncurrent_after_days
+      }
+
     }
   ]
 
@@ -359,16 +373,16 @@ module "s3_bucket_oracle_statistics" {
         autoclean = "true"
       }
 
-      transition = [
-        {
-          days          = 90
-          storage_class = "STANDARD_IA"
-        }
-      ]
+      transition = try(var.db_backup_config.transition, [])
 
       expiration = {
-        days = local.oracle_backup_bucket_expiration
+        days = var.db_backup_config.expire_current_after_days
       }
+
+      noncurrent_version_expiration = {
+        days = var.db_backup_config.expire_noncurrent_after_days
+      }
+
     }
   ]
 
