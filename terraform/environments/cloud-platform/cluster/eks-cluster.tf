@@ -142,6 +142,9 @@ module "karpenter" {
   }
 
   tags = local.tags
+  depends_on = [
+    module.eks
+  ]
 }
 
 
@@ -166,6 +169,9 @@ resource "helm_release" "karpenter" {
      enabled: false
    EOT
  ]
+  depends_on = [
+    module.karpenter
+  ]
 }
 
 # data "template_file" "karpenter_nodepool" {
@@ -182,9 +188,15 @@ data "kubectl_path_documents" "manifests" {
     alias_version = "v20260304"
     cluster_name = module.eks[0].cluster_name
   }
+  depends_on = [
+    helm_release.karpenter
+  ]
 }
 
-resource "kubectl_manifest" "test" {
-    for_each  = data.kubectl_path_documents.manifests.manifests
-    yaml_body = each.value
+resource "kubectl_manifest" "deploy_manifest" {
+  for_each  = data.kubectl_path_documents.manifests.manifests
+  yaml_body = each.value
+  depends_on = [
+    kubectl_path_documents.manifests
+  ]
 }
