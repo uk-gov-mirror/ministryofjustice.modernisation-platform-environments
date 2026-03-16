@@ -156,5 +156,11 @@ locals {
     object_lock_days             = 0
     expire_current_after_days    = 84
     expire_noncurrent_after_days = 10
+    transition = [
+        {
+          days          = 30
+          storage_class = "STANDARD_IA"
+        }
+      ]
   }
 }
