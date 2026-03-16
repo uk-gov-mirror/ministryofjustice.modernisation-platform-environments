@@ -26,15 +26,15 @@ resource "null_resource" "ssm_pick_backend" {
   }
 
 
-  connection {
-    type        = "ssh"
-    host        = "${self.triggers.host_a}"
-    user        = "ec2-user"
-    private_key = file(var.ssh_private_key_path)
-    # Optional hardening:
-    # bastion_host, bastion_user, bastion_private_key etc. if your Terraform version/provider supports them directly
-    timeout     = "60s"
-  }
+  # connection {
+  #   type        = "ssh"
+  #   host        = "${self.triggers.host_a}"
+  #   user        = "ec2-user"
+  #   private_key = file(var.ssh_private_key_path)
+  #   # Optional hardening:
+  #   # bastion_host, bastion_user, bastion_private_key etc. if your Terraform version/provider supports them directly
+  #   timeout     = "60s"
+  # }
 
   provisioner "local-exec" {
     command = join(" ", [
