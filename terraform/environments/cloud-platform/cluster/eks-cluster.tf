@@ -183,7 +183,7 @@ resource "helm_release" "karpenter" {
 # }
 
 data "kubectl_path_documents" "manifests" {
-  pattern = "${path.module}/templates/*.yaml"
+  pattern = "${path.module}/templates/karpenter.yaml"
   vars = {
     alias_version = "v20260304"
     cluster_name = module.eks[0].cluster_name
@@ -194,6 +194,7 @@ data "kubectl_path_documents" "manifests" {
 }
 
 resource "kubectl_manifest" "deploy_manifest" {
-  for_each  = data.kubectl_path_documents.manifests.manifests
-  yaml_body = each.value
+  # for_each  = data.kubectl_path_documents.manifests.manifests
+  # yaml_body = each.value
+  yaml_body = data.kubectl_path_documents.manifests.manifests
 }
