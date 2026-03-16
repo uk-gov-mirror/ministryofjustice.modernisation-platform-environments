@@ -241,8 +241,8 @@ resource "aws_lakeformation_permissions" "glue_table_optimizer_table_permissions
 resource "aws_lakeformation_permissions" "glue_table_optimizer_database_permissions" {
     for_each = toset(local.database_to_optimize)
     principal = aws_iam_role.glue_table_optimizer.arn
-    permissions = ["ALTER", "DESCRIBE", "INSERT", "DELETE"]
+    permissions = ["DESCRIBE"]
     database {
-        name = "${each.key}${local.db_suffix}"
+      name = "${each.key}${local.db_suffix}"
     }
 }
