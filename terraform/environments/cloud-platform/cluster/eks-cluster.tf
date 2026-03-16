@@ -196,7 +196,4 @@ data "kubectl_path_documents" "manifests" {
 resource "kubectl_manifest" "deploy_manifest" {
   for_each  = data.kubectl_path_documents.manifests.manifests
   yaml_body = each.value
-  depends_on = [
-    data.kubectl_path_documents.manifests
-  ]
 }
