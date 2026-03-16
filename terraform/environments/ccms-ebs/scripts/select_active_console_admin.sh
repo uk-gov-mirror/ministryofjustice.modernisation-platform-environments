@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 HOST_A="$1"; PORT_A="$2"; HOST_B="$3"; PORT_B="$4"; PARAM_NAME="$5"; REGION="$6"
 
@@ -13,8 +13,7 @@ if check_tcp "$HOST_A" "$PORT_A"; then
 elif check_tcp "$HOST_B" "$PORT_B"; then
   SELECTED="$HOST_B"
 else
-  echo "Neither backend reachable" >&2
-  exit 1
+  SELECTED="$HOST_A"
 fi
 
 aws ssm put-parameter \
