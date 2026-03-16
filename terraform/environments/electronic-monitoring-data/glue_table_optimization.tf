@@ -176,6 +176,13 @@ data "aws_iam_policy_document" "glue_table_optimizer_policy" {
     statement {
       effect = "Allow"
       actions = [
+        "s3:ListAllMyBuckets",
+      ]
+      resources = ["*"]
+    }
+    statement {
+      effect = "Allow"
+      actions = [
         "glue:UpdateTable",
         "glue:GetTable",
         "glue:CreateTableOptimizer",
