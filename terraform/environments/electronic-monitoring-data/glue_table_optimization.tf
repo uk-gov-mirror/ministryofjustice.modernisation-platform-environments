@@ -220,12 +220,22 @@ resource "aws_lakeformation_permissions" "glue_table_optimizer_permissions" {
     }
 }
 
-resource "aws_lakeformation_permissions" "glue_table_optimizer_database_permissions" {
+resource "aws_lakeformation_permissions" "glue_table_optimizer_table_permissions" {
     for_each = toset(local.database_to_optimize)
     principal = aws_iam_role.glue_table_optimizer.arn
     permissions = ["ALTER", "DESCRIBE", "INSERT", "DELETE"]
     table {
         database_name = "${each.key}${local.db_suffix}"
         wildcard      = true
+    }
+}
+
+
+resource "aws_lakeformation_permissions" "glue_table_optimizer_database_permissions" {
+    for_each = toset(local.database_to_optimize)
+    principal = aws_iam_role.glue_table_optimizer.arn
+    permissions = ["ALTER", "DESCRIBE", "INSERT", "DELETE"]
+    database {
+        name = "${each.key}${local.db_suffix}"
     }
 }
