@@ -177,7 +177,9 @@ data "aws_iam_policy_document" "glue_table_optimizer_policy" {
       effect = "Allow"
       actions = [
         "glue:UpdateTable",
-        "glue:GetTable"
+        "glue:GetTable",
+        "glue:CreateTableOptimizer",
+        "glue:GetTableOptimizer",
       ]
       resources = [
         "arn:aws:glue:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/*/*",
