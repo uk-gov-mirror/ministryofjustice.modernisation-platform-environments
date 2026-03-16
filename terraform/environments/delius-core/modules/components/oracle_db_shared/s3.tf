@@ -50,16 +50,16 @@ module "s3_bucket_oracledb_backups" {
         autoclean = "true"
       }
 
-      transition = [
-        {
-          days          = 90
-          storage_class = "STANDARD_IA"
-        }
-      ]
+      transition = []
 
       expiration = {
-        days = local.oracle_backup_bucket_expiration
+        days = 14
       }
+
+      noncurrent_version_expiration = {
+        days = 10
+      }
+
     }
   ]
 
