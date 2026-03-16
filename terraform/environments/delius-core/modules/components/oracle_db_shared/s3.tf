@@ -50,14 +50,14 @@ module "s3_bucket_oracledb_backups" {
         autoclean = "true"
       }
 
-      transition = []
+      transition = var.db_backup_config.transition
 
       expiration = {
-        days = 14
+        days = var.db_backup_config.expire_current_after_days
       }
 
       noncurrent_version_expiration = {
-        days = 10
+        days = var.db_backup_config.expire_noncurrent_after_days
       }
 
     }
