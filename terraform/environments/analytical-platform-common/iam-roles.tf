@@ -129,6 +129,16 @@ module "data_engineering_datalake_access_terraform_iam_role" {
         identifiers = [module.data_engineering_datalake_access_github_actions_iam_role.arn]
       }]
     }
+    platformEngineerAdminAssume = {
+      actions = [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ]
+      principals = [{
+        type        = "AWS"
+        identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/${data.aws_region.current.region}/${one(data.aws_iam_roles.platform_engineer_admin_sso_role.names)}"]
+      }]
+    }
   }
 
   policies = {
