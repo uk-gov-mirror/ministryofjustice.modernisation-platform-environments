@@ -1780,6 +1780,7 @@ data "aws_iam_policy_document" "fan_out_tags_policy_document" {
     effect = "Allow"
     actions = [
       "s3:GetObjectTagging",
+       "s3:ListBucket",
     ]
     resources = [
       "${module.s3-raw-formatted-data-bucket.bucket.arn}/*"
