@@ -244,7 +244,7 @@ module "calculate_checksum" {
 # DMS Validation Lambdas
 #-----------------------------------------------------------------------------------
 module "dms_retrieve_metadata" {
-  count = local.is-development || local.is-production ? 1 : 0
+  count = local.is-development || local.is-production || local.is-preproduction ? 1 : 0
 
   source                  = "./modules/lambdas"
   is_image                = true
@@ -267,7 +267,7 @@ module "dms_retrieve_metadata" {
 
 
 module "dms_validation" {
-  count = local.is-development || local.is-production ? 1 : 0
+  count = local.is-development || local.is-production || local.is-preproduction ? 1 : 0
 
   source                  = "./modules/lambdas"
   is_image                = true
