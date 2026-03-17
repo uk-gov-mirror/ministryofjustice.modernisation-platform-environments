@@ -350,7 +350,7 @@ moved {
 }
 #---------------------CHANGES FOR USING KMS-CMK FOR S3 BUCKETS---------------------------------------------
  
-resource "aws_s3_bucket_server_side_encryption_configuration" "payment_load" {
+resource "aws_s3_bucket_server_side_encryption_configuration" "payment_load_sse" {
   bucket = aws_s3_bucket.lambda_payment_load.id   
 
   rule {
@@ -363,46 +363,4 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "payment_load" {
   }
 }
 
-resource "aws_s3_bucket_policy" "payment_load" {
-  bucket = aws_s3_bucket.lambda_payment_load.id   
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-
-      # Allow Lambda role for THIS bucket only
-      {
-        Sid    = "AllowLambdaAccess"
-        Effect = "Allow"
-        Principal = {
-          AWS = aws_iam_role.lambda_execution_role.arn
-        }
-        Action = [
-          "s3:ListBucket",
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject"
-        ]
-        Resource = [
-          aws_s3_bucket.lambda_payment_load.arn,
-          "${aws_s3_bucket.lambda_payment_load.arn}/*"
-        ]
-      },
-
-      # Allow GuardDuty tagging after scan
-      {
-        Sid    = "AllowGuardDutyTagging"
-        Effect = "Allow"
-        Principal = {
-          Service = "malware-protection-plan.guardduty.amazonaws.com"
-        }
-        Action = [
-          "s3:GetObject",
-          "s3:GetObjectTagging",
-          "s3:PutObjectTagging"
-        ]
-        Resource = "${aws_s3_bucket.lambda_payment_load.arn}/*"
-      }
-    ]
-  })
-}
