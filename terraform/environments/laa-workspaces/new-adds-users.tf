@@ -1,40 +1,26 @@
 ##############################################
-### AD User Creation
-### Automatically creates/deletes AD users
-### based on workspace_users in new-workspace-users.tf
+### User Management with IAM Identity Center
+###
+### ⚠️ Users are managed in IAM Identity Center
+### 
+### With IAM Identity Center, users are NOT created in AWS Directory Service.
+### Instead, they are managed in IAM Identity Center which can be:
+### - Federated with Office 365 (Azure AD)
+### - Federated with Okta, Google Workspace, etc.
+### - Managed directly in IAM Identity Center
+###
+### To provision WorkSpaces for a user:
+### 1. Ensure user exists in IAM Identity Center
+### 2. Configure IAM Identity Center federation (if using external IdP)
+### 3. Add user to appropriate IAM Identity Center groups
+### 4. Create WorkSpace using their IAM Identity Center username
+###
+### User authentication happens via IAM Identity Center SSO.
 ##############################################
 
-resource "terraform_data" "ad_users" {
-  for_each = local.environment == "development" ? local.workspace_users : {}
+# No user creation needed - users are managed in IAM Identity Center
 
-  input = {
-    directory_id = aws_directory_service_directory.workspaces_ad[0].id
-    username     = each.key
-    first_name   = each.value.first_name
-    last_name    = each.value.last_name
-    email        = each.value.email
-    region       = local.application_data.accounts[local.environment].region
-  }
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      aws ds-data create-user \
-        --directory-id ${self.output.directory_id} \
-        --sam-account-name ${self.output.username} \
-        --given-name "${self.output.first_name}" \
-        --surname "${self.output.last_name}" \
-        --email-address ${self.output.email} \
-        --region ${self.output.region} 2>&1 || echo "User ${self.output.username} may already exist, continuing..."
-    EOT
-  }
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
-      aws ds-data delete-user \
-        --directory-id ${self.output.directory_id} \
-        --sam-account-name ${self.output.username} \
-        --region ${self.output.region} 2>&1 || echo "User ${self.output.username} may not exist, continuing..."
-    EOT
-  }
-}
+# Users authenticate with IAM Identity Center credentials:
+# - If federated with Office 365: Office 365 email/password
+# - If federated with Okta: Okta credentials
+# If IAM Identity Center native: IAM Identity Center username/password

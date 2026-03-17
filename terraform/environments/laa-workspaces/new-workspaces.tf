@@ -1,11 +1,35 @@
 ##############################################
-### WorkSpaces Directory Registration
+### WorkSpaces Directory with IAM Identity Center
+###
+### ⚠️ IMPORTANT SETUP STEPS:
+###
+### 1. Initial Setup Required via AWS Console/CLI:
+###    - Enable WorkSpaces with IAM Identity Center
+###    - This creates a directory automatically
+###    - Get the directory_id after creation
+###
+### 2. Then import into Terraform:
+###    terraform import aws_workspaces_directory.workspaces[0] d-xxxxxxxxxx
+###
+### 3. Or manage via Terraform from the start if supported
+###
 ##############################################
 
+# Data source to reference IAM Identity Center instance
+data "aws_ssoadmin_instances" "this" {}
+
+# WorkSpaces directory backed by IAM Identity Center
+# Note: May require initial setup via console if not supported directly
 resource "aws_workspaces_directory" "workspaces" {
   count = local.environment == "development" ? 1 : 0
 
-  directory_id = aws_directory_service_directory.workspaces_ad[0].id
+  # This will be the directory_id created when enabling WorkSpaces with IAM Identity Center
+  # You may need to:
+  # 1. Create via console first
+  # 2. Import: terraform import aws_workspaces_directory.workspaces[0] d-xxxxxxxxxx
+  # 3. Or use AWS CLI to create with IAM Identity Center
+  
+  directory_id = var.workspaces_directory_id # This needs to be provided
   subnet_ids   = [aws_subnet.private_a[0].id, aws_subnet.private_b[0].id]
 
   self_service_permissions {
@@ -31,7 +55,6 @@ resource "aws_workspaces_directory" "workspaces" {
     enable_internet_access              = false
     enable_maintenance_mode             = true
     user_enabled_as_local_administrator = false
-    default_ou                          = "OU=Computers,OU=${local.application_data.accounts[local.environment].ad_short_name},DC=${replace(local.application_data.accounts[local.environment].ad_directory_name, ".", ",DC=")}"
   }
 
   ip_group_ids = [aws_workspaces_ip_group.workspaces[0].id]
@@ -44,8 +67,20 @@ resource "aws_workspaces_directory" "workspaces" {
 
   tags = merge(
     local.tags,
-    { "Name" = "${local.application_name}-${local.environment}-workspaces-directory" }
+    {
+      "Name"               = "${local.application_name}-${local.environment}-workspaces-directory"
+      "AuthenticationType" = "IAM-Identity-Center"
+      "IdentitySource"     = "IAMIdentityCenter"
+      "InstanceArn"        = local.application_data.accounts[local.environment].identity_center_instance_arn
+    }
   )
+}
+
+# Variable for directory_id (to be provided or imported)
+variable "workspaces_directory_id" {
+  description = "Directory ID created when enabling WorkSpaces with IAM Identity Center"
+  type        = string
+  default     = ""  # Leave empty initially, will be set after creation
 }
 
 ##############################################
@@ -70,10 +105,16 @@ resource "aws_workspaces_ip_group" "workspaces" {
 }
 
 ##############################################
-### WorkSpaces Instances
+### WorkSpaces Instances with IAM Identity Center
+### 
 ### Users are defined in new-workspace-users.tf
-### AD users are auto-created by terraform_data.ad_users
-### Uncomment when ready to deploy workspaces
+### Users must exist in IAM Identity Center
+### 
+### To create WorkSpaces:
+### 1. Ensure users exist in IAM Identity Center
+### 2. If federated, ensure external IdP sync is working
+### 3. Uncomment the resource below
+### 4. Run terraform apply
 ##############################################
 
 # resource "aws_workspaces_workspace" "workspaces" {
@@ -81,7 +122,7 @@ resource "aws_workspaces_ip_group" "workspaces" {
 #
 #   directory_id = aws_workspaces_directory.workspaces[0].id
 #   bundle_id    = local.application_data.accounts[local.environment].workspace_bundle_id
-#   user_name    = each.key
+#   user_name    = each.value.email  # Use IAM Identity Center username (usually email)
 #
 #   root_volume_encryption_enabled = true
 #   user_volume_encryption_enabled = true
@@ -95,15 +136,16 @@ resource "aws_workspaces_ip_group" "workspaces" {
 #     running_mode_auto_stop_timeout_in_minutes = local.workspace_types[each.value.instance_type].running_mode_auto_stop_timeout_in_minutes
 #   }
 #
-#   depends_on = [terraform_data.ad_users]
-#
 #   tags = merge(
 #     local.tags,
 #     {
-#       "Name"  = "${local.application_name}-${local.environment}-workspace-${each.key}"
-#       "User"  = each.key
-#       "Email" = each.value.email
+#       "Name"              = "${local.application_name}-${local.environment}-workspace-${each.key}"
+#       "User"              = each.key
+#       "Email"             = each.value.email
+#       "AuthSource"        = "IAMIdentityCenter"
+#       "IAMIdentityCenter" = local.application_data.accounts[local.environment].identity_center_instance_arn
 #     }
 #   )
+# }
 # }
 

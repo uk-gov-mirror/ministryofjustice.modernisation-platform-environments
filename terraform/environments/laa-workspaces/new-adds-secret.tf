@@ -1,48 +1,36 @@
 ##############################################
-### Secrets for Active Directory
+### Secrets for IAM Identity Center Integration
+### 
+### No directory service passwords needed when
+### using IAM Identity Center as identity source
 ##############################################
 
-resource "random_password" "ad_admin_password" {
-  count   = local.environment == "development" ? 1 : 0
-  length  = 32
-  special = false
-
-  keepers = {
-    directory_name = local.application_data.accounts[local.environment].ad_directory_name
-  }
-
-  lifecycle {
-    ignore_changes = [
-      keepers
-    ]
-  }
-}
-
-resource "aws_secretsmanager_secret" "ad_admin_password" {
+# Store IAM Identity Center configuration for reference
+resource "aws_secretsmanager_secret" "identity_center_config" {
   count                   = local.environment == "development" ? 1 : 0
-  name                    = "${local.application_name}/${local.environment}/ad-admin-password"
-  description             = "Active Directory admin password for ${local.application_name}-${local.environment}"
-  recovery_window_in_days = 0
+  name                    = "${local.application_name}/${local.environment}/identity-center-config"
+  description             = "IAM Identity Center configuration for WorkSpaces - ${local.application_name}-${local.environment}"
+  recovery_window_in_days = 7
 
   tags = merge(
     local.tags,
-    { "Name" = "${local.application_name}/${local.environment}/ad-admin-password" }
+    {
+      "Name"           = "${local.application_name}/${local.environment}/identity-center-config"
+      "Purpose"        = "IAMIdentityCenterReference"
+      "IdentitySource" = "IAMIdentityCenter"
+    }
   )
 }
 
-resource "aws_secretsmanager_secret_version" "ad_admin_password" {
+resource "aws_secretsmanager_secret_version" "identity_center_config" {
   count     = local.environment == "development" ? 1 : 0
-  secret_id = aws_secretsmanager_secret.ad_admin_password[0].id
+  secret_id = aws_secretsmanager_secret.identity_center_config[0].id
   secret_string = jsonencode(
     {
-      username = "Admin"
-      password = random_password.ad_admin_password[0].result
+      instance_arn    = local.application_data.accounts[local.environment].identity_center_instance_arn
+      directory_type  = "IAMIdentityCenter"
+      authentication  = "IAMIdentityCenter-SSO"
+      description     = "WorkSpaces uses IAM Identity Center for authentication. Users managed in IAM Identity Center."
     }
   )
-
-  lifecycle {
-    ignore_changes = [
-      secret_string
-    ]
-  }
 }
