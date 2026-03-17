@@ -156,7 +156,7 @@ locals {
 
   db_backup_config_dev = {
     object_lock_days             = 3
-    expire_current_after_days    = 14
+    expire_current_after_days    = 80
     expire_noncurrent_after_days = 10
   }
 }

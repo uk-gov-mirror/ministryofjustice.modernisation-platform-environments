@@ -154,7 +154,7 @@ locals {
 
   db_backup_config_preprod = {
     object_lock_days             = 0
-    expire_current_after_days    = 84
+    expire_current_after_days    = 200
     expire_noncurrent_after_days = 10
     transition = [
         {
