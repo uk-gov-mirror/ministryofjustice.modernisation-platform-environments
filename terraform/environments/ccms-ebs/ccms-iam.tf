@@ -557,3 +557,117 @@ resource "aws_kms_key_policy" "sns_alerts_key_policy" {
   key_id = aws_kms_key.cloudwatch_sns_alerts_key.id
   policy = data.aws_iam_policy_document.cloudwatch_sns_encryption.json
 }
+
+#-----------------S3 - GuardDuty Access changes-----------------------------------------------------------
+
+resource "aws_s3_bucket_policy" "payment_load" {
+  bucket = aws_s3_bucket.lambda_payment_load.id   
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+
+      # Allow Lambda role for THIS bucket only
+      {
+        Sid    = "AllowLambdaAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = aws_iam_role.lambda_execution_role.arn
+        }
+        Action = [
+          "s3:ListBucket",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          aws_s3_bucket.lambda_payment_load.arn,
+          "${aws_s3_bucket.lambda_payment_load.arn}/*"
+        ]
+      },
+
+      # Allow GuardDuty tagging after scan
+      {
+        Sid    = "AllowGuardDutyTagging"
+        Effect = "Allow"
+        Principal = {
+          Service = "malware-protection-plan.guardduty.amazonaws.com"
+        }
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectTagging",
+          "s3:PutObjectTagging"
+        ]
+        Resource = "${aws_s3_bucket.lambda_payment_load.arn}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_kms_key_policy" "shared_s3_cmk" {
+  key_id = aws_kms_key.shared_s3_cmk.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+
+      # Account admin/root full control (standard, required)
+      {
+        Sid      = "AllowAccountAdmin"
+        Effect   = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      },
+
+      # Allow IAM principals in this account to use the key VIA S3 ONLY
+      #    (safe for shared Lambda roles and multiple buckets)
+      {
+        Sid    = "AllowUseOfKeyViaS3Only"
+        Effect = "Allow"
+        Principal = {
+          AWS = "*"
+        }
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey",
+          "kms:DescribeKey"
+        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "kms:CallerAccount" = data.aws_caller_identity.current.account_id
+            "kms:ViaService"    = "s3.${data.aws_region.current.name}.amazonaws.com"
+          }
+        }
+      },
+
+      # Allow GuardDuty Malware Protection for S3 (REQUIRED)
+      {
+        Sid    = "AllowGuardDutyMalwareProtectionViaS3"
+        Effect = "Allow"
+        Principal = {
+          Service = "malware-protection-plan.guardduty.amazonaws.com"
+        }
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey",
+          "kms:DescribeKey"
+        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "kms:ViaService"    = "s3.${data.aws_region.current.name}.amazonaws.com"
+            "aws:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+          ArnLike = {
+            "aws:SourceArn" = "arn:aws:guardduty:*:${data.aws_caller_identity.current.account_id}:malware-protection-plan/*"
+          }
+        }
+      }
+    ]
+  })
+}
+#-----------------S3 - GuardDuty Access changes ends here-----------------------------------------------------------
