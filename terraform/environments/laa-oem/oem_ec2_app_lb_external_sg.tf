@@ -12,17 +12,17 @@ resource "aws_security_group" "load_balancer_security_group" {
   ), local.tags)
 }
 
-# # EGRESS
-# resource "aws_vpc_security_group_egress_rule" "lb_sg_egress_all_0_0_cidr" {
-#   security_group_id = aws_security_group.load_balancer_security_group.id
-#   description       = "Allow all outbound traffic"
-#   ip_protocol       = "-1"
-#   cidr_ipv4         = "0.0.0.0/0"
-#
-#   tags = {
-#     Name = "Allow all outbound traffic"
-#   }
-# }
+# EGRESS
+resource "aws_vpc_security_group_egress_rule" "lb_sg_egress_all_0_0_cidr" {
+  security_group_id = aws_security_group.load_balancer_security_group.id
+  description       = "Allow all outbound traffic"
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+
+  tags = {
+    Name = "Allow all outbound traffic"
+  }
+}
 
 # INGRESS
 resource "aws_vpc_security_group_ingress_rule" "lb_sg_ingress_tcp_443_443_cidr_1" {
