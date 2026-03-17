@@ -1,36 +1,20 @@
 ##############################################
 ### WorkSpaces Directory with IAM Identity Center
 ###
-### ⚠️ IMPORTANT SETUP STEPS:
+### Uses IAM Identity Center (AWS SSO) as the
+### identity source. No Directory Service needed.
 ###
-### 1. Initial Setup Required via AWS Console/CLI:
-###    - Enable WorkSpaces with IAM Identity Center
-###    - This creates a directory automatically
-###    - Get the directory_id after creation
-###
-### 2. Then import into Terraform:
-###    terraform import aws_workspaces_directory.workspaces[0] d-xxxxxxxxxx
-###
-### 3. Or manage via Terraform from the start if supported
-###
+### Users authenticate via IAM Identity Center,
+### which can be federated with Office 365, Okta, etc.
 ##############################################
 
-# Data source to reference IAM Identity Center instance
-data "aws_ssoadmin_instances" "this" {}
-
-# WorkSpaces directory backed by IAM Identity Center
-# Note: May require initial setup via console if not supported directly
 resource "aws_workspaces_directory" "workspaces" {
   count = local.environment == "development" ? 1 : 0
 
-  # This will be the directory_id created when enabling WorkSpaces with IAM Identity Center
-  # You may need to:
-  # 1. Create via console first
-  # 2. Import: terraform import aws_workspaces_directory.workspaces[0] d-xxxxxxxxxx
-  # 3. Or use AWS CLI to create with IAM Identity Center
-  
-  directory_id = var.workspaces_directory_id # This needs to be provided
-  subnet_ids   = [aws_subnet.private_a[0].id, aws_subnet.private_b[0].id]
+  workspace_type     = "PERSONAL"
+  user_identity_type = "AWS_IAM_IDENTITY_CENTER"
+
+  subnet_ids = [aws_subnet.private_a[0].id, aws_subnet.private_b[0].id]
 
   self_service_permissions {
     change_compute_type  = false
@@ -70,17 +54,8 @@ resource "aws_workspaces_directory" "workspaces" {
     {
       "Name"               = "${local.application_name}-${local.environment}-workspaces-directory"
       "AuthenticationType" = "IAM-Identity-Center"
-      "IdentitySource"     = "IAMIdentityCenter"
-      "InstanceArn"        = local.application_data.accounts[local.environment].identity_center_instance_arn
     }
   )
-}
-
-# Variable for directory_id (to be provided or imported)
-variable "workspaces_directory_id" {
-  description = "Directory ID created when enabling WorkSpaces with IAM Identity Center"
-  type        = string
-  default     = ""  # Leave empty initially, will be set after creation
 }
 
 ##############################################
@@ -105,18 +80,8 @@ resource "aws_workspaces_ip_group" "workspaces" {
 }
 
 ##############################################
-### WorkSpaces Instances with IAM Identity Center
-### 
-### Users are defined in new-workspace-users.tf
-### Users must exist in IAM Identity Center
-### 
-### To create WorkSpaces:
-### 1. Ensure users exist in IAM Identity Center
-### 2. If federated, ensure external IdP sync is working
-### 3. Uncomment the resource below
-### 4. Run terraform apply
+### WorkSpaces Creation
 ##############################################
-
 # resource "aws_workspaces_workspace" "workspaces" {
 #   for_each = local.environment == "development" ? local.workspace_users : {}
 #
