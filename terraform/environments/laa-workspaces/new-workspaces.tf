@@ -1,20 +1,24 @@
 ##############################################
 ### WorkSpaces Directory with IAM Identity Center
 ###
-### Uses IAM Identity Center (AWS SSO) as the
-### identity source. No Directory Service needed.
+### ⚠️ IMPORT REQUIRED
 ###
-### Users authenticate via IAM Identity Center,
-### which can be federated with Office 365, Okta, etc.
+### This resource must be created manually via AWS Console first,
+### then imported into Terraform.
+###
+### Import command:
+###   terraform import aws_workspaces_directory.workspaces[0] d-xxxxxxxxxx
+###
+### After import, Terraform will manage the configuration.
 ##############################################
 
 resource "aws_workspaces_directory" "workspaces" {
   count = local.environment == "development" ? 1 : 0
 
-  workspace_type     = "PERSONAL"
-  user_identity_type = "AWS_IAM_IDENTITY_CENTER"
-
-  subnet_ids = [aws_subnet.private_a[0].id, aws_subnet.private_b[0].id]
+  # This directory_id comes from application_variables.json after manual creation
+  # Leave empty in variables until after console creation
+  directory_id = local.application_data.accounts[local.environment].workspaces_directory_id
+  subnet_ids   = [aws_subnet.private_a[0].id, aws_subnet.private_b[0].id]
 
   self_service_permissions {
     change_compute_type  = false
@@ -54,8 +58,15 @@ resource "aws_workspaces_directory" "workspaces" {
     {
       "Name"               = "${local.application_name}-${local.environment}-workspaces-directory"
       "AuthenticationType" = "IAM-Identity-Center"
+      "IdentityProvider"   = "IAMIdentityCenter"
+      "DirectoryType"      = "IAMIdentityCenter"
     }
   )
+
+  lifecycle {
+    # Prevent replacement if directory_id is updated after import
+    ignore_changes = [directory_id]
+  }
 }
 
 ##############################################
