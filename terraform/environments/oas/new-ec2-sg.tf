@@ -79,6 +79,18 @@ resource "aws_security_group_rule" "ingress_rds_from_mp_vpc_for_edw" {
   cidr_blocks       = [data.aws_vpc.shared.cidr_block]
 }
 
+resource "aws_security_group_rule" "ingress_managed_9514_workspace" {
+  count = local.environment == "preproduction" ? 1 : 0
+
+  type              = "ingress"
+  security_group_id = aws_security_group.ec2_sg[0].id
+  description       = "Access to the managed server from workspace"
+  from_port         = 9514
+  to_port           = 9514
+  protocol          = "tcp"
+  cidr_blocks       = [local.application_data.accounts[local.environment].managementcidr]
+}
+
 ######################################
 ### EC2 EGRESS RULES
 ######################################
@@ -140,4 +152,16 @@ resource "aws_security_group_rule" "egress_rds_to_mp_vpc_for_edw" {
   to_port           = 1521
   protocol          = "tcp"
   cidr_blocks       = [data.aws_vpc.shared.cidr_block]
+}
+
+resource "aws_security_group_rule" "egress_managed_9514_workspace" {
+  count = local.environment == "preproduction" ? 1 : 0
+
+  type              = "egress"
+  security_group_id = aws_security_group.ec2_sg[0].id
+  description       = "Access to the managed server from workspace"
+  from_port         = 9514
+  to_port           = 9514
+  protocol          = "tcp"
+  cidr_blocks       = [local.application_data.accounts[local.environment].managementcidr]
 }
