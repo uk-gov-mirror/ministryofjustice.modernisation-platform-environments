@@ -26,4 +26,16 @@ module "secret_ingestion_api_auth_token" {
   secret_string         = "populate-manually"
 
   tags = local.tags
+
+  policy_statements = {
+    read = {
+      sid = "AllowCPApplicationToReadAndSet"
+      principals = [{
+        type        = "AWS"
+        identifiers = ["arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/aws-sdk-java-1773843258205"]
+      }]
+      actions   = ["secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue"]
+      resources = ["*"]
+    }
+  }
 }

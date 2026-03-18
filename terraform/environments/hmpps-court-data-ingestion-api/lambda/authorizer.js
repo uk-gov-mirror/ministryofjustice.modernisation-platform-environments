@@ -66,10 +66,15 @@ exports.handler = async (event) => {
         .digest('hex');
         
     // Timing-safe comparison
-    const isValid = crypto.timingSafeEqual(
-        Buffer.from(receivedSignature, 'hex'),
-        Buffer.from(computedSignature, 'hex')
-    );
+    let isValid = false
+    try {
+      isValid = crypto.timingSafeEqual(
+          Buffer.from(receivedSignature, 'hex'),
+          Buffer.from(computedSignature, 'hex')
+      );
+    } catch (error) {
+       console.log("[auth] Error comparing signatures ", error.message);
+    }
 
     if (isValid) {
       console.log("[auth] allow: token matched");
