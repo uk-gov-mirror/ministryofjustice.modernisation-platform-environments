@@ -587,7 +587,6 @@ module "s3-data-bucket" {
     aws.bucket-replication = aws
   }
 
-  bucket_policy = local.cross_env_bucket_policy
   lifecycle_rule = [
     {
       id      = "main"
@@ -1144,6 +1143,7 @@ module "s3-glue-job-script-bucket" {
 
 data "aws_iam_policy_document" "allow_cross_env_upload" {
   count = local.is-preproduction ? 1 : 0
+
   statement {
     sid    = "AllowProdLambdaWrite"
     effect = "Allow"
@@ -1156,10 +1156,7 @@ data "aws_iam_policy_document" "allow_cross_env_upload" {
       "s3:PutObject",
       "s3:PutObjectAcl"
     ]
-    resources = [
-      "${module.s3-dms-target-store-bucket.bucket.arn}/*",
-      "${module.s3-data-bucket.bucket.arn}/*",
-    ]
+    resources = ["${module.s3-dms-target-store-bucket.bucket.arn}/*"]
   }
 }
 
