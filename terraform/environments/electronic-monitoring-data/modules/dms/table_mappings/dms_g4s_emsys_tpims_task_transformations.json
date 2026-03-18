@@ -9,15 +9,12 @@
         "table-name": "vw_CurfewSegment",
         "table-type": "view"
       },
-      "rule-action": "include",
-      "filters": [],
-      "parallel-load": null,
-      "isAutoSegmentationChecked": false
+      "rule-action": "include"
     },
     {
       "rule-type": "transformation",
       "rule-id": "11",
-      "rule-name": "RenameCurfewSegmentViewToTableOnTarget",
+      "rule-name": "RenameCurfewSegmentView",
       "rule-target": "table",
       "object-locator": {
         "schema-name": "dbo",
@@ -25,6 +22,20 @@
       },
       "rule-action": "rename",
       "value": "CurfewSegment"
+    },
+    {
+      "rule-type": "transformation",
+      "rule-id": "12",
+      "rule-name": "DefineCurfewSegmentPK",
+      "rule-target": "column",
+      "object-locator": {
+        "schema-name": "dbo",
+        "table-name": "vw_CurfewSegment",
+        "column-name": "CurfewSegmentID"
+      },
+      "rule-action": "define-primary-key",
+      "name": "PK_CurfewSegment",
+      "origin": "primary-key"
     },
     {
       "rule-type": "selection",
@@ -35,15 +46,12 @@
         "table-name": "vw_GPSPositionLatest",
         "table-type": "view"
       },
-      "rule-action": "include",
-      "filters": [],
-      "parallel-load": null,
-      "isAutoSegmentationChecked": false
+      "rule-action": "include"
     },
     {
       "rule-type": "transformation",
       "rule-id": "21",
-      "rule-name": "RenameGPSPositionLatestViewToTableOnTarget",
+      "rule-name": "RenameGPSPositionLatestView",
       "rule-target": "table",
       "object-locator": {
         "schema-name": "dbo",
@@ -51,6 +59,20 @@
       },
       "rule-action": "rename",
       "value": "GPSPositionLatest"
+    },
+    {
+      "rule-type": "transformation",
+      "rule-id": "22",
+      "rule-name": "DefineGPSPositionLatestPK",
+      "rule-target": "column",
+      "object-locator": {
+        "schema-name": "dbo",
+        "table-name": "vw_GPSPositionLatest",
+        "column-name": "GPSPositionID"
+      },
+      "rule-action": "define-primary-key",
+      "name": "PK_GPSPositionLatest",
+      "origin": "primary-key"
     }
   ]
 }
