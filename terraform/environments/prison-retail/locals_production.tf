@@ -26,7 +26,7 @@ locals {
         config = {
           ami_name                      = "Windows_Server-2019-English-Full-SQL_2019_Standard-2026.01.14"
           ami_owner                     = "801119661308"
-          availability_zone             = "eu-west-2b"
+          availability_zone             = "eu-west-2a"
           ebs_volumes_copy_all_from_ami = false
           iam_resource_names_prefix     = "ec2-instance"
           instance_profile_policies = [
