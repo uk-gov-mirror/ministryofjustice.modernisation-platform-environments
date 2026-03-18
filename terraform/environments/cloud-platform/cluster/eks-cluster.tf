@@ -43,19 +43,6 @@ module "eks" {
       taints                 = local.environment_configuration.monitoring_ng.taints
       labels                 = local.environment_configuration.monitoring_ng.labels
     }
-    karpenter = {
-      ami_type       = "BOTTLEROCKET_x86_64"
-      instance_types = ["m5.large"]
-
-      min_size     = 2
-      max_size     = 3
-      desired_size = 2
-
-      labels = {
-        # Used to ensure Karpenter runs on nodes that it does not manage
-        "karpenter.sh/controller" = "true"
-      }
-    }
   }
 
   addons = {
@@ -169,13 +156,6 @@ resource "helm_release" "karpenter" {
   ]
 }
 
-# data "template_file" "karpenter_nodepool" {
-#   template = "${file("${path.module}/templates/karpenter_nodepool.yaml.tpl")}"
-#   vars = {
-#     alias_version = "v20260304"
-#     cluster_name = module.eks[0].cluster_name
-#   }
-# }
 
 data "kubectl_path_documents" "manifests" {
   pattern = "${path.module}/templates/karpenter.yaml"
