@@ -43,6 +43,19 @@ module "eks" {
       taints                 = local.environment_configuration.monitoring_ng.taints
       labels                 = local.environment_configuration.monitoring_ng.labels
     }
+    karpenter = {
+      ami_type       = "BOTTLEROCKET_x86_64"
+      instance_types = ["m5.large"]
+
+      min_size     = 2
+      max_size     = 3
+      desired_size = 2
+
+      labels = {
+        # Used to ensure Karpenter runs on nodes that it does not manage
+        "karpenter.sh/controller" = "true"
+      }
+    }
   }
 
   addons = {
