@@ -34,8 +34,13 @@
         "column-name": "CurfewSegmentID"
       },
       "rule-action": "define-primary-key",
-      "name": "PK_CurfewSegment",
-      "origin": "primary-key"
+      "primary-key-def": {
+        "name": "PK_CurfewSegment",
+        "origin": "primary-key",
+        "columns": [
+          "CurfewSegmentID"
+        ]
+      }
     },
     {
       "rule-type": "selection",
@@ -71,8 +76,13 @@
         "column-name": "GPSPositionID"
       },
       "rule-action": "define-primary-key",
-      "name": "PK_GPSPositionLatest",
-      "origin": "primary-key"
+      "primary-key-def": {
+        "name": "PK_GPSPositionLatest",
+        "origin": "primary-key",
+        "columns": [
+          "GPSPositionID"
+        ]
+      }
     }
   ]
 }
