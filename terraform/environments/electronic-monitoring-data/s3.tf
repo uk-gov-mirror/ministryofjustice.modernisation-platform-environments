@@ -587,6 +587,7 @@ module "s3-data-bucket" {
     aws.bucket-replication = aws
   }
 
+  bucket_policy = local.cross_env_bucket_policy
   lifecycle_rule = [
     {
       id      = "main"
