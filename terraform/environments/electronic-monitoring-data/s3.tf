@@ -1158,7 +1158,7 @@ data "aws_iam_policy_document" "allow_cross_env_upload" {
     resources = [
       "${module.s3-dms-target-store-bucket.bucket.arn}/*",
       "${module.s3-data-bucket.bucket.arn}/*",
-      ]
+    ]
   }
 }
 
