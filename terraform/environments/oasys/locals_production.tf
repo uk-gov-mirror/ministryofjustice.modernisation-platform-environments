@@ -2,6 +2,8 @@ locals {
 
   web_live_side = "b"
 
+  delius_oasys_queues_production = {}
+
   baseline_presets_production = {
     options = {
       db_backup_lifecycle_rule            = "rman_backup_one_month"
@@ -586,8 +588,6 @@ locals {
                     host_header = {
                       values = [ # max of 5
                         "oasys.service.justice.gov.uk",
-                        "bridge-oasys.az.justice.gov.uk",
-                        "www.oasys.service.justice.gov.uk",
                       ]
                     }
                   }
@@ -619,10 +619,7 @@ locals {
                   {
                     host_header = {
                       values = [ # max of 5
-                        "practice.bridge-oasys.az.justice.gov.uk",
                         "practice.oasys.service.justice.gov.uk",
-                        "practice.a.oasys.service.justice.gov.uk",
-                        "practice.b.oasys.service.justice.gov.uk",
                       ]
                     }
                   }
@@ -638,10 +635,7 @@ locals {
                   {
                     host_header = {
                       values = [ # max of 5
-                        "training.bridge-oasys.az.justice.gov.uk",
                         "training.oasys.service.justice.gov.uk",
-                        "training.a.oasys.service.justice.gov.uk",
-                        "training.b.oasys.service.justice.gov.uk",
                       ]
                     }
                   }
@@ -693,9 +687,6 @@ locals {
                     host_header = {
                       values = [ # max of 5
                         "int.oasys.service.justice.gov.uk",
-                        "oasys-ukwest.oasys.az.justice.gov.uk",
-                        # "oasys.az.justice.gov.uk",
-                        "p-oasys.az.justice.gov.uk",
                       ]
                     }
                   }
@@ -728,11 +719,6 @@ locals {
                     host_header = {
                       values = [ # max of 5
                         "practice.int.oasys.service.justice.gov.uk",
-                        "practice.oasys.az.justice.gov.uk",
-                        "practice.p-oasys.az.justice.gov.uk",
-                        # "practice-ukwest.oasys.az.justice.gov.uk",
-                        "practice.a-int.oasys.service.justice.gov.uk",
-                        "practice.b-int.oasys.service.justice.gov.uk",
                       ]
                     }
                   }
@@ -749,11 +735,6 @@ locals {
                     host_header = {
                       values = [ # max of 5
                         "training.int.oasys.service.justice.gov.uk",
-                        "training.oasys.az.justice.gov.uk",
-                        "training.p-oasys.az.justice.gov.uk",
-                        # "training-ukwest.oasys.az.justice.gov.uk",
-                        "training.a-int.oasys.service.justice.gov.uk",
-                        "training.b-int.oasys.service.justice.gov.uk",
                       ]
                     }
                   }
@@ -843,8 +824,7 @@ locals {
       }
       "oasys.az.justice.gov.uk" = {
         records = [
-          { name = "_f3741832781b53d3c8d6ebd0c2f785dd.onr", type = "CNAME", ttl = 86400, records = ["_5021c8da699c0e8c8841f906c7ced90e.sdgjtdhdhz.acm-validations.aws"] },
-          { name = "onr", type = "A", ttl = "300", records = ["10.40.6.210"] }
+          { name = "onr", type = "NS", ttl = "86400", records = ["ns-1693.awsdns-19.co.uk", "ns-1432.awsdns-51.org", "ns-951.awsdns-54.net", "ns-373.awsdns-46.com"] },
         ]
         lb_alias_records = [
           { name = "", type = "A", lbs_map_key = "private" },

@@ -193,13 +193,23 @@ module "load_mdss_event_queue" {
   lambda_function_name = module.load_mdss_lambda.lambda_function_name
   bucket_prefix        = local.bucket_prefix
   maximum_concurrency  = 100
-  max_receive_count    = local.load_sqs_max_receive_count
+  max_receive_count    = local.load_mdss_sqs_max_receive_count
 }
 
 module "load_fms_event_queue" {
   source               = "./modules/sqs_s3_lambda_trigger"
   bucket               = module.s3-raw-formatted-data-bucket.bucket
   lambda_function_name = module.load_fms_lambda.lambda_function_name
+  bucket_prefix        = local.bucket_prefix
+  maximum_concurrency  = 100
+  max_receive_count    = local.load_sqs_max_receive_count
+}
+
+module "fms_fan_out_event_queue" {
+  count                = local.is-development || local.is-test || local.is-preproduction ? 1 : 0
+  source               = "./modules/sqs_s3_lambda_trigger"
+  bucket               = module.s3-raw-formatted-data-bucket.bucket
+  lambda_function_name = module.fan_out_tags[0].lambda_function_name
   bucket_prefix        = local.bucket_prefix
   maximum_concurrency  = 100
   max_receive_count    = local.load_sqs_max_receive_count
@@ -219,6 +229,14 @@ resource "aws_s3_bucket_notification" "load_mdss_event" {
     queue_arn     = module.load_fms_event_queue.sqs_queue.arn
     events        = ["s3:ObjectCreated:*"]
     filter_prefix = "serco/fms"
+  }
+  dynamic "queue" {
+    for_each = local.is-development || local.is-test || local.is-preproduction ? [1] : []
+    content {
+      queue_arn     = module.fms_fan_out_event_queue[0].sqs_queue.arn
+      events        = ["s3:ObjectTagging:Put"]
+      filter_prefix = "serco/fms/validation_rejected"
+    }
   }
 
   depends_on = [module.load_mdss_event_queue, module.load_fms_event_queue]
@@ -257,4 +275,30 @@ resource "aws_lambda_event_source_mapping" "mdss_cleanup_sqs_trigger" {
   scaling_config {
     maximum_concurrency = 100
   }
+}
+
+#-----------------------------------------------------------------------------------
+# Schedule MDSS reconciler (every 5 minutes)
+#-----------------------------------------------------------------------------------
+
+resource "aws_cloudwatch_event_rule" "mdss_reconciler_schedule" {
+  count               = local.is-preproduction || local.is-production ? 0 : 1
+  name                = "mdss_reconciler_schedule"
+  description         = "Runs mdss_reconciler on a schedule to backstop missed MDSS loads"
+  schedule_expression = "rate(5 minutes)"
+}
+
+resource "aws_cloudwatch_event_target" "mdss_reconciler_target" {
+  count = local.is-preproduction || local.is-production ? 0 : 1
+  rule  = aws_cloudwatch_event_rule.mdss_reconciler_schedule[0].name
+  arn   = module.mdss_reconciler[0].lambda_function_arn
+}
+
+resource "aws_lambda_permission" "mdss_reconciler_allow_eventbridge" {
+  count         = local.is-preproduction || local.is-production ? 0 : 1
+  statement_id  = "AllowExecutionFromEventBridgeMdssReconciler"
+  action        = "lambda:InvokeFunction"
+  function_name = module.mdss_reconciler[0].lambda_function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.mdss_reconciler_schedule[0].arn
 }

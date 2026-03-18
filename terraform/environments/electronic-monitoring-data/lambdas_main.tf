@@ -1,8 +1,9 @@
 locals {
-  lambda_path                 = "lambdas"
-  env_name                    = local.is-production ? "prod" : local.is-preproduction ? "preprod" : local.is-test ? "test" : "dev"
-  db_name                     = local.is-production ? "g4s_cap_dw" : "test"
-  load_sqs_max_receive_count  = 2
+  lambda_path                     = "lambdas"
+  env_name                        = local.is-production ? "prod" : local.is-preproduction ? "preprod" : local.is-test ? "test" : "dev"
+  db_name                         = local.is-production ? "g4s_cap_dw" : "test"
+  load_sqs_max_receive_count      = 2
+  load_mdss_sqs_max_receive_count = 8
 }
 
 
@@ -21,7 +22,7 @@ module "output_file_structure_as_json_from_zip" {
   core_shared_services_id = local.environment_management.account_ids["core-shared-services-production"]
   production_dev          = local.is-production ? "prod" : "dev"
   security_group_ids      = [aws_security_group.lambda_generic.id]
-  subnet_ids              = data.aws_subnets.shared-public.ids
+  subnet_ids              = data.aws_subnets.shared-private.ids
   environment_variables = {
     OUTPUT_BUCKET = module.s3-json-directory-structure-bucket.bucket.id
     SOURCE_BUCKET = module.s3-data-bucket.bucket.id
@@ -41,7 +42,7 @@ module "unzip_single_file" {
   memory_size             = 2048
   timeout                 = 900
   security_group_ids      = [aws_security_group.lambda_generic.id]
-  subnet_ids              = data.aws_subnets.shared-public.ids
+  subnet_ids              = data.aws_subnets.shared-private.ids
   core_shared_services_id = local.environment_management.account_ids["core-shared-services-production"]
   production_dev          = local.is-production ? "prod" : "dev"
   environment_variables = {
@@ -63,7 +64,7 @@ module "unzipped_presigned_url" {
   memory_size             = 2048
   timeout                 = 900
   security_group_ids      = [aws_security_group.lambda_generic.id]
-  subnet_ids              = data.aws_subnets.shared-public.ids
+  subnet_ids              = data.aws_subnets.shared-private.ids
   core_shared_services_id = local.environment_management.account_ids["core-shared-services-production"]
   production_dev          = local.is-production ? "prod" : "dev"
 }
@@ -99,7 +100,7 @@ module "virus_scan_definition_upload" {
   memory_size   = 2048
   timeout       = 900
   # security_group_ids      = [aws_security_group.lambda_generic.id]
-  # subnet_ids              = data.aws_subnets.shared-public.ids
+  # subnet_ids              = data.aws_subnets.shared-private.ids
   core_shared_services_id = local.environment_management.account_ids["core-shared-services-production"]
   environment_variables = {
     MODE                         = "definition-upload",
@@ -131,7 +132,7 @@ module "virus_scan_file" {
   memory_size                    = 2048
   timeout                        = 900
   security_group_ids             = [aws_security_group.lambda_generic.id]
-  subnet_ids                     = data.aws_subnets.shared-public.ids
+  subnet_ids                     = data.aws_subnets.shared-private.ids
   reserved_concurrent_executions = 1000
   core_shared_services_id        = local.environment_management.account_ids["core-shared-services-production"]
   environment_variables = {
@@ -156,7 +157,7 @@ module "format_json_fms_data" {
   memory_size                    = 1024
   timeout                        = 900
   security_group_ids             = [aws_security_group.lambda_generic.id]
-  subnet_ids                     = data.aws_subnets.shared-public.ids
+  subnet_ids                     = data.aws_subnets.shared-private.ids
   core_shared_services_id        = local.environment_management.account_ids["core-shared-services-production"]
   production_dev                 = local.is-production ? "prod" : "dev"
   reserved_concurrent_executions = 1000
@@ -175,7 +176,7 @@ module "copy_mdss_data" {
   memory_size                    = 1024
   timeout                        = 900
   security_group_ids             = [aws_security_group.lambda_generic.id]
-  subnet_ids                     = data.aws_subnets.shared-public.ids
+  subnet_ids                     = data.aws_subnets.shared-private.ids
   reserved_concurrent_executions = 1000
   core_shared_services_id        = local.environment_management.account_ids["core-shared-services-production"]
   production_dev                 = local.is-production ? "prod" : "dev"
@@ -202,7 +203,7 @@ module "clean_after_dlt_load" {
   core_shared_services_id        = local.environment_management.account_ids["core-shared-services-production"]
   production_dev                 = local.is-production ? "prod" : local.is-preproduction ? "preprod" : local.is-test ? "test" : "dev"
   security_group_ids             = [aws_security_group.lambda_generic.id]
-  subnet_ids                     = data.aws_subnets.shared-public.ids
+  subnet_ids                     = data.aws_subnets.shared-private.ids
 
   environment_variables = {
     CATALOG_ID      = data.aws_caller_identity.current.account_id
@@ -230,7 +231,7 @@ module "calculate_checksum" {
   memory_size             = 4096
   timeout                 = 900
   security_group_ids      = [aws_security_group.lambda_generic.id]
-  subnet_ids              = data.aws_subnets.shared-public.ids
+  subnet_ids              = data.aws_subnets.shared-private.ids
   core_shared_services_id = local.environment_management.account_ids["core-shared-services-production"]
   production_dev          = local.is-production ? "prod" : "dev"
   environment_variables = {
@@ -243,7 +244,7 @@ module "calculate_checksum" {
 # DMS Validation Lambdas
 #-----------------------------------------------------------------------------------
 module "dms_retrieve_metadata" {
-  count = local.is-development || local.is-production ? 1 : 0
+  count = local.is-development || local.is-production || local.is-preproduction ? 1 : 0
 
   source                  = "./modules/lambdas"
   is_image                = true
@@ -261,12 +262,12 @@ module "dms_retrieve_metadata" {
   }
 
   security_group_ids = [aws_security_group.dms_validation_lambda_sg[0].id]
-  subnet_ids         = data.aws_subnets.shared-public.ids
+  subnet_ids         = data.aws_subnets.shared-private.ids
 }
 
 
 module "dms_validation" {
-  count = local.is-development || local.is-production ? 1 : 0
+  count = local.is-development || local.is-production || local.is-preproduction ? 1 : 0
 
   source                  = "./modules/lambdas"
   is_image                = true
@@ -287,7 +288,7 @@ module "dms_validation" {
   }
 
   security_group_ids = [aws_security_group.dms_validation_lambda_sg[0].id]
-  subnet_ids         = data.aws_subnets.shared-public.ids
+  subnet_ids         = data.aws_subnets.shared-private.ids
 }
 
 #-----------------------------------------------------------------------------------
@@ -307,11 +308,13 @@ module "process_fms_metadata" {
   core_shared_services_id        = local.environment_management.account_ids["core-shared-services-production"]
   production_dev                 = local.is-production ? "prod" : "dev"
   security_group_ids             = [aws_security_group.lambda_generic.id]
-  subnet_ids                     = data.aws_subnets.shared-public.ids
+  subnet_ids                     = data.aws_subnets.shared-private.ids
   environment_variables = {
     SQS_QUEUE_URL                = aws_sqs_queue.format_fms_json_event_queue.id
     POWERTOOLS_METRICS_NAMESPACE = "FMSLiveFeed"
     POWERTOOLS_SERVICE_NAME      = "process-fms-metadata-lambda"
+    SNS_TOPIC_ARN                = aws_sns_topic.emds_alerts.arn
+    ENVIRONMENT_NAME             = local.environment_shorthand
   }
 }
 
@@ -333,7 +336,7 @@ module "load_dms_output" {
   core_shared_services_id        = local.environment_management.account_ids["core-shared-services-production"]
   production_dev                 = local.is-production ? "prod" : "dev"
   security_group_ids             = [aws_security_group.lambda_generic.id]
-  subnet_ids                     = data.aws_subnets.shared-public.ids
+  subnet_ids                     = data.aws_subnets.shared-private.ids
   environment_variables = {
     ATHENA_QUERY_BUCKET = module.s3-athena-bucket.bucket.id
     ACCOUNT_NUMBER      = data.aws_caller_identity.current.account_id
@@ -359,16 +362,20 @@ module "load_mdss_lambda" {
   ephemeral_storage_size         = 10240
   core_shared_services_id        = local.environment_management.account_ids["core-shared-services-production"]
   production_dev                 = local.is-production ? "prod" : local.is-preproduction ? "preprod" : local.is-test ? "test" : "dev"
-  security_group_ids             = [aws_security_group.lambda_generic.id]
-  subnet_ids                     = data.aws_subnets.shared-public.ids
   cloudwatch_retention_days      = 7
+
   environment_variables = {
-    ATHENA_QUERY_BUCKET = module.s3-athena-bucket.bucket.id
-    ACCOUNT_NUMBER      = data.aws_caller_identity.current.account_id
-    STAGING_BUCKET      = module.s3-create-a-derived-table-bucket.bucket.id
-    ENVIRONMENT_NAME    = local.environment_shorthand
-    CLEANUP_QUEUE_URL   = aws_sqs_queue.clean_dlt_load_queue.id
-    MAX_RECEIVE_COUNT   = tostring(local.load_sqs_max_receive_count)
+    ATHENA_QUERY_BUCKET                    = module.s3-athena-bucket.bucket.id
+    ACCOUNT_NUMBER                         = data.aws_caller_identity.current.account_id
+    STAGING_BUCKET                         = module.s3-create-a-derived-table-bucket.bucket.id
+    ENVIRONMENT_NAME                       = local.environment_shorthand
+    CLEANUP_QUEUE_URL                      = aws_sqs_queue.clean_dlt_load_queue.id
+    MAX_RECEIVE_COUNT                      = tostring(local.load_mdss_sqs_max_receive_count)
+    MDSS_MANIFEST_BUCKET                   = module.s3-metadata-bucket.bucket.id
+    MDSS_MANIFEST_PREFIX                   = "mdss-manifest/current"
+    STUCK_STARTED_MINUTES                  = "60"
+    AUTO_REDRIVE_TRANSIENT_COOLDOWN_MINUTES = "60"
+    AUTO_REDRIVE_UNKNOWN_COOLDOWN_MINUTES   = "60"
   }
 }
 
@@ -390,7 +397,7 @@ module "load_fms_lambda" {
   core_shared_services_id        = local.environment_management.account_ids["core-shared-services-production"]
   production_dev                 = local.is-production ? "prod" : local.is-preproduction ? "preprod" : local.is-test ? "test" : "dev"
   security_group_ids             = [aws_security_group.lambda_generic.id]
-  subnet_ids                     = data.aws_subnets.shared-public.ids
+  subnet_ids                     = data.aws_subnets.shared-private.ids
   cloudwatch_retention_days      = 7
   environment_variables = {
     ATHENA_QUERY_BUCKET = module.s3-athena-bucket.bucket.id
@@ -398,7 +405,7 @@ module "load_fms_lambda" {
     STAGING_BUCKET      = module.s3-create-a-derived-table-bucket.bucket.id
     ENVIRONMENT_NAME    = local.environment_shorthand
     CLEANUP_QUEUE_URL   = aws_sqs_queue.clean_dlt_load_queue.id
-    SNS_TOPIC_ARN  = aws_sns_topic.emds_alerts.arn
+    SNS_TOPIC_ARN       = aws_sns_topic.emds_alerts.arn
     MAX_RECEIVE_COUNT   = tostring(local.load_sqs_max_receive_count)
   }
 }
@@ -421,7 +428,7 @@ module "load_historic_csv" {
   core_shared_services_id        = local.environment_management.account_ids["core-shared-services-production"]
   production_dev                 = local.is-production ? "prod" : local.is-preproduction ? "preprod" : local.is-test ? "test" : "dev"
   security_group_ids             = [aws_security_group.lambda_generic.id]
-  subnet_ids                     = data.aws_subnets.shared-public.ids
+  subnet_ids                     = data.aws_subnets.shared-private.ids
   environment_variables = {
     ATHENA_QUERY_BUCKET = module.s3-athena-bucket.bucket.id
     ACCOUNT_NUMBER      = data.aws_caller_identity.current.account_id
@@ -448,7 +455,7 @@ module "glue_db_count_metrics" {
   core_shared_services_id        = local.environment_management.account_ids["core-shared-services-production"]
   production_dev                 = local.env_name
   security_group_ids             = [aws_security_group.lambda_generic.id]
-  subnet_ids                     = data.aws_subnets.shared-public.ids
+  subnet_ids                     = data.aws_subnets.shared-private.ids
 
   environment_variables = {
     METRIC_NAMESPACE = "EMDS/Glue"
@@ -521,7 +528,7 @@ module "mdss_daily_failure_digest" {
   production_dev                 = local.is-production ? "prod" : local.is-preproduction ? "preprod" : local.is-test ? "test" : "dev"
 
   security_group_ids = [aws_security_group.lambda_generic.id]
-  subnet_ids         = data.aws_subnets.shared-public.ids
+  subnet_ids         = data.aws_subnets.shared-private.ids
 
   environment_variables = {
     SNS_TOPIC_ARN  = aws_sns_topic.emds_alerts.arn
@@ -608,43 +615,6 @@ module "iceberg-table-maintenance" {
   }
 }
 
-
-#-----------------------------------------------------------------------------------
-# Bucket replication
-#-----------------------------------------------------------------------------------
-
-module "create_fms_general_batch_replication_job" {
-  count = local.is-development || local.is-preproduction ? 0 : 1
-
-  source                         = "./modules/lambdas"
-  is_image                       = true
-  function_name                  = "create_batch_replication_job"
-  role_name                      = aws_iam_role.bucket_replication[0].name
-  role_arn                       = aws_iam_role.bucket_replication[0].arn
-  handler                        = "create_batch_replication_job.handler"
-  memory_size                    = 512
-  timeout                        = 120
-  reserved_concurrent_executions = 1
-  core_shared_services_id        = local.environment_management.account_ids["core-shared-services-production"]
-  production_dev                 = local.is-production ? "prod" : local.is-preproduction ? "preprod" : local.is-test ? "test" : "dev"
-
-  security_group_ids = [aws_security_group.lambda_generic.id]
-  subnet_ids         = data.aws_subnets.shared-public.ids
-
-  environment_variables = {
-    ACCOUNT_ID = data.aws_caller_identity.current.account_id
-    BATCH_COPY_ROLE = module.s3-fms-general-landing-bucket.replication_role_arn
-    DESTINATION_ACCOUNT_SECRET_ARN = module.cross_account_details[0].secret_arn
-    METADATA_BUCKET_ARN = module.s3-metadata-bucket.bucket.arn
-    FMS_GENERAL_BUCKET = module.s3-fms-general-landing-bucket.bucket_id
-    FMS_HO_BUCKET = module.s3-fms-ho-landing-bucket.bucket_id
-    FMS_SPECIALS_BUCKET = module.s3-fms-specials-landing-bucket.bucket_id
-    MDSS_GENERAL_BUCKET = module.s3-mdss-general-landing-bucket.bucket_id
-    MDSS_HO_BUCKET = module.s3-mdss-ho-landing-bucket.bucket_id
-    MDSS_SPECIALS_BUCKET = module.s3-mdss-specials-landing-bucket.bucket_id
-    }
-}
-
 # ------------------------------------------------------------------------------
 # Lambda: cloudwatch_alarm_threader
 # ------------------------------------------------------------------------------
@@ -664,7 +634,7 @@ module "cloudwatch_alarm_threader" {
   production_dev          = local.is-production ? "prod" : local.is-preproduction ? "preprod" : local.is-test ? "test" : "dev"
 
   security_group_ids = [aws_security_group.lambda_generic.id]
-  subnet_ids         = data.aws_subnets.shared-public.ids
+  subnet_ids         = data.aws_subnets.shared-private.ids
 
   environment_variables = {
     SNS_TOPIC_ARN         = aws_sns_topic.emds_alerts.arn
@@ -673,5 +643,93 @@ module "cloudwatch_alarm_threader" {
     ENVIRONMENT           = local.environment_shorthand
     INCLUDE_REASON        = "true"
     ENABLE_CUSTOM_ACTIONS = "false"
+  }
+}
+
+
+#-----------------------------------------------------------------------------------
+# Ears and Sars Request
+#-----------------------------------------------------------------------------------
+module "ears_sars_request" {
+  count                   = local.is-development || local.is-preproduction ? 1 : 0
+  source                  = "./modules/lambdas"
+  is_image                = true
+  ecr_repo_name           = "electronic-monitoring-ear-sars"
+  function_name           = "ears_sars_request"
+  role_name               = aws_iam_role.ears_sars_iam_role[0].name
+  role_arn                = aws_iam_role.ears_sars_iam_role[0].arn
+  handler                 = "ears_sars_request.handler"
+  memory_size             = 1024
+  timeout                 = 900
+  core_shared_services_id = local.environment_management.account_ids["core-shared-services-production"]
+  production_dev          = local.is-production ? "prod" : "dev"
+
+  environment_variables = {
+    SOURCE_BUCKET = module.s3-dms-target-store-bucket.bucket.id
+  }
+}
+
+
+# ------------------------------------------------------------------------------
+# Fan out fms tags
+# ------------------------------------------------------------------------------
+
+module "fan_out_tags" {
+  count                          = local.is-development || local.is-test || local.is-preproduction ? 1 : 0
+  source                         = "./modules/lambdas"
+  is_image                       = true
+  function_name                  = "fan_out_tags"
+  role_name                      = aws_iam_role.fan_out_tags.name
+  role_arn                       = aws_iam_role.fan_out_tags.arn
+  handler                        = "fan_out_tags.handler"
+  memory_size                    = 512
+  timeout                        = 60
+  reserved_concurrent_executions = 100
+
+  core_shared_services_id = local.environment_management.account_ids["core-shared-services-production"]
+  production_dev          = local.is-production ? "prod" : local.is-preproduction ? "preprod" : local.is-test ? "test" : "dev"
+
+  security_group_ids = [aws_security_group.lambda_generic.id]
+  subnet_ids         = data.aws_subnets.shared-private.ids
+
+  environment_variables = {
+    SQS_QUEUE_ARN = module.load_fms_event_queue.sqs_queue.url
+  }
+}
+
+#-----------------------------------------------------------------------------------
+# MDSS reconciler (scheduled redrive backstop)
+#-----------------------------------------------------------------------------------
+
+module "mdss_reconciler" {
+  count = local.is-preproduction || local.is-production ? 0 : 1
+  source                         = "./modules/lambdas"
+  is_image                       = true
+  function_name                  = "mdss_reconciler"
+  role_name                      = aws_iam_role.mdss_reconciler.name
+  role_arn                       = aws_iam_role.mdss_reconciler.arn
+  memory_size                    = 512
+  timeout                        = 300
+  reserved_concurrent_executions = 1
+
+  core_shared_services_id = local.environment_management.account_ids["core-shared-services-production"]
+  production_dev          = local.is-production ? "prod" : local.is-preproduction ? "preprod" : local.is-test ? "test" : "dev"
+
+  security_group_ids = [aws_security_group.lambda_generic.id]
+  subnet_ids         = data.aws_subnets.shared-private.ids
+
+  environment_variables = {
+    ENVIRONMENT_NAME                        = local.environment_shorthand
+    SOURCE_BUCKET                           = module.s3-raw-formatted-data-bucket.bucket.id
+    LOAD_MDSS_QUEUE_URL                     = module.load_mdss_event_queue.sqs_queue.id
+    MDSS_MANIFEST_BUCKET                    = module.s3-metadata-bucket.bucket.id
+    MDSS_MANIFEST_PREFIX                    = "mdss-manifest/current"
+    LOOKBACK_DAYS                           = "2"
+    MIN_OBJECT_AGE_MINUTES                  = "10"
+    STUCK_STARTED_MINUTES                   = "60"
+    AUTO_REDRIVE_TRANSIENT_COOLDOWN_MINUTES = "60"
+    AUTO_REDRIVE_UNKNOWN_COOLDOWN_MINUTES   = "60"
+    AUTO_REDRIVE_TRANSIENT_MAX_ATTEMPTS     = "2"
+    AUTO_REDRIVE_UNKNOWN_MAX_ATTEMPTS       = "1"
   }
 }

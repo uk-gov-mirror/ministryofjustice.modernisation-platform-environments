@@ -72,6 +72,12 @@ locals {
     "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/staged_fms_${local.env_}dbt",
     "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:table/staged_fms_${local.env_}dbt/*"
   ]
+  ac_cloud_platform_iam_roles = local.is-development || local.is-test ? [
+    "arn:aws:iam::${local.account_ids["cloud-platform"]}:role/${var.cloud-platform-crime-matching-api-iam-dev}",
+    "arn:aws:iam::${local.account_ids["cloud-platform"]}:role/${var.cloud-platform-crime-matching-algorithm-iam-dev}",
+    ] : local.is-preproduction ? [
+    "arn:aws:iam::${local.account_ids["cloud-platform"]}:role/${var.cloud-platform-crime-matching-api-iam-preprod}",
+  ] : []
 }
 
 variable "cloud-platform-iam-dev" {
@@ -95,13 +101,25 @@ variable "cloud-platform-iam-prod" {
 variable "cloud-platform-crime-matching-api-iam-dev" {
   type        = string
   description = "IAM role that the crime matching API in Cloud Platform will use to connect to this role."
-  default     = "arn:aws:iam::754256621582:role/cloud-platform-irsa-6e3937460af175fd-live"
+  default     = "cloud-platform-irsa-6e3937460af175fd-live"
 }
 
 variable "cloud-platform-crime-matching-algorithm-iam-dev" {
   type        = string
   description = "IAM role that the crime matching algorithm in Cloud Platform will use to connect to this role."
-  default     = "arn:aws:iam::754256621582:role/cloud-platform-irsa-65e2e0ef1e64c470-live"
+  default     = "cloud-platform-irsa-65e2e0ef1e64c470-live"
+}
+
+variable "cloud-platform-crime-matching-api-iam-preprod" {
+  type        = string
+  description = "IAM role that the crime matching API in Cloud Platform will use to connect to this role."
+  default     = "cloud-platform-irsa-42e2b12480318007-live"
+}
+
+variable "cloud-platform-crime-matching-algorithm-iam-preprod" {
+  type        = string
+  description = "IAM role that the crime matching algorithm in Cloud Platform will use to connect to this role."
+  default     = "cloud-platform-irsa-65e2e0ef1e64c470-live"
 }
 
 variable "cloud-platform-emdi-iam-dev" {
@@ -139,7 +157,7 @@ module "emdi_trail_maps_role" {
 
 
 resource "aws_lakeformation_permissions" "emdi_fms_db" {
-  count       = local.is-development || local.is-test ? 1 : 0
+  count       = local.is-development ? 1 : 0
   principal   = module.emdi_trail_maps_role[0].iam_role_arn
   permissions = ["DESCRIBE"]
   database {
@@ -148,7 +166,7 @@ resource "aws_lakeformation_permissions" "emdi_fms_db" {
 }
 
 resource "aws_lakeformation_permissions" "emdi_fms_tables" {
-  count       = local.is-development || local.is-test ? 1 : 0
+  count       = local.is-development ? 1 : 0
   principal   = module.emdi_trail_maps_role[0].iam_role_arn
   permissions = ["SELECT", "DESCRIBE"]
   table {
@@ -212,16 +230,13 @@ module "cmt_front_end_assumable_role" {
 module "acquisitive_crime_assumable_role" {
   #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
   #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
-  count   = local.is-development || local.is-test ? 1 : 0
+  count   = local.is-production ? 0 : 1
   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
   version = "5.48.0"
 
   trusted_role_arns = flatten([
     data.aws_iam_roles.mod_plat_roles.arns,
-    [
-      var.cloud-platform-crime-matching-api-iam-dev,
-      var.cloud-platform-crime-matching-algorithm-iam-dev,
-    ],
+    local.ac_cloud_platform_iam_roles,
   ])
 
   create_role       = true
@@ -282,7 +297,7 @@ module "share_specials_data_marts" {
 }
 
 resource "aws_lakeformation_permissions" "ac_allied_db" {
-  count       = local.is-test ? 1 : 0
+  count       = local.is-development ? 1 : 0
   principal   = module.acquisitive_crime_assumable_role[0].iam_role_arn
   permissions = ["DESCRIBE"]
   database {
@@ -291,7 +306,7 @@ resource "aws_lakeformation_permissions" "ac_allied_db" {
 }
 
 resource "aws_lakeformation_permissions" "ac_allied_tables" {
-  count       = local.is-test ? 1 : 0
+  count       = local.is-development ? 1 : 0
   principal   = module.acquisitive_crime_assumable_role[0].iam_role_arn
   permissions = ["SELECT", "DESCRIBE"]
   table {
@@ -301,7 +316,7 @@ resource "aws_lakeformation_permissions" "ac_allied_tables" {
 }
 
 resource "aws_lakeformation_permissions" "ac_fms_db" {
-  count       = local.is-test ? 1 : 0
+  count       = local.is-development ? 1 : 0
   principal   = module.acquisitive_crime_assumable_role[0].iam_role_arn
   permissions = ["DESCRIBE"]
   database {
@@ -310,11 +325,30 @@ resource "aws_lakeformation_permissions" "ac_fms_db" {
 }
 
 resource "aws_lakeformation_permissions" "ac_fms_tables" {
-  count       = local.is-test ? 1 : 0
+  count       = local.is-development ? 1 : 0
   principal   = module.acquisitive_crime_assumable_role[0].iam_role_arn
   permissions = ["SELECT", "DESCRIBE"]
   table {
     database_name = "serco_fms_${local.environment_shorthand}"
+    wildcard      = true
+  }
+}
+
+resource "aws_lakeformation_permissions" "ac_derived_db" {
+  count       = local.is-production ? 0 : 1
+  principal   = module.acquisitive_crime_assumable_role[0].iam_role_arn
+  permissions = ["DESCRIBE"]
+  database {
+    name = "acquisitive_crime${local.dbt_suffix}"
+  }
+}
+
+resource "aws_lakeformation_permissions" "ac_derived_tables" {
+  count       = local.is-production ? 0 : 1
+  principal   = module.acquisitive_crime_assumable_role[0].iam_role_arn
+  permissions = ["SELECT", "DESCRIBE"]
+  table {
+    database_name = "acquisitive_crime${local.dbt_suffix}"
     wildcard      = true
   }
 }
@@ -410,7 +444,7 @@ data "aws_iam_policy_document" "emac_di_permissions" {
     resources = local.is-development || local.is-test ? [
       "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/serco_fms*",
       "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/allied_mdss*"
-      ] : []
+    ] : []
   }
   statement {
     effect = "Allow"
