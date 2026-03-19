@@ -67,10 +67,6 @@ data "aws_iam_policy_document" "secret_ingestion_api_auth_token_policy_data" {
   }
 }
 
-resource "aws_secretsmanager_secret_policy" "this" {
-  secret_arn = module.secret_ingestion_api_auth_token.secret_arn
-  policy     = data.aws_iam_policy_document.secret_policy.json
-}
 resource "aws_secretsmanager_secret_policy" "secret_ingestion_api_auth_token_policy" {
   secret_arn = module.secret_ingestion_api_auth_token.secret_arn
   policy     = data.aws_iam_policy_document.secret_ingestion_api_auth_token_policy_data.json
