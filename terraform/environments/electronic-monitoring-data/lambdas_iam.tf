@@ -544,19 +544,19 @@ data "aws_iam_policy_document" "dms_validation_lambda_role_policy_document" {
 }
 
 resource "aws_iam_role" "dms_validation_lambda_role" {
-  count              = local.is-production || local.is-development ? 1 : 0
+  count              = local.is-production || local.is-development || local.is-preproduction ? 1 : 0
   name               = "dms_validation_lambda_role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
 resource "aws_iam_policy" "dms_validation_lambda_role_policy" {
-  count  = local.is-production || local.is-development ? 1 : 0
+  count  = local.is-production || local.is-development || local.is-preproduction ? 1 : 0
   name   = "dms_validation_lambda_policy"
   policy = data.aws_iam_policy_document.dms_validation_lambda_role_policy_document.json
 }
 
 resource "aws_iam_role_policy_attachment" "validation_lambda_policy_attachment" {
-  count      = local.is-production || local.is-development ? 1 : 0
+  count      = local.is-production || local.is-development || local.is-preproduction ? 1 : 0
   role       = aws_iam_role.dms_validation_lambda_role[0].name
   policy_arn = aws_iam_policy.dms_validation_lambda_role_policy[0].arn
 }
@@ -1780,10 +1780,19 @@ data "aws_iam_policy_document" "fan_out_tags_policy_document" {
     effect = "Allow"
     actions = [
       "s3:GetObjectTagging",
-       "s3:ListBucket",
     ]
     resources = [
       "${module.s3-raw-formatted-data-bucket.bucket.arn}/*"
+    ]
+  }
+  statement {
+    sid     = "ListRawFormattedBucket"
+    effect  = "Allow"
+    actions = [
+      "s3:ListBucket",
+    ]
+    resources = [
+      module.s3-raw-formatted-data-bucket.bucket.arn,
     ]
   }
 
