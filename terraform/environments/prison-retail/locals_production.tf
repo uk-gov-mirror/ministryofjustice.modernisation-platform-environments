@@ -25,7 +25,7 @@ locals {
         # )
         config = {
           ami_name                      = "prison-retail" # based off "Windows_Server-2019-English-Full-SQL_2019_Standard-2026.01.14"
-          ami_owner                     = "969799720137" # "801119661308" owner for above
+          ami_owner                     = "self" # "801119661308" owner for above
           availability_zone             = "eu-west-2a"
           ebs_volumes_copy_all_from_ami = false
           iam_resource_names_prefix     = "ec2-instance"
