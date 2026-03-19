@@ -75,7 +75,7 @@ resource "aws_kms_key" "kms_key_for_secret" {
         Sid = "AllowExternalRoleUsage"
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live"
+          AWS = "*"
         }
         Action = [
           "kms:Encrypt",
