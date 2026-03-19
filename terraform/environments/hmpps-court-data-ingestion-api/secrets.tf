@@ -29,7 +29,7 @@ module "secret_ingestion_api_auth_token" {
 
   policy_statements = {
     read = {
-      sid = "AllowCPApplicationToUpdate"
+      sid = "AllowCPApplicationToReadAndSet"
       principals = [{
         type        = "AWS"
         identifiers = ["arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/*"]
