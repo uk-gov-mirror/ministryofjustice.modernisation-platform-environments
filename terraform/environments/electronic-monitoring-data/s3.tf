@@ -57,7 +57,7 @@ locals {
   ]
 
   cross_account_recieve_mapping = local.is-development ? "test" : local.is-preproduction ? "production" : local.is-test ? "preproduction" : null
-  cross_env_bucket_policy       = local.is-preproduction ? [data.aws_iam_policy_document.allow_cross_env_upload[0].json] : []
+  cross_env_bucket_policy       = local.is-development || local.is-preproduction ? [data.aws_iam_policy_document.allow_cross_env_upload[0].json] : []
 }
 
 
