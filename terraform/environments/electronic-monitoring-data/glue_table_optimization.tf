@@ -123,31 +123,31 @@ resource "aws_glue_catalog_table_optimizer" "standard_retention" {
 }
 
 
-# resource "aws_glue_catalog_table_optimizer" "standard_orphan_file_deletion" {
-#     for_each = toset(flatten([
-#         for database_name in local.database_to_optimize : [
-#             for table_name in local.tables_to_optimize[database_name] : "${database_name}.${table_name}"
-#         ]
-#     ]))
-#   catalog_id    = data.aws_caller_identity.current.account_id
-#   database_name = "${split(".", each.key)[0]}${local.db_suffix}"
-#   table_name    = split(".", each.key)[1]
+resource "aws_glue_catalog_table_optimizer" "standard_orphan_file_deletion" {
+    for_each = toset(flatten([
+        for database_name in local.database_to_optimize : [
+            for table_name in local.tables_to_optimize[database_name] : "${database_name}.${table_name}"
+        ]
+    ]))
+  catalog_id    = data.aws_caller_identity.current.account_id
+  database_name = "${split(".", each.key)[0]}${local.db_suffix}"
+  table_name    = split(".", each.key)[1]
 
-#   configuration {
-#     role_arn =  aws_iam_role.glue_table_optimizer.arn
-#     enabled  = true
+  configuration {
+    role_arn =  aws_iam_role.glue_table_optimizer.arn
+    enabled  = true
 
-#     orphan_file_deletion_configuration {
-#       iceberg_configuration {
-#         orphan_file_retention_period_in_days = 7
-#         location                             = "s3://${module.s3-create-a-derived-table-bucket.bucket.id}/staging/${split(".", each.key)[0]}${local.db_suffix}_pipeline/${split(".", each.key)[0]}${local.db_suffix}/${split(".", each.key)[1]}/"
-#       }
-#     }
+    orphan_file_deletion_configuration {
+      iceberg_configuration {
+        orphan_file_retention_period_in_days = 7
+        location                             = "s3://${module.s3-create-a-derived-table-bucket.bucket.id}/staging/${split(".", each.key)[0]}${local.db_suffix}_pipeline/${split(".", each.key)[0]}${local.db_suffix}/${split(".", each.key)[1]}/"
+      }
+    }
 
-#   }
+  }
 
-#   type = "orphan_file_deletion"
-# }
+  type = "orphan_file_deletion"
+}
 
 data "aws_iam_policy_document" "glue_table_optimizer_assume_role_policy" {
     statement {
