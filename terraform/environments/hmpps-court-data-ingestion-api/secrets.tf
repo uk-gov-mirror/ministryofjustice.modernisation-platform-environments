@@ -32,7 +32,7 @@ module "secret_ingestion_api_auth_token" {
       sid = "AllowCPApplicationToReadAndSet"
       principals = [{
         type        = "AWS"
-        identifiers = ["arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/aws-sdk-java-1773843258205"]
+        identifiers = ["arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/*"]
       }]
       actions   = ["secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue"]
       resources = ["*"]
