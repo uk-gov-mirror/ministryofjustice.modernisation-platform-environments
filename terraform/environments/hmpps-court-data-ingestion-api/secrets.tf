@@ -22,19 +22,31 @@ module "secret_ingestion_api_auth_token" {
   description = "Shared secret/token used by the Lambda Authorizer to verify incoming requests. Populate manually."
   kms_key_id  = module.secrets_kms.key_id
 
+  ignore_secret_changes = true
   secret_string         = "populate-manually"
 
   tags = local.tags
+}
 
-  policy_statements = {
-    read = {
-      sid = "AllowCPApplicationToReadAndSet"
-      principals = [{
-        type        = "AWS"
-        identifiers = ["arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/*"]
-      }]
-      actions   = ["secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue"]
-      resources = ["*"]
+data "aws_iam_policy_document" "aws_iam_policy_document" {
+  statement {
+    sid    = "AllowKMS"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:PutSecretValue"
+    ]    
+    principals {
+      type        = "AWS"
+      identifiers = [
+        "arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/*"
+      ]
     }
+    resources = [module.secret_ingestion_api_auth_token.secret_arn]
   }
+}
+
+resource "aws_secretsmanager_secret_policy" "secret_ingestion_api_auth_token_policy_attachment" {
+  secret_arn = module.secret_ingestion_api_auth_token.secret_arn
+  policy     = data.aws_iam_policy_document.aws_iam_policy_document.json
 }
