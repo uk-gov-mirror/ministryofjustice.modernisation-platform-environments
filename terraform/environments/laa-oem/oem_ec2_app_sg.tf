@@ -452,6 +452,18 @@ resource "aws_vpc_security_group_ingress_rule" "oem_app_sg_ingress_tcp_7803_7803
   }
 }
 
+resource "aws_vpc_security_group_ingress_rule" "oem_app_sg_ingress_tcp_8000_8000_sg_lb" {
+  security_group_id            = aws_security_group.oem_app_security_group.id
+  ip_protocol                  = "tcp"
+  from_port                    = 8000
+  to_port                      = 8000
+  referenced_security_group_id = aws_security_group.load_balancer_security_group.id
+
+  tags = {
+    Name = "Oracle EM Console HTTP from LB"
+  }
+}
+
 resource "aws_vpc_security_group_ingress_rule" "oem_app_sg_ingress_tcp_9788_9788_cidr" {
   security_group_id = aws_security_group.oem_app_security_group.id
   ip_protocol       = "tcp"
