@@ -1143,7 +1143,7 @@ module "s3-glue-job-script-bucket" {
 # ------------------------------------------------------------------------
 
 data "aws_iam_policy_document" "allow_cross_env_upload" {
-  count = local.is-preproduction ? 1 : 0
+  count = local.is-development || local.is-preproduction ? 1 : 0
 
   statement {
     sid    = "AllowProdLambdaWrite"
