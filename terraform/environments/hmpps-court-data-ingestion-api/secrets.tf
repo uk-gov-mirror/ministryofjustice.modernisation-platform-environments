@@ -56,37 +56,4 @@ resource "aws_secretsmanager_secret_policy" "secret_ingestion_api_auth_token_pol
   policy     = data.aws_iam_policy_document.secret_ingestion_api_auth_token_policy_data.json
 }
 
-resource "aws_kms_key" "kms_key_for_secret" {
-  description = "KMS key for Secrets Manager"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid = "EnableRootPermissions"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::754256621582:root"
-        }
-        Action   = "kms:*"
-        Resource = "*"
-      },
-      {
-        Sid = "AllowExternalRoleUsage"
-        Effect = "Allow"
-        Principal = {
-          AWS = "*"
-        }
-        Action = [
-          "kms:Encrypt",
-          "kms:Decrypt",
-          "kms:GenerateDataKey",
-          "kms:DescribeKey"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
-}
-
 #["arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/*"]
