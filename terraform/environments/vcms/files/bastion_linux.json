@@ -2,11 +2,16 @@
   "keys": {
     "poc": {},
     "development": {
-      "snorris": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHFcBHvDJ9uKCokIWtg2tnv1NzMMkWb6C9E9oyN0TueQ sebastian.norris@digital.justice.gov.uk"
+      "snorris": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAkEP7YrmIxWindlqyyw8T2fjiWnUqzKLLUU0DGm4CBh sebastian.norris@MJ003357"
     },
-    "test": {},
-    "stage": {},
-    "preprod": {},
-    "prod": {}
+    "test": {
+      "snorris": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAkEP7YrmIxWindlqyyw8T2fjiWnUqzKLLUU0DGm4CBh sebastian.norris@MJ003357"
+    },
+    "preprod": {
+      "snorris": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICU0Ty+xkzIr52c/lTcOoGB5e/uSQQMb1K/bL8r6BeoX sebastian.norris@MJ003357"
+    },
+    "prod": {
+      "snorris": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICU0Ty+xkzIr52c/lTcOoGB5e/uSQQMb1K/bL8r6BeoX sebastian.norris@MJ003357"
+    }
   }
 }
