@@ -28,24 +28,49 @@ module "secret_ingestion_api_auth_token" {
   tags = local.tags
 }
 
+# data "aws_iam_policy_document" "secret_ingestion_api_auth_token_policy_data" {
+#   statement {
+#     sid    = "AllowUpdateSecret"
+#     effect = "Allow"
+#     resources = [module.secret_ingestion_api_auth_token.secret_arn]
+#     actions = [
+#       "secretsmanager:GetSecretValue",
+#       "secretsmanager:PutSecretValue"
+#     ]    
+#     principals {
+#       type        = "AWS"
+#       identifiers = [
+#         "arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/*"
+#       ]
+#     }
+#   }
+# }
+
 data "aws_iam_policy_document" "secret_ingestion_api_auth_token_policy_data" {
   statement {
-    sid    = "AllowUpdateSecret"
+    sid    = "AllowCrossAccountAccess"
     effect = "Allow"
-    actions = [
-      "secretsmanager:GetSecretValue",
-      "secretsmanager:PutSecretValue"
-    ]    
+
     principals {
-      type        = "AWS"
+      type = "AWS"
       identifiers = [
         "arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/*"
       ]
     }
-    resources = [module.secret_ingestion_api_auth_token.secret_arn]
+
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:PutSecretValue"
+    ]
+
+    resources = ["*"]
   }
 }
 
+resource "aws_secretsmanager_secret_policy" "this" {
+  secret_arn = module.secret_ingestion_api_auth_token.secret_arn
+  policy     = data.aws_iam_policy_document.secret_policy.json
+}
 resource "aws_secretsmanager_secret_policy" "secret_ingestion_api_auth_token_policy" {
   secret_arn = module.secret_ingestion_api_auth_token.secret_arn
   policy     = data.aws_iam_policy_document.secret_ingestion_api_auth_token_policy_data.json
