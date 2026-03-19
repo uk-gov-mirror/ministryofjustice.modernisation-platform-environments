@@ -140,7 +140,7 @@ module "data_engineering_datalake_access_terraform_iam_role" {
         identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
       }]
 
-      conditions = [{
+      condition = [{
         test     = "ArnLike"
         variable = "aws:PrincipalArn"
         values = [
