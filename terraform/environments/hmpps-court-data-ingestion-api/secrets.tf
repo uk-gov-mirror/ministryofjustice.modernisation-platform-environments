@@ -27,15 +27,15 @@ module "secret_ingestion_api_auth_token" {
 
   tags = local.tags
 
-  policy_statements = {
-    read = {
-      sid = "AllowCPApplicationToReadAndSet"
-      principals = [{
-        type        = "AWS"
-        identifiers = ["arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/*"]
-      }]
-      actions   = ["secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue"]
-      resources = ["*"]
-    }
-  }
+  # policy_statements = {
+  #   read = {
+  #     sid = "AllowCPApplicationToReadAndSet"
+  #     principals = [{
+  #       type        = "AWS"
+  #       identifiers = ["arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/*"]
+  #     }]
+  #     actions   = ["secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue"]
+  #     resources = ["*"]
+  #   }
+  # }
 }
