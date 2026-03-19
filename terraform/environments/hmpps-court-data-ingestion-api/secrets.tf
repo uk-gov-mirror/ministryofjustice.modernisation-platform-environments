@@ -28,8 +28,6 @@ module "secret_ingestion_api_auth_token" {
   tags = local.tags
 }
 
-
-
 data "aws_iam_policy_document" "secret_ingestion_api_auth_token_policy_data" {
   statement {
     sid    = "AllowCrossAccountAccess"
@@ -38,7 +36,7 @@ data "aws_iam_policy_document" "secret_ingestion_api_auth_token_policy_data" {
     principals {
       type = "AWS"
       identifiers = [
-        "*"
+        "arn:aws:iam::754256621582:role/cloud-platform-irsa-6852dfe05c1167f2-live"
       ]
     }
 
@@ -50,10 +48,35 @@ data "aws_iam_policy_document" "secret_ingestion_api_auth_token_policy_data" {
     resources = ["*"]
   }
 }
+data "aws_iam_policy_document" "secret_ingestion_api_auth_token_policy_allow_self_admin_data" {
+  statement {
+    sid    = "AllowSelfAdmin"
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::953751538119:root"
+      ]
+    }
+
+    actions = [
+      "*"
+    ]
+
+    resources = ["*"]
+  }
+}
 
 resource "aws_secretsmanager_secret_policy" "secret_ingestion_api_auth_token_policy" {
   secret_arn = module.secret_ingestion_api_auth_token.secret_arn
   policy     = data.aws_iam_policy_document.secret_ingestion_api_auth_token_policy_data.json
 }
+
+resource "aws_secretsmanager_secret_policy" "secret_ingestion_api_auth_token_allow_self_admin_policy" {
+  secret_arn = module.secret_ingestion_api_auth_token.secret_arn
+  policy     = data.aws_iam_policy_document.secret_ingestion_api_auth_token_policy_allow_self_admin_data.json
+}
+
 
 #["arn:aws:sts::754256621582:assumed-role/cloud-platform-irsa-6852dfe05c1167f2-live/*"]

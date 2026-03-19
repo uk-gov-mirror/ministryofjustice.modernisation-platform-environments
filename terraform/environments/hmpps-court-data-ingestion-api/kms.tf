@@ -7,6 +7,4 @@ module "secrets_kms" {
   enable_default_policy   = true
   deletion_window_in_days = 7
   tags                    = local.tags
-  
-  key_users                              = ["arn:aws:iam::754256621582:root"]
 }
