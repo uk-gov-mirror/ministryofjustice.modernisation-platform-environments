@@ -22,7 +22,6 @@ module "secret_ingestion_api_auth_token" {
   description = "Shared secret/token used by the Lambda Authorizer to verify incoming requests. Populate manually."
   kms_key_id  = module.secrets_kms.key_id
 
-  ignore_secret_changes = true
   secret_string         = "populate-manually"
 
   tags = local.tags
