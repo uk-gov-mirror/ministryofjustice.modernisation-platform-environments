@@ -28,9 +28,9 @@ module "secret_ingestion_api_auth_token" {
   tags = local.tags
 }
 
-data "aws_iam_policy_document" "aws_iam_policy_document" {
+data "aws_iam_policy_document" "secret_ingestion_api_auth_token_policy_data" {
   statement {
-    sid    = "AllowKMS"
+    sid    = "AllowSecretWrite"
     effect = "Allow"
     actions = [
       "secretsmanager:GetSecretValue",
@@ -46,7 +46,14 @@ data "aws_iam_policy_document" "aws_iam_policy_document" {
   }
 }
 
-resource "aws_secretsmanager_secret_policy" "secret_ingestion_api_auth_token_policy_attachment" {
-  secret_arn = module.secret_ingestion_api_auth_token.secret_arn
-  policy     = data.aws_iam_policy_document.aws_iam_policy_document.json
+module "secret_ingestion_api_auth_token_policy" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
+  version = "6.4.0"
+
+  name_prefix = "secret-ingestion-api-auth-token"
+  description = "IAM Policy"
+
+  policy = data.aws_iam_policy_document.secret_ingestion_api_auth_token_policy_data.json
+
+  tags = local.tags
 }
