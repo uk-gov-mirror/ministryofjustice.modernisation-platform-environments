@@ -7,10 +7,10 @@
     "test": {
       "snorris": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAkEP7YrmIxWindlqyyw8T2fjiWnUqzKLLUU0DGm4CBh sebastian.norris@MJ003357"
     },
-    "preprod": {
+    "preproduction": {
       "snorris": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICU0Ty+xkzIr52c/lTcOoGB5e/uSQQMb1K/bL8r6BeoX sebastian.norris@MJ003357"
     },
-    "prod": {
+    "production": {
       "snorris": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICU0Ty+xkzIr52c/lTcOoGB5e/uSQQMb1K/bL8r6BeoX sebastian.norris@MJ003357"
     }
   }
