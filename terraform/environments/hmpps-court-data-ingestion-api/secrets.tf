@@ -42,7 +42,8 @@ data "aws_iam_policy_document" "secret_ingestion_api_auth_token_policy_data" {
 
     actions = [
       "secretsmanager:GetSecretValue",
-      "secretsmanager:PutSecretValue"
+      "secretsmanager:PutSecretValue",
+      "secretsmanager:UpdateSecret"
     ]
 
     resources = ["*"]
