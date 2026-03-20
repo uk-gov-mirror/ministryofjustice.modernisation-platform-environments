@@ -49,7 +49,7 @@ exports.handler = async (event) => {
 
 
     // Extract actual signature (assuming format: sha256=abcdef123...)
-    const receivedSignature = signatureHeader.replace('sha256=', '');
+    const receivedSignature = Buffer.from(signatureHeader.replace('sha256=', '')).toString();
 
     // IMPORTANT: Use raw body (API Gateway must pass it unmodified)
     const rawBody = event.body;
