@@ -21,17 +21,17 @@ resource "aws_security_group" "rds_sg" {
 ### RDS SG Ingress Rules
 ######################################
 # Allow inbound from OAS application over TLS/SSL
-resource "aws_security_group_rule" "ingress_rds_from_oas" {
-  count = local.environment == "preproduction" ? 1 : 0
+# resource "aws_security_group_rule" "ingress_rds_from_oas" {
+#   count = local.environment == "preproduction" ? 1 : 0
 
-  type              = "ingress"
-  security_group_id = aws_security_group.rds_sg[0].id
-  from_port         = 1521
-  to_port           = 1521
-  protocol          = "tcp"
-  cidr_blocks       = [data.aws_vpc.shared.cidr_block]
-  description       = "Oracle connections from OAS over TLS"
-}
+#   type              = "ingress"
+#   security_group_id = aws_security_group.rds_sg[0].id
+#   from_port         = 1521
+#   to_port           = 1521
+#   protocol          = "tcp"
+#   cidr_blocks       = [data.aws_vpc.shared.cidr_block]
+#   description       = "Oracle connections from OAS over TLS"
+# }
 
 resource "aws_security_group_rule" "ingress_rds_from_workspaces" {
   count = local.environment == "preproduction" ? 1 : 0
