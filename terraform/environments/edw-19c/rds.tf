@@ -222,7 +222,7 @@ resource "aws_db_instance" "edw_rds_instance" {
 resource "aws_db_instance_role_association" "edw_rds_instance_role_association" {
   count = local.environment == "preproduction" ? 1 : 0
 
-  db_instance_identifier = aws_db_instance.edw_rds_instance[0].id
+  db_instance_identifier = aws_db_instance.edw_rds_instance[0].identifier
   role_arn              = aws_iam_role.rds_s3_access_role[0].arn
   feature_name          = "S3_INTEGRATION"
 }
