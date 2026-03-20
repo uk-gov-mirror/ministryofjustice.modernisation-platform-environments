@@ -35,3 +35,21 @@ module "lakeformation_registration_iam_role" {
     }
   }
 }
+
+module "airflow_iam_role" {
+  #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
+  #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
+
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  version = "6.4.0"
+
+  name = "hub-airflow"
+
+  oidc_providers = {
+    ap_compute = {
+      provider_arn               = aws_iam_openid_connect_provider.analytical_platform_compute.arn
+      namespace_service_accounts = ["mwaa:hub-workflow"]
+    }
+  }
+
+}
