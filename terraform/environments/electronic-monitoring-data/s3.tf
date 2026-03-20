@@ -590,7 +590,7 @@ module "s3-data-bucket" {
     aws.bucket-replication = aws
   }
 
-  bucket_policy = local.is-development || local.is-preproduction ? [
+  bucket_policy = local.is-preproduction ? [
     lookup(data.aws_iam_policy_document.allow_cross_env_upload, module.s3-data-bucket.bucket.id, { json = "{}" }).json
   ] : []
   lifecycle_rule = [
@@ -1148,7 +1148,7 @@ module "s3-glue-job-script-bucket" {
 # ------------------------------------------------------------------------
 
 data "aws_iam_policy_document" "allow_cross_env_upload" {
-  for_each = local.is-development || local.is-preproduction ? local.cross_env_bucket_policy : {}
+  for_each = local.is-preproduction ? local.cross_env_bucket_policy : {}
 
   statement {
     sid    = "AllowProdLambdaWrite"
@@ -1188,7 +1188,7 @@ module "s3-dms-target-store-bucket" {
     aws.bucket-replication = aws
   }
 
-  bucket_policy = local.is-development || local.is-preproduction ? [
+  bucket_policy = local.is-preproduction ? [
     lookup(data.aws_iam_policy_document.allow_cross_env_upload, module.s3-dms-target-store-bucket.bucket.id, { json = "{}" }).json
   ] : []
   lifecycle_rule = [
