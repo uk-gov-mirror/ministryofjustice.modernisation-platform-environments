@@ -4,6 +4,11 @@ locals {
   athena_query_bucket_name    = "mojap-next-poc-hub-athena-query"
   producer_account_id         = local.environment_management.account_ids["analytical-platform-next-poc-producer-development"]
   producer_database           = "moj"
+  airflow_secret_placeholder = {
+    oidc_cluster_identifier = "placeholder"
+  }
+  #checkov:skip=CKV_SECRET_6: Ignore this
+  airflow_cadt_secret_placeholder = "placeholder"
 
   users = [
     # slugified emails

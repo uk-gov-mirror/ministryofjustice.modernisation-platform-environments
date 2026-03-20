@@ -2,6 +2,11 @@ locals {
   athena_query_bucket_name = "mojap-next-poc-athena-query"
   datastore_bucket_name    = "mojap-next-poc-data"
   hub_account_id           = local.environment_management.account_ids["analytical-platform-next-poc-hub-development"]
+  airflow_secret_placeholder = {
+    oidc_cluster_identifier = "placeholder"
+  }
+  #checkov:skip=CKV_SECRET_6: Ignore this
+  airflow_cadt_secret_placeholder = "placeholder"
 
   test_data_csv = "https://factprod.blob.core.windows.net/csv/courts-and-tribunals-data.csv"
 

@@ -2,15 +2,6 @@
 # set up
 # ------------------------------------------
 
-locals {
-  enable_airflow_secret = local.application_data.accounts[local.environment].enable_airflow_secret
-  airflow_secret_placeholder = {
-    oidc_cluster_identifier = "placeholder"
-  }
-  #checkov:skip=CKV_SECRET_6: Ignore this
-  airflow_cadt_secret_placeholder = "placeholder"
-}
-
 data "aws_secretsmanager_secret" "airflow_secret" {
   name = aws_secretsmanager_secret.airflow_secret[0].id
 
@@ -27,8 +18,6 @@ data "aws_secretsmanager_secret_version" "airflow_secret" {
 ## AP EKS Cluster Identifier
 # PlaceHolder Secrets
 resource "aws_secretsmanager_secret_version" "airflow_secret" {
-  count = local.enable_airflow_secret ? 1 : 0
-
   secret_id     = aws_secretsmanager_secret.airflow_secret[0].id
   secret_string = jsonencode(local.airflow_secret_placeholder)
 
@@ -42,8 +31,6 @@ resource "aws_secretsmanager_secret_version" "airflow_secret" {
 resource "aws_secretsmanager_secret" "airflow_secret" {
   #checkov:skip=CKV2_AWS_57: “Ignore - Ensure Secrets Manager secrets should have automatic rotation enabled"
   #checkov:skip=CKV_AWS_149: "Ensure that Secrets Manager secret is encrypted using KMS CMK"
-
-  count = local.enable_airflow_secret ? 1 : 0
 
   name = "external/analytical_platform/airflow_auth"
 
