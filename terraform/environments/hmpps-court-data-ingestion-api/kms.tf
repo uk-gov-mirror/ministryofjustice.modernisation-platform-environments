@@ -4,7 +4,6 @@ module "secrets_kms" {
 
   aliases                 = ["${local.application_name}-secrets"]
   description             = "KMS key for ${local.application_name} secrets"
-  enable_default_policy   = true
   deletion_window_in_days = 7
   tags                    = local.tags
 }
@@ -14,6 +13,15 @@ resource "aws_kms_key_policy" "key_policy" {
   policy = jsonencode({
     Id = "example"
     Statement = [
+      {
+        "Sid": "Default",
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": "arn:aws:iam::953751538119:root"
+        },
+        "Action": "kms:*",
+        "Resource": "*"
+      },
       {
         "Sid": "Allow use of the key for SSM only",
         "Effect": "Allow",
@@ -26,15 +34,7 @@ resource "aws_kms_key_policy" "key_policy" {
             "kms:ReEncrypt*",
             "kms:GenerateDataKey*"
         ],
-        "Resource": "*",
-        "Condition": {
-            "StringLike": {
-                "kms:ViaService": [
-                    "secretsmanager.*.amazonaws.com",
-                    "autoscaling.*.amazonaws.com"
-                ]
-            }
-        }
+        "Resource": "*"
     },
     {
         "Sid": "Allow reading of key metadata",
