@@ -5,8 +5,6 @@ locals {
   airflow_secret_placeholder = {
     oidc_cluster_identifier = "placeholder"
   }
-  #checkov:skip=CKV_SECRET_6: Ignore this
-  airflow_cadt_secret_placeholder = "placeholder"
 
   test_data_csv = "https://factprod.blob.core.windows.net/csv/courts-and-tribunals-data.csv"
 
