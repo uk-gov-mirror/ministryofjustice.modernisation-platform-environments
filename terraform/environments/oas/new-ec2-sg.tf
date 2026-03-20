@@ -19,17 +19,17 @@ resource "aws_security_group" "ec2_sg" {
 ######################################
 ### EC2 INGRESS RULES
 ######################################
-resource "aws_security_group_rule" "ingress_oas_db_1521" {
-  count = local.environment == "preproduction" ? 1 : 0
+# resource "aws_security_group_rule" "ingress_oas_db_1521" {
+#   count = local.environment == "preproduction" ? 1 : 0
 
-  type                     = "ingress"
-  security_group_id        = aws_security_group.ec2_sg[0].id
-  from_port                = 1521
-  to_port                  = 1521
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.rds_sg[0].id
-  description              = "Database connections to OAS RDS"
-}
+#   type                     = "ingress"
+#   security_group_id        = aws_security_group.ec2_sg[0].id
+#   from_port                = 1521
+#   to_port                  = 1521
+#   protocol                 = "tcp"
+#   source_security_group_id = aws_security_group.rds_sg[0].id
+#   description              = "Database connections to OAS RDS"
+# }
 
 resource "aws_security_group_rule" "ingress_ssh_from_bastion" {
   count = local.environment == "preproduction" ? 1 : 0
@@ -94,17 +94,17 @@ resource "aws_security_group_rule" "ingress_managed_9514_workspace" {
 ######################################
 ### EC2 EGRESS RULES
 ######################################
-resource "aws_security_group_rule" "egress_oas_db_1521" {
-  count = local.environment == "preproduction" ? 1 : 0
+# resource "aws_security_group_rule" "egress_oas_db_1521" {
+#   count = local.environment == "preproduction" ? 1 : 0
 
-  type                     = "egress"
-  security_group_id        = aws_security_group.ec2_sg[0].id
-  description              = "Database connections to OAS RDS"
-  from_port                = 1521
-  to_port                  = 1521
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.rds_sg[0].id
-}
+#   type                     = "egress"
+#   security_group_id        = aws_security_group.ec2_sg[0].id
+#   description              = "Database connections to OAS RDS"
+#   from_port                = 1521
+#   to_port                  = 1521
+#   protocol                 = "tcp"
+#   source_security_group_id = aws_security_group.rds_sg[0].id
+# }
 
 resource "aws_security_group_rule" "egress_https_s3" {
   count = local.environment == "preproduction" ? 1 : 0
