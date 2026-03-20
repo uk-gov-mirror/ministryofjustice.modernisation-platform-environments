@@ -587,7 +587,7 @@ module "s3-data-bucket" {
     aws.bucket-replication = aws
   }
 
-  bucket_policy  = local.cross_env_bucket_policy
+  # bucket_policy  = local.cross_env_bucket_policy
   lifecycle_rule = [
     {
       id      = "main"
@@ -1159,7 +1159,7 @@ data "aws_iam_policy_document" "allow_cross_env_upload" {
     ]
     resources = [
       "${module.s3-dms-target-store-bucket.bucket.arn}/*",
-      "arn:aws:s3:::${local.bucket_prefix}-data-*/*"
+      # "arn:aws:s3:::${local.bucket_prefix}-data-*/*"
     ]
   }
 }
