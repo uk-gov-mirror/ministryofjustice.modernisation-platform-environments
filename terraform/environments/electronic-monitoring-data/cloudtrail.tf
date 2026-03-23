@@ -8,6 +8,8 @@ resource "aws_cloudwatch_log_group" "ears_sars_cloudtrail" {
 }
 
 resource "aws_cloudtrail" "ears_sars_cloudtrail" {
+  count = local.is-development || local.is-preproduction ? 1 : 0
+
   depends_on = [module.s3-logging-bucket.bucket_policy]
 
   name                          = local.ears_sars_cloudtrail
