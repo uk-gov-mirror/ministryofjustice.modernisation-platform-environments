@@ -17,6 +17,7 @@ resource "aws_cloudtrail" "ears_sars_cloudtrail" {
   s3_key_prefix                 = local.ears_sars
   include_global_service_events = false
 
+  # Target the State Machine
   advanced_event_selector {
     name = "Log ears & sars requests"
 
@@ -32,10 +33,7 @@ resource "aws_cloudtrail" "ears_sars_cloudtrail" {
 
     field_selector {
       field  = "resources.type"
-      equals = [
-        "AWS::StepFunctions::StateMachine",
-        "AWS::StepFunctions::Activity"
-      ]
+      equals = ["AWS::StepFunctions::StateMachine"]
     }
     
     field_selector {
