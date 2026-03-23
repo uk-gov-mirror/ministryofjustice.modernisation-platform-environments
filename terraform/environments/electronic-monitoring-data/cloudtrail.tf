@@ -4,15 +4,15 @@ locals {
 }
 
 resource "aws_cloudwatch_log_group" "ears_sars_cloudtrail" {
-  name = locals.ears_sars_cloudtrail
+  name = local.ears_sars_cloudtrail
 }
 
 resource "aws_cloudtrail" "ears_sars_cloudtrail" {
   depends_on = [module.s3-logging-bucket.bucket_policy]
 
-  name                          = locals.ears_sars_cloudtrail
+  name                          = local.ears_sars_cloudtrail
   s3_bucket_name                = module.s3-logging-bucket.bucket.id
-  s3_key_prefix                 = locals.ears_sars
+  s3_key_prefix                 = local.ears_sars
   include_global_service_events = false
 
   advanced_event_selector {

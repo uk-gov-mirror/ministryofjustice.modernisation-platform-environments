@@ -194,7 +194,7 @@ data "aws_iam_policy_document" "log_bucket_policy" {
     condition {
       test     = "StringEquals"
       variable = "aws:SourceArn"
-      values   = ["arn:aws:cloudtrail:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:trail/${locals.ears_sars_cloudtrail}"]
+      values   = ["arn:aws:cloudtrail:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:trail/${local.ears_sars_cloudtrail}"]
     }
   }
 
@@ -208,7 +208,7 @@ data "aws_iam_policy_document" "log_bucket_policy" {
     }
 
     actions   = ["s3:PutObject"]
-    resources = ["${module.s3-logging-bucket.bucket.arn}/${locals.ears_sars}"]
+    resources = ["${module.s3-logging-bucket.bucket.arn}/${local.ears_sars}"]
 
     condition {
       test     = "StringEquals"
@@ -218,7 +218,7 @@ data "aws_iam_policy_document" "log_bucket_policy" {
     condition {
       test     = "StringEquals"
       variable = "aws:SourceArn"
-      values   = ["arn:aws:cloudtrail:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:trail/${locals.ears_sars_cloudtrail}"]
+      values   = ["arn:aws:cloudtrail:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:trail/${local.ears_sars_cloudtrail}"]
     }
   }
 
