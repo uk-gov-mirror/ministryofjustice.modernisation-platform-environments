@@ -4,7 +4,7 @@ locals {
 }
 
 resource "aws_cloudwatch_log_group" "ears_sars_cloudtrail" {
-  name = ${locals.ears_sars_cloudtrail}
+  name = locals.ears_sars_cloudtrail
 }
 
 resource "aws_cloudtrail" "ears_sars_cloudtrail" {
