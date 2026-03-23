@@ -18,7 +18,7 @@ resource "aws_workspaces_directory" "workspaces" {
   # This directory_id comes from application_variables.json after manual creation
   # Leave empty in variables until after console creation
   directory_id = local.application_data.accounts[local.environment].workspaces_directory_id
-  subnet_ids   = [aws_subnet.private_a[0].id, aws_subnet.private_b[0].id]
+  subnet_ids   = data.terraform_remote_state.workspace_components.outputs.private_subnet_ids
 
   self_service_permissions {
     change_compute_type  = false
