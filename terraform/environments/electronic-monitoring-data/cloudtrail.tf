@@ -40,7 +40,7 @@ resource "aws_cloudtrail" "ears_sars_cloudtrail" {
     
     field_selector {
       field  = "resources.ARN"
-      equals = module.ears_sars_step_function[0].arn
+      equals = [module.ears_sars_step_function[0].arn]
     }
   }
 
