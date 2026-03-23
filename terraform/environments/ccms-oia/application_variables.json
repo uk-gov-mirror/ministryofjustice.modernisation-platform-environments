@@ -177,7 +177,7 @@
       "opa_server_port": "7001",
       "db_user": "opahubdb",
       "wl_user": "weblogicadmin",
-      "db_instance_version": "8.0.42",
+      "db_instance_version": "8.0.44",
       "wl_mem_args": "-Xms6144m -Xmx8192m",
       "opa_container_cpu": "3072",
       "opa_container_memory": "12288",

@@ -61,6 +61,7 @@ resource "aws_db_option_group" "soa_oracle_19" {
 resource "aws_db_instance" "soa_db" {
   identifier                          = "soa-db"
   allocated_storage                   = local.application_data.accounts[local.environment].soa_db_storage_gb
+  iops                                = local.application_data.accounts[local.environment].soa_db_iops
   auto_minor_version_upgrade          = local.application_data.accounts[local.environment].soa_db_minor_version_upgrade_allowed
   storage_type                        = "gp3"
   engine                              = "oracle-ee"
