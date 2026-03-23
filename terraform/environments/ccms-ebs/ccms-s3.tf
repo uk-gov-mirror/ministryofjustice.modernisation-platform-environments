@@ -115,16 +115,21 @@ data "aws_iam_policy_document" "logging_s3_policy" {
     effect = "Allow"
     principals {
       type        = "Service"
-      identifiers = ["logging.s3.amazonaws.com",
-                      "s3.amazonaws.com"
-                      ]
+      identifiers = ["logging.s3.amazonaws.com"]
     }
     actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::ccms-ebs-${local.environment}-logging/*"]
+    resources = ["arn:aws:s3:::ccms-ebs-${local.environment}-logging/s3access/*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-acl"
+      values   = ["bucket-owner-full-control"]
+    }
   }
 
-  statement {
-  sid    = "DenyNonAWSLoggingWrites"
+  # Deny any PutObject outside the approved logging prefixes
+statement {
+  sid    = "DenyPutOutsideApprovedPrefixes"
   effect = "Deny"
 
   principals {
@@ -134,22 +139,19 @@ data "aws_iam_policy_document" "logging_s3_policy" {
 
   actions = ["s3:PutObject"]
 
-  # Apply deny to the WHOLE BUCKET 
   resources = [
     "arn:aws:s3:::ccms-ebs-${local.environment}-logging/*"
   ]
 
+  # Only allow PUTs to these prefixes:
   condition {
-    test     = "StringNotEqualsIfExists"
-    variable = "aws:CalledVia"
+    test     = "StringNotLike"
+    variable = "s3:prefix"
     values = [
-      "s3.amazonaws.com",                             # S3 service
-      "logging.s3.amazonaws.com",                     # S3 Server Access Logging
-      "logdelivery.elasticloadbalancing.amazonaws.com", # ALB/NLB Access Logging
-      "firehose.amazonaws.com",                       # WAF logs (delivered via Firehose)
-      "athena.amazonaws.com"                          # Athena query result                        
-      # Add these if used:
-      # "logging.cloudfront.amazonaws.com"
+      "s3access/*",      # S3 server access logs
+      "s3-access-logs/*",
+      "elb-logs/*",      # ALB/NLB logs (if enabled)
+      "athena-results/*" # Athena (only if you use it)
     ]
   }
 }
