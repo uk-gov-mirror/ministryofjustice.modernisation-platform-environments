@@ -1,5 +1,5 @@
 locals {
-  structured_data_image_name = "gdpr_structured_data"
+  structured_data_image_name = "delete_structured_data"
   ecr_repo_name              = "electronic-monitoring-ear-sars"
   core_shared_services_id    = local.environment_management.account_ids["core-shared-services-production"]
 }
