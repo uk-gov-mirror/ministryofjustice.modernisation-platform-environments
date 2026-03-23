@@ -1,22 +1,24 @@
 ##############################################
 ### WorkSpaces Directory with IAM Identity Center
 ###
-### ⚠️ IMPORT REQUIRED
+### ⚠️ MANUAL CREATION + IMPORT REQUIRED
 ###
-### This resource must be created manually via AWS Console first,
-### then imported into Terraform.
-###
-### Import command:
+### STEP 1: Create directory manually in AWS Console with IAM Identity Center
+### STEP 2: Add the directory ID to application_variables.json: workspaces_directory_id
+### STEP 3: Import into Terraform:
 ###   terraform import aws_workspaces_directory.workspaces[0] d-xxxxxxxxxx
+### STEP 4: Apply to manage the configuration
 ###
-### After import, Terraform will manage the configuration.
+### This resource will only be created when workspaces_directory_id is set in application_variables.json
 ##############################################
 
 resource "aws_workspaces_directory" "workspaces" {
-  count = local.environment == "development" ? 1 : 0
+  count = (
+    local.environment == "development" &&
+    try(local.application_data.accounts[local.environment].workspaces_directory_id, "") != ""
+  ) ? 1 : 0
 
   # This directory_id comes from application_variables.json after manual creation
-  # Leave empty in variables until after console creation
   directory_id = local.application_data.accounts[local.environment].workspaces_directory_id
   subnet_ids   = try(data.terraform_remote_state.workspace_components.outputs.private_subnet_ids, [])
 
