@@ -208,7 +208,7 @@ data "aws_iam_policy_document" "log_bucket_policy" {
     }
 
     actions   = ["s3:PutObject"]
-    resources = ["${module.s3-logging-bucket.bucket.arn}/${local.ears_sars}"]
+    resources = ["${module.s3-logging-bucket.bucket.arn}/${local.ears_sars}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"]
 
     condition {
       test     = "StringEquals"
