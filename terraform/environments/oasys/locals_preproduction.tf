@@ -51,6 +51,13 @@ locals {
 
     ec2_autoscaling_groups = {
       pp-oasys-web-a = merge(local.ec2_autoscaling_groups.web, {
+        autoscaling_group = merge(local.ec2_autoscaling_groups.web.autoscaling_group, {
+          desired_capacity = 1 # setting to 0 leaves in a stopped state because of the warm_pool config below ####
+          warm_pool = {
+            min_size          = 0
+            reuse_on_scale_in = true
+          }
+        })
         autoscaling_schedules = {
           scale_up   = { recurrence = "0 5 * * Mon-Fri" }
           scale_down = { recurrence = "0 19 * * Mon-Fri", desired_capacity = 0 }
@@ -319,7 +326,7 @@ locals {
       }
       "pp-oasys.az.justice.gov.uk" = {
         records = [
-          { name = "onr", type = "A", ttl = "300", records = ["10.40.40.210"] }
+          { name = "onr", type = "NS", ttl = "86400", records = ["ns-1445.awsdns-52.org", "ns-1929.awsdns-49.co.uk", "ns-435.awsdns-54.com", "ns-602.awsdns-11.net"] },
         ]
         lb_alias_records = [
           { name = "", type = "A", lbs_map_key = "private" }

@@ -102,7 +102,7 @@ locals {
     }
 
     ldap = {
-      image_tag        = "6.1.3-latest"
+      image_tag        = "6.4.3-20916932939-1"
       container_port   = 389
       slapd_log_level  = "stats"
       container_cpu    = 512
@@ -152,5 +152,11 @@ locals {
       end_time        = "06:45"
       disable_weekend = true
     }
+  }
+
+  db_backup_config_dev = {
+    object_lock_days             = 3
+    expire_current_after_days    = 80
+    expire_noncurrent_after_days = 10
   }
 }
