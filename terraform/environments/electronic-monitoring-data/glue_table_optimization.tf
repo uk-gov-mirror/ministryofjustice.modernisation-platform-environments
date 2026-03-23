@@ -2,6 +2,9 @@ locals {
   database_to_optimize = local.live_feeds_dbs
   tables_to_optimize = {
     "allied_mdss" : [
+      "_dlt_loads",
+      "_dlt_pipeline_state",
+      "_dlt_version",
       "curfew",
       "curfew__rule",
       "curfew__zone",
@@ -12,6 +15,9 @@ locals {
       "position",
     ],
     "serco_fms" : [
+      "_dlt_loads",
+      "_dlt_pipeline_state",
+      "_dlt_version",
       "alm_asset",
       "asmt_assessment_instance",
       "asmt_assessment_instance_question",
