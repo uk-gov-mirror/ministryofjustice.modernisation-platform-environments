@@ -57,7 +57,7 @@ locals {
   ]
 
   cross_account_recieve_mapping = local.is-development ? "test" : local.is-preproduction ? "production" : local.is-test ? "preproduction" : null
-  cross_env_bucket_policy       = {
+  cross_env_bucket_policy = {
     (module.s3-dms-target-store-bucket.bucket.id) = module.s3-dms-target-store-bucket.bucket.arn
     (module.s3-data-bucket.bucket.id)             = module.s3-data-bucket.bucket.arn
   }

@@ -7,7 +7,7 @@ resource "aws_iam_policy" "rds_s3_access_policy" {
 
   name        = "${local.application_name}-rds-s3-access-policy"
   description = "Policy to allow RDS access to S3 buckets for Data Pump imports"
-  policy      = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
@@ -23,7 +23,7 @@ resource "aws_iam_policy" "rds_s3_access_policy" {
       }
     ]
   })
-  
+
 }
 
 resource "aws_iam_role" "rds_s3_access_role" {
