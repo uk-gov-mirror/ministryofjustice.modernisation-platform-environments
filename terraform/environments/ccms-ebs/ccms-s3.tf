@@ -120,10 +120,10 @@ data "aws_iam_policy_document" "logging_s3_policy" {
     actions   = ["s3:PutObject"]
     resources = ["arn:aws:s3:::ccms-ebs-${local.environment}-logging/s3access/*"]
 
-    condition {
+   condition {
       test     = "StringEquals"
-      variable = "s3:x-amz-acl"
-      values   = ["bucket-owner-full-control"]
+      variable = "aws:SourceAccount"
+      values   = ["${data.aws_caller_identity.current.account_id}"]
     }
   }
 
