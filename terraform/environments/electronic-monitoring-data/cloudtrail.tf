@@ -40,7 +40,7 @@ resource "aws_cloudtrail" "ears_sars_cloudtrail" {
     
     field_selector {
       field  = "resources.ARN"
-      equals = [module.ears_sars_step_function.arn] 
+      equals = [module.ears_sars_step_function.arn[0]]
     }
   }
 
@@ -63,6 +63,6 @@ data "aws_iam_policy_document" "cloudtrail_policies" {
         "cloudtrail:GetTrailStatus",
         "cloudtrail:GetEventSelectors"
         ]
-    resources = ["arn:aws:cloudtrail:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:trail/${locals.ears_sars_cloudtrail}"]
+    resources = ["arn:aws:cloudtrail:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:trail/${local.ears_sars_cloudtrail}"]
   }
 }
