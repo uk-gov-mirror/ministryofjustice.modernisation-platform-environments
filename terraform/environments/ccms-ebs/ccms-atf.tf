@@ -37,7 +37,7 @@ data "aws_iam_policy_document" "atf_kms_policy" {
 }
 
 resource "aws_kms_key" "atf_kms" {
-  count               = local.is_development ? 1 : 0
+    count               = local.is_development ? 1 : 0
   description         = "KMS for SSH private keys in Secrets Manager for AWS Transfer Family"
   enable_key_rotation = true
   policy              = data.aws_iam_policy_document.atf_kms_policy.json
@@ -103,24 +103,24 @@ resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
 
 resource "aws_security_group" "atf_ftp_server_sg" {
   name   = "atf-sftp-server-sg"
-  vpc_id = aws_vpc.main.id
+  vpc_id = data.aws_vpc.shared.id
   tags   = merge(local.tags, { Name = lower(format("sg-%s-%s-atf-ftp-server", local.application_name, local.environment) ) })
 }
 
-resource "aws_security_group_ingress_rule" "atf_ftp_server_sg_ingress" {
+resource "aws_vpc_security_group_ingress_rule" "atf_ftp_server_sg_ingress" {
   security_group_id = aws_security_group.atf_ftp_server_sg.id
   from_port         = 22
   to_port           = 22
-  protocol          = "tcp"
+  ip_protocol          = "tcp"
   referenced_security_group_id = aws_security_group.ec2_sg_ebsapps.id
 }
 
-resource "aws_security_group_egress_rule" "atf_ftp_server_sg_egress" {
+resource "aws_vpc_security_group_egress_rule" "atf_ftp_server_sg_egress" {
   security_group_id = aws_security_group.atf_ftp_server_sg.id
   from_port         = 0
   to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
 }
 
 resource "aws_iam_role" "lambda_atf_ftp_server_role" {
@@ -142,6 +142,7 @@ resource "aws_iam_role" "lambda_atf_ftp_server_role" {
 }
 
 resource "aws_iam_role_policy" "lambda_atf_ftp_server_role_policy" {
+  count = local.is_development ? 1 : 0
   name = "${local.application_name}-${local.environment}-lambda_atf_ftp_server_role_policy"
   role = aws_iam_role.lambda_atf_ftp_server_role.id
 
@@ -173,21 +174,23 @@ resource "aws_iam_role_policy" "lambda_atf_ftp_server_role_policy" {
           "kms:GenerateDataKey*",
           "kms:Decrypt"
         ]
-        Resource = [aws_kms_key.atf_kms.arn]
+        Resource = [aws_kms_key.atf_kms[count.index].arn]
       }
     ]
   })
 }
 
 data "archive_file" "atf_lambda_zip" {
+  count = local.is_development ? 1 : 0
   type        = "zip"
   source_dir  = "${path.module}/lambda/atf_ftp_server_idp"
   output_path = "${path.module}/lambda/atf_ftp_server_idp.zip"
 }
 
 resource "aws_lambda_function" "atf_ftp_server_idp" {
+  count = local.is_development ? 1 : 0
   function_name    = "${local.application_name}-${local.environment}-atf-ftp-server-idp"
-  filename         = data.archive_file.atf_lambda_zip.output_path
+  filename         = data.archive_file.atf_lambda_zip[count.index].output_path
   source_code_hash = base64sha256(join("", local.lambda_source_hashes_atf_ftp_server_idp))
   role             = aws_iam_role.lambda_atf_ftp_server_role.arn
   handler          = "lambda_function.lambda_handler"
@@ -256,8 +259,9 @@ resource "aws_iam_role_policy" "atf_ftp_server_policy" {
 }
 
 resource "aws_transfer_server" "atf_ftp_server" {
+  count = local.is_development ? 1 : 0
   identity_provider_type = "AWS_LAMBDA"
-  function               = aws_lambda_function.atf_ftp_server_idp.arn
+  function               = aws_lambda_function.atf_ftp_server_idp[count.index].arn
   protocols              = ["SFTP"]
   endpoint_type          = "VPC"
   domain                 = "S3"
