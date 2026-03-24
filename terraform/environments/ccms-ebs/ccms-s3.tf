@@ -118,36 +118,11 @@ data "aws_iam_policy_document" "logging_s3_policy" {
     actions   = ["s3:PutObject"]
     resources = ["arn:aws:s3:::ccms-ebs-${local.environment}-logging/s3access/*"]
 
-    #   condition {
-    #      test     = "StringEquals"
-    #      variable = "aws:SourceAccount"
-    #      values   = ["${data.aws_caller_identity.current.account_id}"]
-    #    }
-    condition {
-      test     = "StringEquals"
-      variable = "s3:x-amz-acl"
-      values   = ["bucket-owner-full-control"]
-    }
-  }
-
-  # Deny any PutObject outside the approved prefixes
-  statement {
-    sid    = "DenyPutOutsideApprovedPrefixes"
-    effect = "Deny"
-
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-
-    actions = ["s3:PutObject"]
-
-    not_resources = [
-      "arn:aws:s3:::ccms-ebs-${local.environment}-logging/s3access/*",       # S3 access logs
-      "arn:aws:s3:::ccms-ebs-${local.environment}-logging/s3-access-logs/*", # if you use this prefix
-      "arn:aws:s3:::ccms-ebs-${local.environment}-logging/elb-logs/*",       # ALB/NLB logs
-      "arn:aws:s3:::ccms-ebs-${local.environment}-logging/athena-results/*"  # Athena results
-    ]
+       condition {
+          test     = "StringEquals"
+          variable = "aws:SourceAccount"
+          values   = ["${data.aws_caller_identity.current.account_id}"]
+       }
   }
 }
 
