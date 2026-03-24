@@ -123,7 +123,9 @@ data "aws_iam_policy_document" "logging_s3_policy" {
       values   = ["${data.aws_caller_identity.current.account_id}"]
     }
   }
+}
 
+data "aws_iam_policy_document" "logging_s3_policy_deny" {
   statement {
     sid    = "DenyPutOutsideApprovedPrefixes"
     effect = "Deny"
