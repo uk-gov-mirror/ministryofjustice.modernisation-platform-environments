@@ -127,7 +127,7 @@ data "aws_iam_policy_document" "logging_s3_policy" {
     }
   }
 
-  # Deny any PutObject outside the approved logging prefixes
+# Deny any PutObject outside the approved prefixes
 statement {
   sid    = "DenyPutOutsideApprovedPrefixes"
   effect = "Deny"
@@ -139,22 +139,13 @@ statement {
 
   actions = ["s3:PutObject"]
 
-  resources = [
-    "arn:aws:s3:::ccms-ebs-${local.environment}-logging/*"
+  not_resources = [
+    "arn:aws:s3:::ccms-ebs-${local.environment}-logging/s3access/*",       # S3 access logs
+    "arn:aws:s3:::ccms-ebs-${local.environment}-logging/s3-access-logs/*", # if you use this prefix
+    "arn:aws:s3:::ccms-ebs-${local.environment}-logging/elb-logs/*",       # ALB/NLB logs
+    "arn:aws:s3:::ccms-ebs-${local.environment}-logging/athena-results/*"  # Athena results
   ]
-
-  # Only allow PUTs to these prefixes:
-  condition {
-    test     = "StringNotLike"
-    variable = "s3:prefix"
-    values = [
-      "s3access/*",      # S3 server access logs
-      "s3-access-logs/*",
-      "elb-logs/*",      # ALB/NLB logs (if enabled)
-      "athena-results/*" # Athena (only if you use it)
-    ]
-  }
-}
+ }
 }
 
 # ---------------------------------------------
