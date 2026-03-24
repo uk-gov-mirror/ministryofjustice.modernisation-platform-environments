@@ -66,6 +66,31 @@ data "aws_iam_policy_document" "airflow_cde_bedrock" {
       "arn:aws:bedrock:*::foundation-model/*"
     ]
   }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "aws-marketplace:Subscribe"
+    ]
+    resources = ["*"]
+    condition {
+      test     = "ForAnyValue:StringEquals"
+      variable = "aws-marketplace:ProductId"
+      values = [
+        "prod-mxcfnwvpd6kb4",
+        "prod-5ukwuglpt66kg",
+        "prod-ffvjxvh4ltq64"
+      ]
+    }
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "aws-marketplace:viewsubscriptions",
+    ]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_policy" "airflow_cde_bedrock" {
