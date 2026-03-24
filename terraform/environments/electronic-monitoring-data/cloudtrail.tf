@@ -66,6 +66,8 @@ data "aws_iam_policy_document" "cloudtrail_policies" {
 }
 
 resource "aws_athena_database" "audit_db" {
+  count = local.is-development || local.is-preproduction ? 1 : 0
+
   name    = "audit_logs_db"
   comment = "Database for CloudTrail and Security audit logs"
 
@@ -76,6 +78,8 @@ resource "aws_athena_database" "audit_db" {
 }
 
 resource "aws_glue_catalog_table" "ear_sar_api_cloudtrail_logs" {
+  count = local.is-development || local.is-preproduction ? 1 : 0
+
   database_name = aws_athena_database.audit_db.name # Assuming you created an Athena DB
   name          = "cloudtrail_targeted_logs"
 
@@ -125,8 +129,8 @@ resource "aws_glue_catalog_table" "ear_sar_api_cloudtrail_logs" {
     # Standard CloudTrail columns. 
     # 'requestparameters' is kept as a string so you can use Athena JSON functions to extract specific data based on the API call.
     columns { 
-      name = "eventversion"        
-      type = "string" 
+      name = "eventversion"
+      type = "string"
     }
     columns {
       name = "useridentity"
@@ -134,11 +138,11 @@ resource "aws_glue_catalog_table" "ear_sar_api_cloudtrail_logs" {
     }
     columns {
       name = "eventtime"
-      type = "string" 
+      type = "string"
     }
     columns {
       name = "eventsource"
-      type = "string" 
+      type = "string"
     }
     columns {
       name = "eventname"
@@ -167,7 +171,7 @@ resource "aws_glue_catalog_table" "ear_sar_api_cloudtrail_logs" {
     columns {
       name = "requestparameters"
       type = "string" 
-    } # We can think about changing this later as we can query this in Athena.
+    }
     columns {
       name = "responseelements"
       type = "string" 
@@ -210,34 +214,34 @@ resource "aws_glue_catalog_table" "ear_sar_api_cloudtrail_logs" {
     }
     columns {
       name = "sharedeventid"
-      type = "string" 
+      type = "string"
     }
     columns {
       name = "vpcendpointid"
-      type = "string" 
-    }
-    columns {
-      name = vpcendpointaccountid
       type = "string"
     }
     columns {
-      name = eventcategory
+      name = "vpcendpointaccountid"
       type = "string"
     }
     columns {
-      name = addendum
+      name = "eventcategory"
+      type = "string"
+    }
+    columns {
+      name = "addendum"
       type = "struct<reason:string,updatedfields:string,originalrequestid:string,originaleventid:string>"
     }
     columns {
-      name = sessioncredentialfromconsole
+      name = "sessioncredentialfromconsole"
       type = "string"
     }
     columns {
-      name = edgedevicedetails
+      name = "edgedevicedetails"
       type = "string"
     }
     columns {
-      name = tlsdetails
+      name = "tlsdetails"
       type = "struct<tlsversion:string,ciphersuite:string,clientprovidedhostheader:string>"
     }
   }
