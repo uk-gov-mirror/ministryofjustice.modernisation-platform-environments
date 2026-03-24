@@ -88,7 +88,9 @@ resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
     # atf_ingerprint_md5 = tls_private_key.atf[0].public_key_fingerprint_md5
     # key_type        = "rsa"
     atf_user1_key_name        = aws_key_pair.atf[0].key_name
-    created_at_utc  = timestamp()
+    atf_user1_home_directory  = aws_s3_bucket.buckets["laa-ccms-inbound-${local.environment}-mp"].id/CCMS_PRD_Barclaycard/Inbound
+    atf_user1_role            = aws_iam_role.lambda_atf_ftp_server_role
+    atf_user1_created_at_utc  = timestamp()
   })
 
 #   lifecycle {
@@ -206,12 +208,54 @@ resource "aws_lambda_function" "atf_ftp_server_idp" {
  
 }
 
+resource "aws_iam_role" "atf_ftp_server_user_role" {
+  name = "atf-ftp-server-user-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "transfer.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "atf_ftp_server_policy" {
+  role = aws_iam_role.atf_ftp_server_user_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ]
+        Resource = "arn:aws:s3:::${aws_s3_bucket.buckets["laa-ccms-inbound-${local.environment}-mp"].id}"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "arn:aws:s3:::${aws_s3_bucket.buckets["laa-ccms-inbound-${local.environment}-mp"].id}/CCMS_PRD_Barclaycard/Inbound/*"
+      }
+    ]
+  })
+}
+
 resource "aws_transfer_server" "atf_ftp_server" {
   identity_provider_type = "AWS_LAMBDA"
   function               = aws_lambda_function.atf_ftp_server_idp.arn
   protocols              = ["SFTP"]
   endpoint_type          = "VPC"
-
+  domain                 = "S3"
 
   endpoint_details {
     vpc_id             = data.aws_vpc.shared.id
