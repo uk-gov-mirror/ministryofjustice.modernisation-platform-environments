@@ -81,7 +81,7 @@ resource "random_password" "password_user1" {
 
 resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
   count     = local.is_development ? 1 : 0
-  secret_id = aws_secretsmanager_secret.atf_ftp_server_secrets.id
+  secret_id = aws_secretsmanager_secret.atf_ftp_server_secrets[count.index].id
   secret_string = jsonencode({
     "atf_user1_username"        = "user1",
     "atf_user1_password"        = random_password.password_user1.result,
@@ -90,10 +90,11 @@ resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
     # atf_ingerprint_md5 = tls_private_key.atf[0].public_key_fingerprint_md5
     # key_type        = "rsa"
     "atf_user1_key_name"        = aws_key_pair.atf[0].key_name,
-    "atf_user1_home_directory"  = aws_s3_bucket.buckets["laa-ccms-inbound-${local.environment}-mp"].id/CCMS_PRD_Barclaycard/Inbound,
+    "atf_user1_home_directory"  = "/aws_s3_bucket.buckets[laa-ccms-inbound-${local.environment}-mp].id/CCMS_PRD_Barclaycard/Inbound",
     "atf_user1_role"            = aws_iam_role.lambda_atf_ftp_server_role,
     "atf_user1_created_at_utc"  = timestamp(),
-    "servername"                = aws_transfer_server.atf_ftp_server.id
+    "servername"                = "servername"
+    # "servername"                = aws_transfer_server.atf_ftp_server[count.index].id
   })
 
 #   lifecycle {
