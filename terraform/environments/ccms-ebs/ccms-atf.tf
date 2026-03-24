@@ -178,14 +178,16 @@ resource "aws_iam_role_policy" "lambda_atf_ftp_server_role_policy" {
   })
 }
 
-data "archive_file" "lambda_zip" {
+data "archive_file" "atf_lambda_zip" {
   type        = "zip"
   source_dir  = "${path.module}/lambda/atf_ftp_server_idp"
   output_path = "${path.module}/lambda/atf_ftp_server_idp.zip"
 }
 
 resource "aws_lambda_function" "atf_ftp_server_idp" {
-  function_name    = "atf-ftp-server-idp"
+  function_name    = "${local.application_name}-${local.environment}-atf-ftp-server-idp"
+  filename         = data.archive_file.atf_lambda_zip.output_path
+  source_code_hash = base64sha256(join("", local.lambda_source_hashes_atf_ftp_server_idp))
   role             = aws_iam_role.lambda_atf_ftp_server_role.arn
   handler          = "lambda_function.lambda_handler"
 #   layers           = [aws_lambda_layer_version.lambda_cloudwatch_sns_layer.arn]
@@ -195,7 +197,7 @@ resource "aws_lambda_function" "atf_ftp_server_idp" {
 
   environment {
     variables = {
-      # This secret now contains slack_channel_webhook, slack_channel_webhook_guardduty, slack_channel_webhook_s3
+      # This secret now contains multiple secrets
       SECRET_NAME = aws_secretsmanager_secret.atf_ftp_server_secrets.name
     }
   }

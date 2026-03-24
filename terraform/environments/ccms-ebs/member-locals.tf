@@ -22,6 +22,11 @@ locals {
     sha256(file("${path.module}/lambda/payment_load_monitor/${f}"))
   ]
 
+  lambda_source_hashes_atf_ftp_server_idp = [
+    for f in fileset("./lambda/atf_ftp_server_idp", "**") :
+    sha256(file("${path.module}/lambda/atf_ftp_server_idp/${f}"))
+  ]
+
   data_subnets = [
     data.aws_subnet.data_subnets_a.id,
     data.aws_subnet.data_subnets_b.id,
