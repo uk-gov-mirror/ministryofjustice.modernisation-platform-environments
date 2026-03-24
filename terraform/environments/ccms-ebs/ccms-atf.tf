@@ -202,7 +202,7 @@ resource "aws_lambda_function" "atf_ftp_server_idp" {
   environment {
     variables = {
       # This secret now contains multiple secrets
-      SECRET_NAME = aws_secretsmanager_secret.atf_ftp_server_secrets.name
+      SECRET_NAME = aws_secretsmanager_secret.atf_ftp_server_secrets[count.index].name
     }
   }
 
