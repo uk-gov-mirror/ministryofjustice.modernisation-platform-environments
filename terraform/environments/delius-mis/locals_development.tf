@@ -10,6 +10,7 @@ locals {
     ad_trust_dns_ip_addrs                  = module.ip_addresses.mp_ips.ad_fixngo_azure_domain_controllers
     core_shared_services_vpc_cidr          = module.ip_addresses.mp_cidr["core-shared-services-non-live-data"]
     ec2_user_ssh_key                       = file("${path.module}/files/.ssh/${terraform.workspace}/ec2-user.pub")
+    lb_additional_allowed_public_cidrs     = module.ip_addresses.mp_cidrs.non_live_eu_west_nat
     migration_environment_full_name        = "dmd-mis-dev"
     migration_environment_abbreviated_name = "dmd"
     migration_environment_short_name       = "mis-dev"
@@ -361,4 +362,12 @@ locals {
   datasync_config_dev = {
     source_s3_bucket_arn = "arn:aws:s3:::eu-west-2-delius-mis-dev-dfi-extracts" # differs per environment
   }
+
+  db_backup_config_dev = {
+    object_lock_days             = 3
+    expire_current_after_days    = 80
+    expire_noncurrent_after_days = 10
+  }
+
 }
+

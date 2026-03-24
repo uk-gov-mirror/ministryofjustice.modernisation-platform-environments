@@ -10,6 +10,7 @@ locals {
     ad_trust_dns_ip_addrs                  = module.ip_addresses.mp_ips.ad_fixngo_hmpp_domain_controllers
     core_shared_services_vpc_cidr          = module.ip_addresses.mp_cidr["core-shared-services-live-data-additional"]
     ec2_user_ssh_key                       = file("${path.module}/files/.ssh/${terraform.workspace}/ec2-user.pub")
+    lb_additional_allowed_public_cidrs     = module.ip_addresses.mp_cidrs.live_eu_west_nat
     migration_environment_full_name        = "del-pre-prod"
     migration_environment_abbreviated_name = "del"
     migration_environment_short_name       = "pre-prod"
@@ -410,4 +411,17 @@ locals {
   dfi_report_bucket_config_preprod = null
 
   lb_config_preprod = null
+
+  db_backup_config_preprod = {
+    object_lock_days             = 0
+    expire_current_after_days    = 200
+    expire_noncurrent_after_days = 10
+    transition = [
+      {
+        days          = 30
+        storage_class = "STANDARD_IA"
+      }
+    ]
+  }
+
 }
