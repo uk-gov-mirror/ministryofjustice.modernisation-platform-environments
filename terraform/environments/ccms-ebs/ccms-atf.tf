@@ -65,7 +65,7 @@ resource "aws_key_pair" "atf" {
 
 resource "aws_secretsmanager_secret" "atf_ftp_server_secrets" {
   count                   = local.is_development ? 1 : 0
-  name                    = "ssh/${local.environment}/atf/private-key"
+  name                    = "aws/transfer/${aws_transfer_server.atf_ftp_server.id}/user1"
   kms_key_id              = aws_kms_key.atf_kms[0].arn
   recovery_window_in_days = 7
   tags                    = { Environment = local.environment, Purpose = "sftp-login" }
@@ -82,15 +82,17 @@ resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
   count     = local.is_development ? 1 : 0
   secret_id = aws_secretsmanager_secret.atf_ftp_server_secrets.id
   secret_string = jsonencode({
-    atf_user1_password        = random_password.password_user1.result
-    atf_user1_private_key_pem = tls_private_key.atf[0].private_key_pem
-    atf_user1_public_key      = tls_private_key.atf[0].public_key_openssh
+    "atf_user1_username"        = "user1",
+    "atf_user1_password"        = random_password.password_user1.result,
+    "atf_user1_private_key_pem" = tls_private_key.atf[0].private_key_pem,
+    "atf_user1_public_key"      = tls_private_key.atf[0].public_key_openssh,
     # atf_ingerprint_md5 = tls_private_key.atf[0].public_key_fingerprint_md5
     # key_type        = "rsa"
-    atf_user1_key_name        = aws_key_pair.atf[0].key_name
-    atf_user1_home_directory  = aws_s3_bucket.buckets["laa-ccms-inbound-${local.environment}-mp"].id/CCMS_PRD_Barclaycard/Inbound
-    atf_user1_role            = aws_iam_role.lambda_atf_ftp_server_role
-    atf_user1_created_at_utc  = timestamp()
+    "atf_user1_key_name"        = aws_key_pair.atf[0].key_name,
+    "atf_user1_home_directory"  = aws_s3_bucket.buckets["laa-ccms-inbound-${local.environment}-mp"].id/CCMS_PRD_Barclaycard/Inbound,
+    "atf_user1_role"            = aws_iam_role.lambda_atf_ftp_server_role,
+    "atf_user1_created_at_utc"  = timestamp(),
+    "servername"                = aws_transfer_server.atf_ftp_server.id
   })
 
 #   lifecycle {
