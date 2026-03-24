@@ -118,6 +118,62 @@ resource "aws_security_group_egress_rule" "atf_ftp_server_sg_egress" {
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
+resource "aws_iam_role" "lambda_atf_ftp_server_role" {
+  name = "${local.application_name}-${local.environment}-lambda_atf_ftp_server_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+  tags = merge(local.tags, {
+    Name = "${local.application_name}-${local.environment}-lambda_atf_ftp_server_role"
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_atf_ftp_server_role_policy" {
+  name = "${local.application_name}-${local.environment}-lambda_atf_ftp_server_role_policy"
+  role = aws_iam_role.lambda_atf_ftp_server_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:ListSecretVersionIds"
+        ]
+        # Secret now contains slack_channel_webhook, slack_channel_webhook_guardduty, slack_channel_webhook_s3
+        Resource = [aws_secretsmanager_secret.ebs_cw_alerts_secrets.arn]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${aws_lambda_function.cloudwatch_sns.function_name}:*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:GenerateDataKey*",
+          "kms:Decrypt"
+        ]
+        Resource = [aws_kms_key.atf_kms.arn]
+      }
+    ]
+  })
+}
+
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_dir  = "${path.module}/lambda/atf_ftp_server_idp"
@@ -126,9 +182,9 @@ data "archive_file" "lambda_zip" {
 
 resource "aws_lambda_function" "atf_ftp_server_idp" {
   function_name    = "atf-ftp-server-idp"
-  role             = aws_iam_role.lambda_cloudwatch_sns_role.arn
+  role             = aws_iam_role.lambda_atf_ftp_server_role.arn
   handler          = "lambda_function.lambda_handler"
-  layers           = [aws_lambda_layer_version.lambda_cloudwatch_sns_layer.arn]
+#   layers           = [aws_lambda_layer_version.lambda_cloudwatch_sns_layer.arn]
   runtime          = "python3.13"
   timeout          = 30
   publish          = true
@@ -136,7 +192,7 @@ resource "aws_lambda_function" "atf_ftp_server_idp" {
   environment {
     variables = {
       # This secret now contains slack_channel_webhook, slack_channel_webhook_guardduty, slack_channel_webhook_s3
-    #   SECRET_NAME = aws_secretsmanager_secret.ebs_cw_alerts_secrets.name
+      SECRET_NAME = aws_secretsmanager_secret.atf_ftp_server_secrets.name
     }
   }
 
@@ -145,7 +201,7 @@ resource "aws_lambda_function" "atf_ftp_server_idp" {
   }
 
   tags = merge(local.tags, {
-    Name = "${local.application_name}-${local.environment}-cloudwatch-alarm-slack-integration"
+    Name = "${local.application_name}-${local.environment}-atf-ftp-server-idp"
   })
  
 }
