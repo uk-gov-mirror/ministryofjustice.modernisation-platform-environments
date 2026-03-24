@@ -89,6 +89,7 @@ resource "aws_lambda_function" "red_button_trigger" {
 
 resource "aws_s3_bucket" "red_button_data" {
   bucket = "${local.application_name}-${local.environment}-red-button-data"
+  object_lock_enabled = local.is-development
 
   tags = merge(local.tags,
     {
@@ -121,6 +122,18 @@ resource "aws_s3_bucket_versioning" "red_button_data" {
   }
 }
 
+resource "aws_s3_bucket_object_lock_configuration" "red_button_data" {
+  count  = local.is-development ? 1 : 0
+  bucket = aws_s3_bucket.red_button_data.id
+
+  rule {
+    default_retention {
+      mode = "GOVERNANCE"
+      days = 1
+    }
+  }
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "red_button_data" {
   bucket = aws_s3_bucket.red_button_data.id
 
@@ -143,9 +156,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "red_button_data_lifecycle" {
 
   bucket = aws_s3_bucket.red_button_data.id
 
-  # One lifecycle rule per prefix
+  # One lifecycle rule per prefix.
   rule {
-    id     = "expire-${aws_s3_bucket.red_button_data.id}-${local.application_data.accounts[local.environment].s3_lifecycle_days_expiration_current}d"
+    id     = local.is-development ? "expire-${aws_s3_bucket.red_button_data.id}-2d" : "expire-${aws_s3_bucket.red_button_data.id}-${local.application_data.accounts[local.environment].s3_lifecycle_days_expiration_current}d"
     status = "Enabled"
 
     filter {
@@ -153,7 +166,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "red_button_data_lifecycle" {
     }
 
     expiration {
-      days = local.application_data.accounts[local.environment].s3_lifecycle_days_expiration_current
+      days = local.is-development ? 2 : local.application_data.accounts[local.environment].s3_lifecycle_days_expiration_current
     }
 
     noncurrent_version_transition {
@@ -166,11 +179,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "red_button_data_lifecycle" {
       storage_class   = "GLACIER"
     }
     noncurrent_version_expiration {
-      noncurrent_days = local.application_data.accounts[local.environment].s3_lifecycle_days_expiration_noncurrent
+      noncurrent_days = local.is-development ? 2 : local.application_data.accounts[local.environment].s3_lifecycle_days_expiration_noncurrent
     }
 
     abort_incomplete_multipart_upload {
-      days_after_initiation = local.application_data.accounts[local.environment].s3_lifecycle_days_abort_incomplete_multipart_upload_days
+      days_after_initiation = local.is-development ? 2 : local.application_data.accounts[local.environment].s3_lifecycle_days_abort_incomplete_multipart_upload_days
     }
 
   }
