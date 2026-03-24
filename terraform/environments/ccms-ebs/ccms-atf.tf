@@ -65,7 +65,8 @@ resource "aws_key_pair" "atf" {
 
 resource "aws_secretsmanager_secret" "atf_ftp_server_secrets" {
   count                   = local.is_development ? 1 : 0
-  name                    = "aws/transfer/${aws_transfer_server.atf_ftp_server.id}/user1"
+  # name                    = "aws/transfer/${aws_transfer_server.atf_ftp_server.id}/user1"
+  name                    = "aws/transfer/sftp_server/user1"
   kms_key_id              = aws_kms_key.atf_kms[0].arn
   recovery_window_in_days = 7
   tags                    = { Environment = local.environment, Purpose = "sftp-login" }
