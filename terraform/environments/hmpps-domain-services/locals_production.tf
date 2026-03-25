@@ -260,7 +260,7 @@ locals {
       "az.justice.gov.uk" = {
         records = [
           # validation records
-          { name = "_bc45f2d6d9bf486b641716271dfbe56c.cafmtx", type = "CNAME", ttl = 86400, records = ["_1aa4c911695fe4b8da33b57c2405112d.sdgjtdhdhz.acm-validations.aws"] },
+          # { name = "_bc45f2d6d9bf486b641716271dfbe56c.cafmtx", type = "CNAME", ttl = 86400, records = ["_1aa4c911695fe4b8da33b57c2405112d.sdgjtdhdhz.acm-validations.aws"] }, #this is auto populating
           # cname records
           { name = "cafmtx", type = "CNAME", ttl = "86400", records = ["cafmtx.planetfm.service.justice.gov.uk"] },
           # NS records
