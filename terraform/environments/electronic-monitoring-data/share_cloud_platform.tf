@@ -222,7 +222,7 @@ data "aws_iam_policy_document" "em_data_validation_permissions" {
       "glue:GetTables",
     ]
     resources = [
-      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database:validation${local.dbt_suffix}",
+      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/validation${local.dbt_suffix}",
     ]
   }
   statement {
