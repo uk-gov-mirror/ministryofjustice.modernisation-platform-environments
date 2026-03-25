@@ -91,11 +91,11 @@ resource "aws_cloudtrail" "ears_sars_cloudtrail" {
   }
 
   tags = merge(
-    local.tags,
-    {
-      Resource_Type = "CloudTrail for EARS&SARS S3 Audit Logs",
-    }
-  )
+      local.tags,
+      {
+        Resource_Type = "CloudTrail resource for EARs/SARs API request Step Function logs",
+      }
+    )
 }
 
 # data "aws_iam_policy_document" "cloudtrail_policies" {
