@@ -36,7 +36,7 @@ class ConfigValidator:
             "atf_user1_username": config_dict.get("atf_user1_username"),
             "atf_user1_password": config_dict.get("atf_user1_password"),
             "atf_user1_home_directory": config_dict.get("atf_user1_home_directory"),
-            "atf_user1_publickey": config_dict.get("atf_user1_publickey"),
+            "atf_user1_public_key": config_dict.get("atf_user1_public_key"),
             "atf_user1_role": config_dict.get("atf_user1_role"),
             "servername": config_dict.get("servername"),
         }
@@ -83,7 +83,7 @@ class ValidateConfig:
     atf_user1_password: str
     atf_user1_home_directory: str
     atf_user1_role: str
-    atf_user1_publickey: str
+    atf_user1_public_key: str
     servername: str
 
     def __post_init__(self):
@@ -93,7 +93,7 @@ class ValidateConfig:
             "atf_user1_password": self.atf_user1_password,
             "atf_user1_home_directory": self.atf_user1_home_directory,
             "atf_user1_role": self.atf_user1_role,
-            "atf_user1_publickey": self.atf_user1_publickey,
+            "atf_user1_public_key": self.atf_user1_public_key,
             "servername": self.servername
         }
 
@@ -153,8 +153,8 @@ def parse_config_from_env_and_secrets(
         atf_user1_home_directory=ConfigValidator.get_mandatory_secret(
             secrets_data, "atf_user1_home_directory"
         ),
-        atf_user1_publickey=ConfigValidator.get_mandatory_secret(
-            secrets_data, "atf_user1_publickey"
+        atf_user1_public_key=ConfigValidator.get_mandatory_secret(
+            secrets_data, "atf_user1_public_key"
         ),
         atf_user1_role=ConfigValidator.get_mandatory_secret(
             secrets_data, "atf_user1_role"
@@ -208,7 +208,7 @@ def lambda_handler(event, context):
     logger.info("Parsing configuration from environment and secrets")
     config = parse_config_from_env_and_secrets(env_config, secrets_data)
 
-    username = event["username"]
+    username = config.atf_user1_username
     password = config.atf_user1_password
     # server_id = event["serverId"]
     # secret = sm.get_secret_value(
@@ -217,17 +217,25 @@ def lambda_handler(event, context):
     # data = json.loads(secret["SecretString"])
     
     # Validate password and Validate SSH public key
-    if "password" in event and event["password"] == password and "publicKey" in event and event["publicKey"] == config.atf_user1_publickey:
+    # logger.info(event)
+    # public_key = event.get("publicKey")
+    logger.info(f"Public key received: {public_key}")
+    if "password" in event and event["password"] == password and "publicKey" in event and event["publicKey"] == config.atf_user1_public_key:
+        logger.info("private key is validated")
         return {
             "Role": config.atf_user1_role,
             "HomeDirectory": config.atf_user1_home_directory,
         }
+    # if "password" in event and event["password"] == password:
+    #     return {
+    #         "Role": config.atf_user1_role,
+    #         "HomeDirectory": config.atf_user1_home_directory,
+    #     }
 
-
-    # if "publicKey" in event and event["publicKey"] == config.atf_user1_publickey:
+    # if "publicKey" in event and event["publicKey"] == config.atf_user1_public_key:
     #     return {
     #         "Role": data["Role"],
     #         "HomeDirectory": data["HomeDirectory"],
     #     }
-
+    # logger.info("private key is invalid")
     return {"errorMessage": "Authentication failed"}
