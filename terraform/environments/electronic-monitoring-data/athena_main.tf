@@ -100,7 +100,7 @@ resource "aws_glue_catalog_database" "ears_sars_audit_db" {
 resource "aws_glue_catalog_table" "ears_sars_audit_table" {
   count = local.is-development || local.is-preproduction ? 1 : 0
   name          = "reports_requested"
-  database_name = aws_glue_catalog_database.ears_sars_audit_db.name
+  database_name = aws_glue_catalog_database.ears_sars_audit_db[0].name
   table_type    = "EXTERNAL_TABLE"
 
   parameters = {
