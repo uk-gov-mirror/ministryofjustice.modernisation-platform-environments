@@ -86,7 +86,7 @@ resource "aws_cloudtrail" "ears_sars_cloudtrail" {
  
     field_selector {
       field  = "resources.ARN"
-      starts_with = ["${module.module.s3-logging-bucket.arn}/ears_sars/"]
+      starts_with = ["${module.s3-logging-bucket.arn}/ears_sars/"]
     }
   }
 
