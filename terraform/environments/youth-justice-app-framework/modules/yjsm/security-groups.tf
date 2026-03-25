@@ -133,6 +133,7 @@ resource "aws_security_group_rule" "ecs_to_assets" {
   description              = "ECS internal to ASSETS"
 }
 
+/*
 # (ESB)
 resource "aws_security_group_rule" "esb_80" {
   type                     = "ingress"
@@ -143,7 +144,7 @@ resource "aws_security_group_rule" "esb_80" {
   source_security_group_id = var.esb_service_sg_id
   description              = "YJSM to ESB"
 }
-
+*/
 
 # YJSM to RDS
 resource "aws_security_group_rule" "allow_postgres_from_yjsm" {

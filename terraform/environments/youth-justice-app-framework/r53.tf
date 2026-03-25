@@ -43,7 +43,7 @@ locals {
   dns_a_records = {
     yjsm          = [module.yjsm.yjsm_instance_private_ip]
     yjsmhubadmin  = [module.yjsm.yjsm_instance_secondary_private_ip]
-    mule          = [module.esb.esb_instance_private_ip]
+#    mule          = [module.esb.esb_instance_private_ip]
     ldap          = module.ds.dns_ip_addresses
   }
 }
