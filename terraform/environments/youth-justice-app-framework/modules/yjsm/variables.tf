@@ -65,6 +65,11 @@ variable "private_ip" {
   type        = string
 }
 
+variable "private_ip_secondary" {
+  description = "Secondary private IP for the instance"
+  default     = null
+}
+
 variable "ami" {
   description = "AMI for the instance"
   type        = string

@@ -35,10 +35,18 @@ module "yjsm" {
       test          = "10.26.152.172"
       preproduction = "10.27.144.83"
       production    = "10.27.152.21"
-      # Add more environments when IP is known
     },
     local.environment,
     null # Default to null, allowing AWS to auto-assign an IP
+  )
+  private_ip_secondary = lookup(
+    {
+      development   = "10.26.144.104"
+      test          = "10.26.152.145"
+      preproduction = "10.27.144.18"
+      production    = "10.27.152.34"
+    },
+    local.environment, null
   )
 
   ami = lookup(
