@@ -1517,8 +1517,8 @@ data "aws_iam_policy_document" "ears_sars_iam_role_policy_document" {
     effect    = "Allow"
     actions   = ["s3:PutObject", "s3:PutObjectAcl"]
     resources = [
-      "${module.s3-logging-bucket.arn}/ears_sars/*",
-      module.s3-logging-bucket.arn
+      "${module.s3-logging-bucket.bucket.arn}/ears_sars/*",
+      module.s3-logging-bucket.bucket.arn
     ]
   }
 
