@@ -60,8 +60,7 @@ resource "aws_cloudtrail" "ears_sars_cloudtrail" {
   s3_bucket_name                = module.s3-logging-bucket.bucket.id
   s3_key_prefix                 = local.ears_sars
   include_global_service_events = false
-
-  # Target the S3 Bucket for PutObject events
+  
   advanced_event_selector {
     name = "Log S3 Audit PutEvents"
 
@@ -94,7 +93,7 @@ resource "aws_cloudtrail" "ears_sars_cloudtrail" {
   tags = merge(
     local.tags,
     {
-      Resource_Type = "CloudTrail for S3 Audit Logs",
+      Resource_Type = "CloudTrail for EARS&SARS S3 Audit Logs",
     }
   )
 }
