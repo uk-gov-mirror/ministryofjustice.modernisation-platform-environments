@@ -7,6 +7,50 @@ locals {
 #   name = local.ears_sars_cloudtrail
 # }
 
+# resource "aws_cloudtrail" "ears_sars_cloudtrail" {
+#   count = local.is-development || local.is-preproduction ? 1 : 0
+
+#   depends_on = [module.s3-logging-bucket.bucket_policy]
+
+#   name                          = local.ears_sars_cloudtrail
+#   s3_bucket_name                = module.s3-logging-bucket.bucket.id
+#   s3_key_prefix                 = local.ears_sars
+#   include_global_service_events = false
+
+#   # Target the State Machine
+#   advanced_event_selector {
+#     name = "Log ears & sars requests"
+
+#     field_selector {
+#       field  = "eventCategory"
+#       equals = ["Data"]
+#     }
+
+#     # field_selector {
+#     #   field  = "eventNames"
+#     #   equals = ["StartExecution"]
+#     # }
+
+#     field_selector {
+#       field  = "resources.type"
+#       equals = ["AWS::StepFunctions::StateMachine"]
+#     }
+    
+#     field_selector {
+#       field  = "resources.ARN"
+#       equals = [module.ears_sars_step_function[0].arn]
+#     }
+#   }
+
+#   tags = merge(
+#     local.tags,
+#     {
+#       Resource_Type = "CloudTrail resource for EARs/SARs API request Step Function logs",
+#     }
+#   )
+# }
+
+
 resource "aws_cloudtrail" "ears_sars_cloudtrail" {
   count = local.is-development || local.is-preproduction ? 1 : 0
 
@@ -17,35 +61,40 @@ resource "aws_cloudtrail" "ears_sars_cloudtrail" {
   s3_key_prefix                 = local.ears_sars
   include_global_service_events = false
 
-  # Target the State Machine
+  # Target the S3 Bucket for PutObject events
   advanced_event_selector {
-    name = "Log ears & sars requests"
+    name = "Log S3 Audit PutEvents"
 
     field_selector {
       field  = "eventCategory"
       equals = ["Data"]
     }
 
-    # field_selector {
-    #   field  = "eventNames"
-    #   equals = ["StartExecution"]
-    # }
-
     field_selector {
       field  = "resources.type"
-      equals = ["AWS::StepFunctions::StateMachine"]
+      equals = ["AWS::S3::Object"]
     }
-    
+
+    field_selector {
+      field  = "readOnly"
+      equals = ["false"]
+    }
+    field_selector {
+      field  = "eventName"
+      equals = ["PutObject"]
+    }
+
+ 
     field_selector {
       field  = "resources.ARN"
-      equals = [module.ears_sars_step_function[0].arn]
+      starts_with = ["${module.module.s3-logging-bucket.arn}/ears_sars/"]
     }
   }
 
   tags = merge(
     local.tags,
     {
-      Resource_Type = "CloudTrail resource for EARs/SARs API request Step Function logs",
+      Resource_Type = "CloudTrail for S3 Audit Logs",
     }
   )
 }
