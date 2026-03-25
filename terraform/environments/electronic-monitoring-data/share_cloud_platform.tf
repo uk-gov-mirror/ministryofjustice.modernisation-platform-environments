@@ -189,6 +189,38 @@ resource "aws_iam_role_policy_attachment" "standard_athena_access_em_data_valida
   role       = module.emd_validation_db_role[0].iam_role_name
 }
 
+data "aws_iam_policy_document" "em_data_validation_permissions" {
+  statement {
+    sid       = "ListAccountAliasForEnvironmentClass"
+    effect    = "Allow"
+    actions   = ["iam:ListAccountAliases"]
+    resources = ["*"]
+  }
+  statement {
+    sid    = "ListAllBucketsForEnvironmentClass"
+    effect = "Allow"
+    actions = [
+      "s3:ListAllMyBuckets",
+      "s3:GetBucketLocation"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "em_data_validation_permissions" {
+  count       = local.is-test ? 1 : 0
+  name_prefix = "em_data_validation_permissions"
+  description = "Permissions for environment class for emd tool."
+  policy      = data.aws_iam_policy_document.em_data_validation_permissions.json
+}
+
+resource "aws_iam_role_policy_attachment" "em_data_validation_permissions" {
+  count      = local.is-test ? 1 : 0
+  policy_arn = aws_iam_policy.em_data_validation_permissions[0].arn
+  role       = module.emd_validation_db_role[0].iam_role_name
+}
+
+
 module "emdi_trail_maps_role" {
   #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
   #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
