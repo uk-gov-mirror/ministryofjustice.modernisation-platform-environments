@@ -123,7 +123,7 @@ resource "aws_glue_catalog_table" "ears_sars_audit_table" {
     ser_de_info {
       serialization_library = "org.openx.data.jsonserde.JsonSerDe"
     }
-  columns {
+   columns {
       name = "legacy_subject_id"
       type = "string"
     }
@@ -151,4 +151,17 @@ resource "aws_glue_catalog_table" "ears_sars_audit_table" {
       name = "information_requested_to"
       type = "string"
     }
+  }
+  partition_keys {
+    name = "year"
+    type = "string"
+  }
+  partition_keys {
+    name = "month"
+    type = "string"
+  }
+  partition_keys {
+    name = "day"
+    type = "string"
+  }
 }
