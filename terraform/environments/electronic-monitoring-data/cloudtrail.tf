@@ -3,9 +3,9 @@ locals {
   ears_sars_cloudtrail = "ears_sars_cloudtrail"
 }
 
-resource "aws_cloudwatch_log_group" "ears_sars_cloudtrail" {
-  name = local.ears_sars_cloudtrail
-}
+# resource "aws_cloudwatch_log_group" "ears_sars_cloudtrail" {
+#   name = local.ears_sars_cloudtrail
+# }
 
 resource "aws_cloudtrail" "ears_sars_cloudtrail" {
   count = local.is-development || local.is-preproduction ? 1 : 0
@@ -50,17 +50,17 @@ resource "aws_cloudtrail" "ears_sars_cloudtrail" {
   )
 }
 
-data "aws_iam_policy_document" "cloudtrail_policies" {
-  statement {
-    sid       = "TestAPAirflowPermissionsListBuckets"
-    effect    = "Allow"
-    actions   = [
-        "cloudtrail:StartLogging",
-        "cloudtrail:StopLogging",
-        "cloudtrail:GetTrail",
-        "cloudtrail:GetTrailStatus",
-        "cloudtrail:GetEventSelectors"
-        ]
-    resources = ["arn:aws:cloudtrail:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:trail/${local.ears_sars_cloudtrail}"]
-  }
-}
+# data "aws_iam_policy_document" "cloudtrail_policies" {
+#   statement {
+#     sid       = "TestAPAirflowPermissionsListBuckets"
+#     effect    = "Allow"
+#     actions   = [
+#         "cloudtrail:StartLogging",
+#         "cloudtrail:StopLogging",
+#         "cloudtrail:GetTrail",
+#         "cloudtrail:GetTrailStatus",
+#         "cloudtrail:GetEventSelectors"
+#         ]
+#     resources = ["arn:aws:cloudtrail:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:trail/${local.ears_sars_cloudtrail}"]
+#   }
+# }
