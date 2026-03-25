@@ -1504,11 +1504,22 @@ resource "aws_iam_role_policy_attachment" "cross_account_copy" {
 data "aws_iam_policy_document" "ears_sars_iam_role_policy_document" {
   count = local.is-development || local.is-preproduction ? 1 : 0
 
+  # DO WE NEED THIS?
   statement {
     sid       = "S3BucketPerms"
     effect    = "Allow"
     actions   = ["s3:ListAllMyBuckets", "s3:GetBucketLocation"]
     resources = ["*"]
+  }
+
+  statement {
+    sid       = "S3BucketPerms"
+    effect    = "Allow"
+    actions   = ["s3:PutObject", "s3:PutObjectAcl"]
+    resources = [
+      "${module.s3-logging-bucket.arn}/ears_sars/*",
+      module.s3-logging-bucket.arn
+    ]
   }
 
   statement {
