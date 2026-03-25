@@ -155,6 +155,18 @@ data "terraform_remote_state" "core_network_services" {
   }
 }
 
+# State for workspace-components (VPC and subnets)
+data "terraform_remote_state" "workspace_components" {
+  backend = "s3"
+  config = {
+    acl     = "bucket-owner-full-control"
+    bucket  = "modernisation-platform-terraform-state"
+    key     = "environments/members/laa-workspaces/workspace-components/${terraform.workspace}/terraform.tfstate"
+    region  = "eu-west-2"
+    encrypt = "true"
+  }
+}
+
 data "aws_organizations_organization" "root_account" {}
 
 # Retrieve information about the modernisation platform account
