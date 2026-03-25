@@ -174,7 +174,7 @@ resource "aws_lakeformation_permissions" "em_data_validation_table" {
   }
 }
 
-resource "aws_lakeformation_persmissions" "em_data_validation_s3" {
+resource "aws_lakeformation_permissions" "em_data_validation_s3" {
   count = local.is-test ? 1 : 0
   principal = module.emd_validation_db_role[0].iam_role_arn
   permissions = ["DATA_LOCATION_ACCESS"]
