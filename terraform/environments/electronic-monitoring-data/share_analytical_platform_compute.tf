@@ -91,6 +91,10 @@ locals {
     "staged_scram_alcohol_monitoring",
   ]
 
+  ears_sars_audit_db = [
+    "ears_sars_audit"
+  ]
+
   dev_dbs_to_grant       = local.is-production ? [for db in local.prod_dbs_to_grant : "${db}_historic_dev_dbt"] : []
   prod_dbt_dbs_to_grant  = flatten([[for db in local.prod_dbs_to_grant : "${db}${local.dbt_suffix}"], local.dev_dbs_to_grant])
   dbt_dbs_to_grant       = [for db in local.dbt_dbs : "${db}${local.dbt_suffix}"]
@@ -98,7 +102,7 @@ locals {
   dbs_to_grant           = toset(flatten([local.prod_dbt_dbs_to_grant, local.dbt_dbs_to_grant]))
 
 
-  existing_dbs_to_grant = toset(flatten([local.live_feed_dbs_to_grant, local.historic_source_dbs]))
+  existing_dbs_to_grant = toset(flatten([local.live_feed_dbs_to_grant, local.historic_source_dbs, local.ears_sars_audit_db]))
 }
 
 # Source Analytics DBT Secrets
