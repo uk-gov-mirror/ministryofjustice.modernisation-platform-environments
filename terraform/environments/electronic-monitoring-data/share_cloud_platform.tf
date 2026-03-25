@@ -167,7 +167,7 @@ resource "aws_lakeformation_permissions" "em_data_validation_db" {
 resource "aws_lakeformation_permissions" "em_data_validation_table" {
   count       = local.is-test ? 1 : 0
   principal   = module.emd_validation_db_role[0].iam_role_arn
-  permissions = ["DESCRIBE"]
+  permissions = ["DESCRIBE", "SELECT"]
   table {
     database_name = "validation${local.dbt_suffix}"
     wildcard      = true
