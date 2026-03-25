@@ -37,11 +37,11 @@ data "aws_iam_policy_document" "atf_kms_policy" {
 }
 
 resource "aws_kms_key" "atf_kms" {
-    count               = local.is_development ? 1 : 0
+  count               = local.is_development ? 1 : 0
   description         = "KMS for SSH private keys in Secrets Manager for AWS Transfer Family"
   enable_key_rotation = true
   policy              = data.aws_iam_policy_document.atf_kms_policy.json
-  tags                = { Environment = local.environment }
+  tags                = merge(local.tags, { Name = "atf-kms-key"})
 }
 
 # Generate SSH key pair
@@ -55,7 +55,7 @@ resource "aws_key_pair" "atf" {
   count      = local.is_development ? 1 : 0
   key_name   = "atf_key_name_user1"
   public_key = tls_private_key.atf[0].public_key_openssh
-  tags       = { Name = "atf-key", Environment = local.environment }
+  tags       = merge(local.tags, { Name = "atf-key" })
 
   lifecycle {
     ignore_changes = [public_key]
@@ -65,18 +65,18 @@ resource "aws_key_pair" "atf" {
 
 resource "aws_secretsmanager_secret" "atf_ftp_server_secrets" {
   count                   = local.is_development ? 1 : 0
-  # name                    = "aws/transfer/${aws_transfer_server.atf_ftp_server.id}/user1"
-  name                    = "aws/transfer/sftp_server/user1"
+  name                    = "aws/transfer/${aws_transfer_server.atf_ftp_server.id}/user1"
+  # name                    = "aws/transfer/sftp_server/user1"
   kms_key_id              = aws_kms_key.atf_kms[0].arn
   recovery_window_in_days = 7
-  tags                    = { Environment = local.environment, Purpose = "sftp-login" }
-
+  tags                    = merge(local.tags, { Purpose = "sftp-login" })
+  
 }
 
 resource "random_password" "password_user1" {
   length  = 16
-  special = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  # special = true
+  # override_special = "!#$%&*()-_=+[]{}<>:?"
 } 
 
 resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
@@ -90,10 +90,10 @@ resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
     # atf_ingerprint_md5 = tls_private_key.atf[0].public_key_fingerprint_md5
     # key_type        = "rsa"
     "atf_user1_key_name"        = aws_key_pair.atf[0].key_name,
-    "atf_user1_home_directory"  = "/aws_s3_bucket.buckets[laa-ccms-inbound-${local.environment}-mp].id/CCMS_PRD_Barclaycard/Inbound",
-    "atf_user1_role"            = aws_iam_role.lambda_atf_ftp_server_role,
+    "atf_user1_home_directory"  = "/laa-ccms-inbound-${local.environment}-mp/CCMS_PRD_Barclaycard/Inbound",
+    "atf_user1_role"            = aws_iam_role.atf_ftp_server_user_role.arn,
     "atf_user1_created_at_utc"  = timestamp(),
-    "servername"                = "servername"
+    "servername"                = "${aws_transfer_server.atf_ftp_server.id}"
     # "servername"                = aws_transfer_server.atf_ftp_server[count.index].id
   })
 
@@ -120,7 +120,7 @@ resource "aws_vpc_security_group_egress_rule" "atf_ftp_server_sg_egress" {
   security_group_id = aws_security_group.atf_ftp_server_sg.id
   from_port         = 0
   to_port           = 0
-  ip_protocol       = "-1"
+  ip_protocol       = "tcp"
   cidr_ipv4         = "0.0.0.0/0"
 }
 
@@ -158,7 +158,7 @@ resource "aws_iam_role_policy" "lambda_atf_ftp_server_role_policy" {
           "secretsmanager:ListSecretVersionIds"
         ]
         # Secret now contains slack_channel_webhook, slack_channel_webhook_guardduty, slack_channel_webhook_s3
-        Resource = [aws_secretsmanager_secret.ebs_cw_alerts_secrets.arn]
+        Resource = [aws_secretsmanager_secret.atf_ftp_server_secrets[count.index].arn]
       },
       {
         Effect = "Allow"
@@ -167,7 +167,7 @@ resource "aws_iam_role_policy" "lambda_atf_ftp_server_role_policy" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${aws_lambda_function.cloudwatch_sns.function_name}:*"
+        Resource = "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${aws_lambda_function.atf_ftp_server_idp[count.index].function_name}:*"
       },
       {
         Effect = "Allow"
@@ -188,6 +188,16 @@ data "archive_file" "atf_lambda_zip" {
   output_path = "${path.module}/lambda/atf_ftp_server_idp.zip"
 }
 
+resource "aws_lambda_layer_version" "lambda_atf_sftp_server_layer" {
+  # filename                 = "lambda/layerV1.zip"
+  layer_name               = "${local.application_name}-${local.environment}-atf-sftp-server-layer"
+  s3_key                   = "lambda_delivery/cloudwatch_sns_layer/layerV1.zip"
+  s3_bucket                = aws_s3_bucket.ccms_ebs_shared.bucket
+  compatible_runtimes      = ["python3.13"]
+  compatible_architectures = ["x86_64"]
+  description              = "Lambda Layer for ${local.application_name} atf ftp server"
+}
+
 resource "aws_lambda_function" "atf_ftp_server_idp" {
   count = local.is_development ? 1 : 0
   function_name    = "${local.application_name}-${local.environment}-atf-ftp-server-idp"
@@ -195,7 +205,7 @@ resource "aws_lambda_function" "atf_ftp_server_idp" {
   source_code_hash = base64sha256(join("", local.lambda_source_hashes_atf_ftp_server_idp))
   role             = aws_iam_role.lambda_atf_ftp_server_role.arn
   handler          = "lambda_function.lambda_handler"
-#   layers           = [aws_lambda_layer_version.lambda_cloudwatch_sns_layer.arn]
+  layers           = [aws_lambda_layer_version.lambda_atf_sftp_server_layer.arn]
   runtime          = "python3.13"
   timeout          = 30
   publish          = true
@@ -203,7 +213,7 @@ resource "aws_lambda_function" "atf_ftp_server_idp" {
   environment {
     variables = {
       # This secret now contains multiple secrets
-      SECRET_NAME = aws_secretsmanager_secret.atf_ftp_server_secrets[count.index].name
+      # SECRET_NAME = aws_secretsmanager_secret.atf_ftp_server_secrets[count.index].name
     }
   }
 
@@ -244,7 +254,7 @@ resource "aws_iam_role_policy" "atf_ftp_server_policy" {
           "s3:ListBucket",
           "s3:GetBucketLocation"
         ]
-        Resource = "arn:aws:s3:::${aws_s3_bucket.buckets["laa-ccms-inbound-${local.environment}-mp"].id}"
+        Resource = "arn:aws:s3:::laa-ccms-inbound-${local.environment}-mp"
       },
       {
         Effect = "Allow"
@@ -253,7 +263,7 @@ resource "aws_iam_role_policy" "atf_ftp_server_policy" {
           "s3:PutObject",
           "s3:DeleteObject"
         ]
-        Resource = "arn:aws:s3:::${aws_s3_bucket.buckets["laa-ccms-inbound-${local.environment}-mp"].id}/CCMS_PRD_Barclaycard/Inbound/*"
+        Resource = "arn:aws:s3:::laa-ccms-inbound-${local.environment}-mp/CCMS_PRD_Barclaycard/Inbound/*"
       }
     ]
   })
@@ -266,10 +276,27 @@ resource "aws_transfer_server" "atf_ftp_server" {
   protocols              = ["SFTP"]
   endpoint_type          = "VPC"
   domain                 = "S3"
+  sftp_authentication_methods = "PUBLIC_KEY_AND_PASSWORD"
 
+  structured_log_destinations = [
+    "${aws_cloudwatch_log_group.atf_ftp_server.arn}:*"
+  ]
   endpoint_details {
     vpc_id             = data.aws_vpc.shared.id
     subnet_ids         = data.aws_subnets.shared-private.ids
     security_group_ids = [aws_security_group.atf_ftp_server_sg.id]
   }
+}
+
+resource "aws_cloudwatch_log_group" "atf_ftp_server" {
+  name_prefix = "atf_ftp_server"
+}
+
+resource "aws_lambda_permission" "allow_transfer" {
+  count = local.is_development ? 1 : 0
+  statement_id  = "AllowAtfSFTPServerInvocation"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.atf_ftp_server_idp.function_name
+  principal     = "transfer.amazonaws.com"
+  source_arn = aws_transfer_server.atf_ftp_server[count.index].arn
 }
