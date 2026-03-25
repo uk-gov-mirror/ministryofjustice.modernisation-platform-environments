@@ -37,7 +37,7 @@ data "aws_iam_policy_document" "atf_kms_policy" {
 }
 
 resource "aws_kms_key" "atf_kms" {
-  count               = local.is_development ? 1 : 0
+  count               = local.is-development || local.is-test ? 1 : 0
   description         = "KMS for SSH private keys in Secrets Manager for AWS Transfer Family"
   enable_key_rotation = true
   policy              = data.aws_iam_policy_document.atf_kms_policy.json
@@ -46,13 +46,13 @@ resource "aws_kms_key" "atf_kms" {
 
 # Generate SSH key pair
 resource "tls_private_key" "atf" {
-  count     = local.is_development ? 1 : 0
+  count     = local.is-development || local.is-test ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
 resource "aws_key_pair" "atf" {
-  count      = local.is_development ? 1 : 0
+  count      = local.is-development || local.is-test ? 1 : 0
   key_name   = "atf_key_name_user1"
   public_key = tls_private_key.atf[0].public_key_openssh
   tags       = merge(local.tags, { Name = "atf-key" })
@@ -64,8 +64,8 @@ resource "aws_key_pair" "atf" {
 }
 
 resource "aws_secretsmanager_secret" "atf_ftp_server_secrets" {
-  count                   = local.is_development ? 1 : 0
-  name                    = "aws/transfer/${aws_transfer_server.atf_ftp_server.id}/user1"
+  count                   = local.is-development || local.is-test ? 1 : 0
+  name                    = "aws/transfer/${aws_transfer_server.atf_ftp_server[count.index].id}/user1"
   # name                    = "aws/transfer/sftp_server/user1"
   kms_key_id              = aws_kms_key.atf_kms[0].arn
   recovery_window_in_days = 7
@@ -80,7 +80,7 @@ resource "random_password" "password_user1" {
 } 
 
 resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
-  count     = local.is_development ? 1 : 0
+  count     = local.is-development || local.is-test ? 1 : 0
   secret_id = aws_secretsmanager_secret.atf_ftp_server_secrets[count.index].id
   secret_string = jsonencode({
     "atf_user1_username"        = "user1",
@@ -143,7 +143,7 @@ resource "aws_iam_role" "lambda_atf_ftp_server_role" {
 }
 
 resource "aws_iam_role_policy" "lambda_atf_ftp_server_role_policy" {
-  count = local.is_development ? 1 : 0
+  count = local.is-development || local.is-test ? 1 : 0
   name = "${local.application_name}-${local.environment}-lambda_atf_ftp_server_role_policy"
   role = aws_iam_role.lambda_atf_ftp_server_role.id
 
@@ -182,7 +182,7 @@ resource "aws_iam_role_policy" "lambda_atf_ftp_server_role_policy" {
 }
 
 data "archive_file" "atf_lambda_zip" {
-  count = local.is_development ? 1 : 0
+  count = local.is-development || local.is-test ? 1 : 0
   type        = "zip"
   source_dir  = "${path.module}/lambda/atf_ftp_server_idp"
   output_path = "${path.module}/lambda/atf_ftp_server_idp.zip"
@@ -199,7 +199,7 @@ resource "aws_lambda_layer_version" "lambda_atf_sftp_server_layer" {
 }
 
 resource "aws_lambda_function" "atf_ftp_server_idp" {
-  count = local.is_development ? 1 : 0
+  count = local.is-development || local.is-test ? 1 : 0
   function_name    = "${local.application_name}-${local.environment}-atf-ftp-server-idp"
   filename         = data.archive_file.atf_lambda_zip[count.index].output_path
   source_code_hash = base64sha256(join("", local.lambda_source_hashes_atf_ftp_server_idp))
@@ -279,7 +279,7 @@ resource "aws_iam_role_policy" "atf_ftp_server_policy" {
 }
 
 resource "aws_transfer_server" "atf_ftp_server" {
-  count = local.is_development ? 1 : 0
+  count = local.is-development || local.is-test ? 1 : 0
   identity_provider_type = "AWS_LAMBDA"
   function               = aws_lambda_function.atf_ftp_server_idp[count.index].arn
   protocols              = ["SFTP"]
@@ -302,10 +302,10 @@ resource "aws_cloudwatch_log_group" "atf_ftp_server" {
 }
 
 resource "aws_lambda_permission" "allow_transfer" {
-  count = local.is_development ? 1 : 0
+  count = local.is-development || local.is-test ? 1 : 0
   statement_id  = "AllowAtfSFTPServerInvocation"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.atf_ftp_server_idp.function_name
+  function_name = aws_lambda_function.atf_ftp_server_idp[count.index].function_name
   principal     = "transfer.amazonaws.com"
   source_arn = aws_transfer_server.atf_ftp_server[count.index].arn
 }
