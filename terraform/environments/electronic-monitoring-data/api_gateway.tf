@@ -74,7 +74,7 @@ module "ears_sars_api" {
   api_version = "0.1.1"
 }
 
-resource "aws_api_gateway_account" "demo" {
+resource "aws_api_gateway_account" "global_usage" {
   cloudwatch_role_arn = aws_iam_role.cloudwatch.arn
 }
 
