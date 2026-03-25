@@ -209,6 +209,7 @@ data "aws_iam_policy_document" "em_data_validation_permissions" {
     effect = "Allow"
     actions = [
       "glue:GetDatabases",
+      "glue:GetDatabase",
     ]
     resources = [
       "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:catalog",
