@@ -342,19 +342,40 @@ resource "helm_release" "shared_services_gateway" {
   ]
 }
 
-# Disabling KEDA. When enabling we need to switch the external metrics API server to use hostNetwork as the cluster needs to connect to it, same as cert-manager
-# resource "helm_release" "keda" {
-#   /* https://artifacthub.io/packages/helm/kedacore/keda */
+resource "helm_release" "keda" {
+  /* https://artifacthub.io/packages/helm/kedacore/keda */
 
-#   name       = "keda"
-#   repository = "https://kedacore.github.io/charts"
-#   chart      = "keda"
-#   version    = local.cluster_configuration.helm_chart_versions.keda
-#   namespace  = module.keda_namespace.name
-#   values = [
-#     templatefile(
-#       "${path.module}/configuration/helm/keda/values.yml.tftpl",
-#       {}
-#     )
-#   ]
-# }
+  name       = "keda"
+  repository = "https://kedacore.github.io/charts"
+  chart      = "keda"
+  version    = local.cluster_configuration.helm_chart_versions.keda
+  namespace  = module.keda_namespace.name
+  values = [
+    templatefile(
+      "${path.module}/configuration/helm/keda/values.yml.tftpl",
+      {}
+    )
+  ]
+}
+
+resource "helm_release" "aws_load_balancer_controller" {
+  /* https://artifacthub.io/packages/helm/aws/aws-load-balancer-controller */
+
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  version    = local.cluster_configuration.helm_chart_versions.aws_load_balancer_controller
+  namespace  = "kube-system"
+  values = [
+    templatefile(
+      "${path.module}/configuration/helm/aws-load-balancer-controller/values.yml.tftpl",
+      {
+        cluster_name = module.eks.cluster_name
+        aws_region   = data.aws_region.current.region
+        vpc_id       = data.aws_vpc.main.id
+      }
+    )
+  ]
+
+  depends_on = [kubernetes_manifest.aws_load_balancer_controller_crds]
+}

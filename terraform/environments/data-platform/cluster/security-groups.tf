@@ -113,6 +113,20 @@ module "node_security_group" {
       description              = "Cluster API to node 10260/tcp webhook"
       source_security_group_id = module.eks.cluster_security_group_id
     },
+    {
+      from_port                = 10262
+      to_port                  = 10262
+      protocol                 = "tcp"
+      description              = "Cluster API to node 10262/tcp webhook"
+      source_security_group_id = module.eks.cluster_security_group_id
+    },
+    {
+      from_port                = 10263
+      to_port                  = 10263
+      protocol                 = "tcp"
+      description              = "Cluster API to node 10263/tcp metrics API server"
+      source_security_group_id = module.eks.cluster_security_group_id
+    },
   ]
 
   tags = {
