@@ -29,6 +29,15 @@ locals {
     "servicemonitors",
     "thanosrulers"
   ]
+
+  aws_load_balancer_controller_crd_manifests = {
+    for i, doc in split("\n---\n", data.http.aws_load_balancer_controller_crd.response_body) :
+    tostring(i) => {
+      for k, v in yamldecode(doc) :
+      k => v if k != "status"
+    }
+    if trimspace(doc) != ""
+  }
 }
 
 data "http" "gateway_api_crd" {
@@ -53,4 +62,14 @@ resource "kubernetes_manifest" "prometheus_operator_crd" {
   for_each = data.http.prometheus_operator_crds
 
   manifest = yamldecode(each.value.response_body)
+}
+
+data "http" "aws_load_balancer_controller_crd" {
+  url = "https://raw.githubusercontent.com/aws/eks-charts/${local.cluster_configuration.crd_versions.aws_load_balancer_controller}/stable/aws-load-balancer-controller/crds/crds.yaml"
+}
+
+resource "kubernetes_manifest" "aws_load_balancer_controller_crds" {
+  for_each = local.aws_load_balancer_controller_crd_manifests
+
+  manifest = each.value
 }
