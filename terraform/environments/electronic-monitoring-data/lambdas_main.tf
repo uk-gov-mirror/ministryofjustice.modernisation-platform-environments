@@ -675,6 +675,7 @@ module "ears_sars_request" {
 # ------------------------------------------------------------------------------
 
 module "fan_out_tags" {
+  count                          = local.is-development || local.is-test || local.is-preproduction || local.is-production ? 1 : 0
   source                         = "./modules/lambdas"
   is_image                       = true
   function_name                  = "fan_out_tags"
