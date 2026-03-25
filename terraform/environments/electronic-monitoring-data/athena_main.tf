@@ -123,21 +123,32 @@ resource "aws_glue_catalog_table" "ears_sars_audit_table" {
     ser_de_info {
       serialization_library = "org.openx.data.jsonserde.JsonSerDe"
     }
-    columns {
-      name = "body"
+  columns {
+      name = "legacy_subject_id"
       type = "string"
     }
-  }
-  partition_keys {
-    name = "year"
-    type = "string"
-  }
-  partition_keys {
-    name = "month"
-    type = "string"
-  }
-  partition_keys {
-    name = "day"
-    type = "string"
-  }
+    columns {
+      name = "legacy_order_id"
+      type = "string"
+    }
+    columns {
+      name = "priority"
+      type = "string"
+    }
+    columns {
+      name = "monitoring_requirement"
+      type = "string"
+    }
+    columns {
+      name = "request_types"
+      type = "array<string>"
+    }
+    columns {
+      name = "information_requested_from"
+      type = "string"
+    }
+    columns {
+      name = "information_requested_to"
+      type = "string"
+    }
 }
