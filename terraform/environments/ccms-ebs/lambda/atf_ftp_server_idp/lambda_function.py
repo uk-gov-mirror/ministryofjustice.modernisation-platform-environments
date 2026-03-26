@@ -192,8 +192,12 @@ def lambda_handler(event, context):
             f"SECRET_NAME must be a string, got: {type(secret_name).__name__}"
         )
     logger.info("Retrieving credentials from AWS Secrets Manager")
+    server_id = event["serverId"]
+    username = event["username"]
     secrets_manager = SecretsManager()
-    secrets_data = secrets_manager.get_credentials(secret_name)
+    full_secret_name = f"aws/transfer/{server_id}/{username}"
+
+    secrets_data = secrets_manager.get_credentials(full_secret_name)
 
     required_secrets = [
         "atf_user1_username",
