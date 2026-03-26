@@ -902,7 +902,7 @@ data "aws_iam_policy_document" "load_mdss_lambda_role_policy_document" {
     resources = [
       module.kms_metadata_key.key_arn,
     ]
-  }  
+  }
 }
 
 resource "aws_iam_role" "load_mdss" {
@@ -1503,12 +1503,22 @@ resource "aws_iam_role_policy_attachment" "cross_account_copy" {
 
 data "aws_iam_policy_document" "ears_sars_iam_role_policy_document" {
   count = local.is-development || local.is-preproduction ? 1 : 0
-
+ 
   statement {
     sid       = "S3BucketPerms"
     effect    = "Allow"
     actions   = ["s3:ListAllMyBuckets", "s3:GetBucketLocation"]
     resources = ["*"]
+  }
+
+  statement {
+    sid       = "S3LoggingBucketPerms"
+    effect    = "Allow"
+    actions   = ["s3:PutObject", "s3:PutObjectAcl"]
+    resources = [
+      "${module.s3-logging-bucket.bucket.arn}/ears_sars/*",
+      module.s3-logging-bucket.bucket.arn
+    ]
   }
 
   statement {
@@ -1780,10 +1790,19 @@ data "aws_iam_policy_document" "fan_out_tags_policy_document" {
     effect = "Allow"
     actions = [
       "s3:GetObjectTagging",
-       "s3:ListBucket",
     ]
     resources = [
       "${module.s3-raw-formatted-data-bucket.bucket.arn}/*"
+    ]
+  }
+  statement {
+    sid    = "ListRawFormattedBucket"
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket",
+    ]
+    resources = [
+      module.s3-raw-formatted-data-bucket.bucket.arn,
     ]
   }
 
