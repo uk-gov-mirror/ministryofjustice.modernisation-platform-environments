@@ -158,6 +158,7 @@ module "karpenter" {
 
 
 resource "helm_release" "karpenter" {
+ count = contains(local.enabled_workspaces, local.cluster_environment) ? 1 : 0
  namespace           = "kube-system"
  name                = "karpenter"
  repository          = "oci://public.ecr.aws/karpenter"
@@ -196,6 +197,6 @@ resource "kubectl_manifest" "deploy_manifest" {
   count = contains(local.enabled_workspaces, local.cluster_environment) ? 1 : 0
   yaml_body = data.kubectl_path_documents.manifests.manifests.value
   depends_on = [
-    helm_release.karpenter
+    helm_release.karpenter[0]
   ]
 }
