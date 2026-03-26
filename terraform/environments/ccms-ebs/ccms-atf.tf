@@ -93,7 +93,7 @@ resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
     # key_type        = "rsa"
     "atf_user1_key_name"        = aws_key_pair.atf[0].key_name,
     "atf_user1_home_directory"  = "/laa-ccms-inbound-${local.environment}-mp/CCMS_PRD_Barclaycard/Inbound",
-    "atf_user1_role"            = aws_iam_role.atf_ftp_server_user_role.arn,
+    "atf_user1_role"            = aws_iam_role.atf_ftp_server_user_role[count.index].arn,
     "atf_user1_created_at_utc"  = timestamp(),
     "servername"                = aws_transfer_server.atf_ftp_server[count.index].id
   })
