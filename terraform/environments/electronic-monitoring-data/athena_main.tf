@@ -106,12 +106,12 @@ resource "aws_glue_catalog_table" "ears_sars_audit_table" {
   parameters = {
     "classification"              = "json"
     "projection.enabled"          = "true"
-    "projection.year.type"        = "integer"
-    "projection.year.range"       = "2025,2040"
-    "projection.month.type"       = "integer"
-    "projection.month.range"      = "1,12"
-    "projection.day.type"         = "integer"
-    "projection.day.range"        = "1,31"
+    "projection._year.type"        = "integer"
+    "projection._year.range"       = "2025,2040"
+    "projection._month.type"       = "integer"
+    "projection._month.range"      = "1,12"
+    "projection._day.type"         = "integer"
+    "projection._day.range"        = "1,31"
     
     "storage.location.template" = "s3://${module.s3-logging-bucket.bucket.id}/ears_sars/$${year}/$${month}/$${day}/"
   }
