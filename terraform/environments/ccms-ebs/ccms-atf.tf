@@ -300,7 +300,7 @@ resource "aws_transfer_server" "atf_ftp_server" {
   endpoint_details {
     vpc_id             = data.aws_vpc.shared.id
     subnet_ids         = data.aws_subnets.shared-private.ids
-    security_group_ids = [aws_security_group.atf_ftp_server_sg.id]
+    security_group_ids = [aws_security_group.atf_ftp_server_sg[count.index].id]
   }
 }
 
