@@ -140,6 +140,7 @@ module "eks" {
 }
 
 module "karpenter" {
+  count = contains(local.enabled_workspaces, local.cluster_environment) ? 1 : 0
   source = "terraform-aws-modules/eks/aws//modules/karpenter"
 
   cluster_name = module.eks[0].cluster_name
@@ -172,13 +173,13 @@ resource "helm_release" "karpenter" {
    settings:
      clusterName: ${module.eks[0].cluster_name}
      clusterEndpoint: ${module.eks[0].cluster_endpoint}
-     interruptionQueue: ${module.karpenter.queue_name}
+     interruptionQueue: ${module.karpenter[0].queue_name}
    webhook:
      enabled: false
    EOT
  ]
   depends_on = [
-    module.karpenter
+    module.karpenter[0]
   ]
 }
 
@@ -187,14 +188,15 @@ data "kubectl_path_documents" "manifests" {
   pattern = "${path.module}/templates/karpenter.yaml"
   vars = {
     alias_version = "v20260304"
-    cluster_name = module.eks[0].cluster_name
+    cluster_name = try(module.eks[0].cluster_name, null)
   }
 }
 
 resource "kubectl_manifest" "deploy_manifest" {
+  count = contains(local.enabled_workspaces, local.cluster_environment) ? 1 : 0
   for_each  = data.kubectl_path_documents.manifests.manifests
   yaml_body = each.value
   depends_on = [
-    helm_release.karpenter
+    helm_release.karpenter[0]
   ]
 }
