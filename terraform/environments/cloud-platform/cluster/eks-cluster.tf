@@ -194,8 +194,8 @@ data "kubectl_path_documents" "manifests" {
 
 resource "kubectl_manifest" "deploy_manifest" {
   count = contains(local.enabled_workspaces, local.cluster_environment) ? 1 : 0
-  yaml_body = data.kubectl_path_documents.manifests[0].manifests.value
+  yaml_body = data.kubectl_path_documents.manifests.manifests.value
   depends_on = [
-    helm_release.karpenter[0]
+    helm_release.karpenter
   ]
 }
