@@ -106,10 +106,10 @@
           - name: Set IAM Role Name
             id: set-role
             run: |
-              if [[ ("${{ inputs.environment }}" == "preproduction" || "${{ inputs.environment }}" == "production") && "${{ github.ref }}" != "refs/heads/main" ]]; then
+              if [[ ("${{ inputs.environment }}" == "preproduction" || "${{ inputs.environment }}" == "nonlive" || "${{ inputs.environment }}" == "production" || "${{ inputs.environment }}" == "live") && "${{ github.ref }}" != "refs/heads/main" ]]; then
                 echo "role_name=github-actions-plan" >> $GITHUB_OUTPUT
                 echo "session_name=githubactionsplanrolesession" >> $GITHUB_OUTPUT
-              elif [[ ("${{ inputs.environment }}" == "preproduction" || "${{ inputs.environment }}" == "production") && "${{ github.ref }}" == "refs/heads/main" ]]; then
+              elif [[ ("${{ inputs.environment }}" == "preproduction" || "${{ inputs.environment }}" == "nonlive" || "${{ inputs.environment }}" == "production" || "${{ inputs.environment }}" == "live") && "${{ github.ref }}" == "refs/heads/main" ]]; then
                 echo "role_name=github-actions-apply" >> $GITHUB_OUTPUT
                 echo "session_name=githubactionsrolesession" >> $GITHUB_OUTPUT
               else
