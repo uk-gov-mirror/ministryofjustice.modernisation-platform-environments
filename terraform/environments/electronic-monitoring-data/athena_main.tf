@@ -113,7 +113,7 @@ resource "aws_glue_catalog_table" "ears_sars_audit_table" {
     "projection._day.type"         = "integer"
     "projection._day.range"        = "1,31"
     
-    "storage.location.template" = "s3://${module.s3-logging-bucket.bucket.id}/ears_sars/$${year}/$${month}/$${day}/"
+    "storage.location.template" = "s3://${module.s3-logging-bucket.bucket.id}/ears_sars/$${_year}/$${_month}/$${_day}/"
   }
   storage_descriptor {
     location      = "s3://${module.s3-logging-bucket.bucket.id}/ears_sars/"
