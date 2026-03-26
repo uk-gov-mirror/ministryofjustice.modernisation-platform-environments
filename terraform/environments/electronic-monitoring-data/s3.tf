@@ -179,49 +179,6 @@ data "aws_iam_policy_document" "log_bucket_policy" {
       values   = [data.aws_caller_identity.current.account_id]
     }
   }
-
-  statement {
-    sid    = "AWSCloudTrailAclCheck"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudtrail.amazonaws.com"]
-    }
-
-    actions   = ["s3:GetBucketAcl"]
-    resources = [module.s3-logging-bucket.bucket.arn]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceArn"
-      values   = ["arn:aws:cloudtrail:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:trail/${local.ears_sars_cloudtrail}"]
-    }
-  }
-
-  statement {
-    sid    = "AWSCloudTrailWrite"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudtrail.amazonaws.com"]
-    }
-
-    actions   = ["s3:PutObject"]
-    resources = ["${module.s3-logging-bucket.bucket.arn}/${local.cloudtrail_output_prefix}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "s3:x-amz-acl"
-      values   = ["bucket-owner-full-control"]
-    }
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceArn"
-      values   = ["arn:aws:cloudtrail:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:trail/${local.ears_sars_cloudtrail}"]
-    }
-  }
-
 }
 
 resource "aws_s3_bucket_logging" "s3_buckets_logging" {

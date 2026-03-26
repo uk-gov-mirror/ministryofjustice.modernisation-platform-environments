@@ -92,11 +92,11 @@ resource "aws_athena_workgroup" "cadt-historic-dev" {
   }
 }
 
-
 resource "aws_glue_catalog_database" "ears_sars_audit_db" {
   count = local.is-development || local.is-preproduction ? 1 : 0  
   name = "ears_sars_audit"
 }
+
 resource "aws_glue_catalog_table" "ears_sars_audit_table" {
   count = local.is-development || local.is-preproduction ? 1 : 0
   name          = "reports_requested"
@@ -151,17 +151,21 @@ resource "aws_glue_catalog_table" "ears_sars_audit_table" {
       name = "information_requested_to"
       type = "string"
     }
+    columns {
+      name = "time_of_request"
+      type = "string"
+    }
   }
   partition_keys {
-    name = "year"
+    name = "_year"
     type = "string"
   }
   partition_keys {
-    name = "month"
+    name = "_month"
     type = "string"
   }
   partition_keys {
-    name = "day"
+    name = "_day"
     type = "string"
   }
 }
