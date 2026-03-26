@@ -1503,8 +1503,7 @@ resource "aws_iam_role_policy_attachment" "cross_account_copy" {
 
 data "aws_iam_policy_document" "ears_sars_iam_role_policy_document" {
   count = local.is-development || local.is-preproduction ? 1 : 0
-
-  # DO WE NEED THIS?
+ 
   statement {
     sid       = "S3BucketPerms"
     effect    = "Allow"
