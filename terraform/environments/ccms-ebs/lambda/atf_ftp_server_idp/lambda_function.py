@@ -175,8 +175,10 @@ def lambda_handler(event, context):
     
     This function gets triggered by sftp login.
     """
-
+    logger.info(event)
+    logger.info(context)
     tracemalloc.start()
+    response = {}
     env_config = {
         # Mandatory environment variables (currently none)
     }
@@ -197,6 +199,7 @@ def lambda_handler(event, context):
         "atf_user1_username",
         "atf_user1_password",
         "atf_user1_home_directory",
+        "atf_user1_public_key",
         "atf_user1_role",
         "servername" 
     ]
@@ -206,6 +209,8 @@ def lambda_handler(event, context):
 
     # Parse combined configuration
     logger.info("Parsing configuration from environment and secrets")
+    # logger.info(secrets_data)
+
     config = parse_config_from_env_and_secrets(env_config, secrets_data)
 
     username = config.atf_user1_username
@@ -217,15 +222,27 @@ def lambda_handler(event, context):
     # data = json.loads(secret["SecretString"])
     
     # Validate password and Validate SSH public key
-    # logger.info(event)
-    # public_key = event.get("publicKey")
+    logger.info(event)
+    public_key = event.get("publicKey")
     logger.info(f"Public key received: {public_key}")
-    if "password" in event and event["password"] == password and "publicKey" in event and event["publicKey"] == config.atf_user1_public_key:
-        logger.info("private key is validated")
-        return {
-            "Role": config.atf_user1_role,
-            "HomeDirectory": config.atf_user1_home_directory,
-        }
+    response = {
+      'Role': config.atf_user1_role,
+      'HomeDirectory': config.atf_user1_home_directory
+    };
+    if event.get('password', '') == '':
+        # If no password provided, return the user's SSH public key
+        response['PublicKeys'] = [config.atf_user1_public_key]
+        logger.info(response)
+        return response
+    if "password" in event and event["password"] == password:
+        return response
+    # return response
+    # if "password" in event and event["password"] == password and "publicKey" in event and event["publicKey"] == config.atf_user1_public_key:
+    #     logger.info("private key is validated")
+    #     return {
+    #         "Role": config.atf_user1_role,
+    #         "HomeDirectory": config.atf_user1_home_directory,
+    #     }
     # if "password" in event and event["password"] == password:
     #     return {
     #         "Role": config.atf_user1_role,
