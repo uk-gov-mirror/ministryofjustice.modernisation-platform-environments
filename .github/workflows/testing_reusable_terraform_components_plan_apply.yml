@@ -51,7 +51,7 @@
     env:
       ACCOUNT_NAME: "${{ inputs.application }}-${{ inputs.environment }}"
       WORKSPACE_NAME: "${{ inputs.application }}-${{ inputs.environment }}"
-      SKIP_PLAN_EVALUATOR: '["cloud-platform-development", "cloud-platform-preproduction", "cloud-platform-nonlive", "cloud-platform-live", "data-platform-development", "data-platform-test", "data-platform-preproduction", "data-platform-production"]'
+      SKIP_PLAN_EVALUATOR: '["cloud-platform-non-live-preproduction", "cloud-platform-non-live-production", "cloud-platform-development", "cloud-platform-preproduction", "cloud-platform-nonlive", "cloud-platform-live", "data-platform-development", "data-platform-test", "data-platform-preproduction", "data-platform-production"]'
     concurrency:
       group: ${{ inputs.application }}-${{ inputs.environment }}-${{ inputs.component }}
     jobs:
@@ -66,6 +66,8 @@
         needs: fetch-secrets
         outputs:
           plan_exitcode: "${{ steps.plan.outputs.exitcode }}"
+          role_name: "${{ steps.set-role.outputs.role_name }}"
+          session_name: "${{ steps.set-role.outputs.session_name }}"
         steps:
           - name: Debug
             run: |
@@ -101,11 +103,25 @@
               echo "::add-mask::$BACKEND_NUMBER"
               echo "BACKEND_NUMBER=${BACKEND_NUMBER}" >> $GITHUB_ENV
 
+          - name: Set IAM Role Name
+            id: set-role
+            run: |
+              if [[ ("${{ inputs.environment }}" == "preproduction" || "${{ inputs.environment }}" == "production") && "${{ github.ref }}" != "refs/heads/main" ]]; then
+                echo "role_name=github-actions-plan" >> $GITHUB_OUTPUT
+                echo "session_name=githubactionsplanrolesession" >> $GITHUB_OUTPUT
+              elif [[ ("${{ inputs.environment }}" == "preproduction" || "${{ inputs.environment }}" == "production") && "${{ github.ref }}" == "refs/heads/main" ]]; then
+                echo "role_name=github-actions-apply" >> $GITHUB_OUTPUT
+                echo "session_name=githubactionsrolesession" >> $GITHUB_OUTPUT
+              else
+                echo "role_name=github-actions" >> $GITHUB_OUTPUT
+                echo "session_name=githubactionsrolesession" >> $GITHUB_OUTPUT
+              fi
+
           - name: Configure AWS Credentials
             uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7  # v6.0.0
             with:
-              role-to-assume: "arn:aws:iam::${{ env.ACCOUNT_NUMBER }}:role/github-actions"
-              role-session-name: githubactionsrolesession
+              role-to-assume: "arn:aws:iam::${{ env.ACCOUNT_NUMBER }}:role/${{ steps.set-role.outputs.role_name }}"
+              role-session-name: ${{ steps.set-role.outputs.session_name }}
               aws-region: "eu-west-2"
 
           - name: Setup Terraform
@@ -303,25 +319,11 @@
               echo "::add-mask::$BACKEND_NUMBER"
               echo "BACKEND_NUMBER=${BACKEND_NUMBER}" >> $GITHUB_ENV
 
-          - name: Set IAM Role Name
-            id: set-role
-            run: |
-              if [[ ("${{ inputs.environment }}" == "preproduction" || "${{ inputs.environment }}" == "production") && "${{ github.ref }}" != "refs/heads/main" ]]; then
-                echo "role_name=github-actions-plan" >> $GITHUB_OUTPUT
-                echo "session_name=githubactionsplanrolesession" >> $GITHUB_OUTPUT
-              elif [[ ("${{ inputs.environment }}" == "preproduction" || "${{ inputs.environment }}" == "production") && "${{ github.ref }}" == "refs/heads/main" ]]; then
-                echo "role_name=github-actions-apply" >> $GITHUB_OUTPUT
-                echo "session_name=githubactionsrolesession" >> $GITHUB_OUTPUT
-              else
-                echo "role_name=github-actions" >> $GITHUB_OUTPUT
-                echo "session_name=githubactionsrolesession" >> $GITHUB_OUTPUT
-              fi
-
           - name: Configure AWS Credentials
             uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7  # v6.0.0
             with:
-              role-to-assume: "arn:aws:iam::${{ env.ACCOUNT_NUMBER }}:role/${{ steps.set-role.outputs.role_name }}"
-              role-session-name: ${{ steps.set-role.outputs.session_name }}
+              role-to-assume: "arn:aws:iam::${{ env.ACCOUNT_NUMBER }}:role/${{ needs.plan.outputs.role_name }}"
+              role-session-name: ${{ needs.plan.outputs.session_name }}
               aws-region: "eu-west-2"
 
           - name: Setup Terraform
