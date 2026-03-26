@@ -175,8 +175,8 @@ def lambda_handler(event, context):
     
     This function gets triggered by sftp login.
     """
-    logger.info(event)
-    logger.info(context)
+    # logger.info(event)
+    # logger.info(context)
     tracemalloc.start()
     response = {}
     env_config = {
@@ -226,9 +226,9 @@ def lambda_handler(event, context):
     # data = json.loads(secret["SecretString"])
     
     # Validate password and Validate SSH public key
-    logger.info(event)
-    public_key = event.get("publicKey")
-    logger.info(f"Public key received: {public_key}")
+    # logger.info(event)
+    # public_key = event.get("publicKey")
+    # logger.info(f"Public key received: {public_key}")
     response = {
       'Role': config.atf_user1_role,
       'HomeDirectory': config.atf_user1_home_directory
@@ -259,4 +259,5 @@ def lambda_handler(event, context):
     #         "HomeDirectory": data["HomeDirectory"],
     #     }
     # logger.info("private key is invalid")
+    logger.info("errorMessage: Authentication failed")
     return {"errorMessage": "Authentication failed"}

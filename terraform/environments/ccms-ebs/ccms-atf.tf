@@ -1,4 +1,5 @@
 data "aws_iam_policy_document" "atf_kms_policy" {
+  count = local.is-development ? 1 : 0
   statement {
     sid = "AllowRootAccountAdmin"
     principals {
@@ -40,7 +41,7 @@ resource "aws_kms_key" "atf_kms" {
   count               = local.is-development ? 1 : 0
   description         = "KMS for SSH private keys in Secrets Manager for AWS Transfer Family"
   enable_key_rotation = true
-  policy              = data.aws_iam_policy_document.atf_kms_policy.json
+  policy              = data.aws_iam_policy_document.atf_kms_policy[count.index].json
   tags                = merge(local.tags, { Name = "atf-kms-key"})
 }
 
@@ -74,6 +75,7 @@ resource "aws_secretsmanager_secret" "atf_ftp_server_secrets" {
 }
 
 resource "random_password" "password_user1" {
+  count     = local.is-development ? 1 : 0
   length  = 16
   # special = true
   # override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -84,7 +86,7 @@ resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
   secret_id = aws_secretsmanager_secret.atf_ftp_server_secrets[count.index].id
   secret_string = jsonencode({
     "atf_user1_username"        = "user1",
-    "atf_user1_password"        = random_password.password_user1.result,
+    "atf_user1_password"        = random_password.password_user1[count.index].result,
     "atf_user1_private_key_pem" = tls_private_key.atf[0].private_key_pem,
     "atf_user1_public_key"      = tls_private_key.atf[0].public_key_openssh,
     # atf_ingerprint_md5 = tls_private_key.atf[0].public_key_fingerprint_md5
@@ -93,8 +95,7 @@ resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
     "atf_user1_home_directory"  = "/laa-ccms-inbound-${local.environment}-mp/CCMS_PRD_Barclaycard/Inbound",
     "atf_user1_role"            = aws_iam_role.atf_ftp_server_user_role.arn,
     "atf_user1_created_at_utc"  = timestamp(),
-    "servername"                = "${aws_transfer_server.atf_ftp_server[count.index].id}"
-    # "servername"                = aws_transfer_server.atf_ftp_server[count.index].id
+    "servername"                = aws_transfer_server.atf_ftp_server[count.index].id
   })
 
 #   lifecycle {
@@ -103,13 +104,15 @@ resource "aws_secretsmanager_secret_version" "atf_privkey_v1" {
 }
 
 resource "aws_security_group" "atf_ftp_server_sg" {
+  count     = local.is-development ? 1 : 0
   name   = "atf-sftp-server-sg"
   vpc_id = data.aws_vpc.shared.id
   tags   = merge(local.tags, { Name = lower(format("sg-%s-%s-atf-ftp-server", local.application_name, local.environment) ) })
 }
 
 resource "aws_vpc_security_group_ingress_rule" "atf_ftp_server_sg_ingress" {
-  security_group_id = aws_security_group.atf_ftp_server_sg.id
+  count     = local.is-development ? 1 : 0
+  security_group_id = aws_security_group.atf_ftp_server_sg[count.index].id
   from_port         = 22
   to_port           = 22
   ip_protocol          = "tcp"
@@ -117,7 +120,8 @@ resource "aws_vpc_security_group_ingress_rule" "atf_ftp_server_sg_ingress" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "atf_ftp_server_sg_egress" {
-  security_group_id = aws_security_group.atf_ftp_server_sg.id
+  count     = local.is-development ? 1 : 0
+  security_group_id = aws_security_group.atf_ftp_server_sg[count.index].id
   from_port         = 0
   to_port           = 0
   ip_protocol       = "tcp"
@@ -125,6 +129,7 @@ resource "aws_vpc_security_group_egress_rule" "atf_ftp_server_sg_egress" {
 }
 
 resource "aws_iam_role" "lambda_atf_ftp_server_role" {
+  count     = local.is-development ? 1 : 0
   name = "${local.application_name}-${local.environment}-lambda_atf_ftp_server_role"
 
   assume_role_policy = jsonencode({
@@ -145,7 +150,7 @@ resource "aws_iam_role" "lambda_atf_ftp_server_role" {
 resource "aws_iam_role_policy" "lambda_atf_ftp_server_role_policy" {
   count = local.is-development ? 1 : 0
   name = "${local.application_name}-${local.environment}-lambda_atf_ftp_server_role_policy"
-  role = aws_iam_role.lambda_atf_ftp_server_role.id
+  role = aws_iam_role.lambda_atf_ftp_server_role[count.index].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -189,7 +194,7 @@ data "archive_file" "atf_lambda_zip" {
 }
 
 resource "aws_lambda_layer_version" "lambda_atf_sftp_server_layer" {
-  # filename                 = "lambda/layerV1.zip"
+  count     = local.is-development ? 1 : 0
   layer_name               = "${local.application_name}-${local.environment}-atf-sftp-server-layer"
   s3_key                   = "lambda_delivery/cloudwatch_sns_layer/layerV1.zip"
   s3_bucket                = aws_s3_bucket.ccms_ebs_shared.bucket
@@ -203,9 +208,9 @@ resource "aws_lambda_function" "atf_ftp_server_idp" {
   function_name    = "${local.application_name}-${local.environment}-atf-ftp-server-idp"
   filename         = data.archive_file.atf_lambda_zip[count.index].output_path
   source_code_hash = base64sha256(join("", local.lambda_source_hashes_atf_ftp_server_idp))
-  role             = aws_iam_role.lambda_atf_ftp_server_role.arn
+  role             = aws_iam_role.lambda_atf_ftp_server_role[count.index].arn
   handler          = "lambda_function.lambda_handler"
-  layers           = [aws_lambda_layer_version.lambda_atf_sftp_server_layer.arn]
+  layers           = [aws_lambda_layer_version.lambda_atf_sftp_server_layer[count.index].arn]
   runtime          = "python3.13"
   timeout          = 30
   publish          = true
@@ -228,6 +233,7 @@ resource "aws_lambda_function" "atf_ftp_server_idp" {
 }
 
 resource "aws_iam_role" "atf_ftp_server_user_role" {
+  count = local.is-development ? 1 : 0
   name = "atf-ftp-server-user-role"
 
   assume_role_policy = jsonencode({
@@ -243,7 +249,8 @@ resource "aws_iam_role" "atf_ftp_server_user_role" {
 }
 
 resource "aws_iam_role_policy" "atf_ftp_server_policy" {
-  role = aws_iam_role.atf_ftp_server_user_role.id
+  count = local.is-development ? 1 : 0
+  role = aws_iam_role.atf_ftp_server_user_role[count.index].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -288,7 +295,7 @@ resource "aws_transfer_server" "atf_ftp_server" {
   sftp_authentication_methods = "PUBLIC_KEY_AND_PASSWORD"
 
   structured_log_destinations = [
-    "${aws_cloudwatch_log_group.atf_ftp_server.arn}:*"
+    "${aws_cloudwatch_log_group.atf_ftp_server[count.index].arn}:*"
   ]
   endpoint_details {
     vpc_id             = data.aws_vpc.shared.id
@@ -298,6 +305,7 @@ resource "aws_transfer_server" "atf_ftp_server" {
 }
 
 resource "aws_cloudwatch_log_group" "atf_ftp_server" {
+  count     = local.is-development ? 1 : 0
   name_prefix = "atf_ftp_server"
 }
 
