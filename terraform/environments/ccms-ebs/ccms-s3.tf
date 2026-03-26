@@ -12,6 +12,8 @@ module "s3-bucket-logging" {
 
   log_bucket = local.logging_bucket_name
   log_prefix = "s3access/${local.logging_bucket_name}"
+  sse_algorithm  = "AES256" 
+  custom_kms_key = "" 
 
   # Refer to the below section "Replication" before enabling replication
   replication_enabled = false
@@ -125,43 +127,7 @@ data "aws_iam_policy_document" "logging_s3_policy" {
   }
 }
 
-data "aws_iam_policy_document" "logging_s3_policy_deny" {
-  statement {
-    sid    = "DenyPutOutsideApprovedPrefixes"
-    effect = "Deny"
 
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-
-    actions = ["s3:PutObject"]
-
-    #
-    # 1. DO NOT DENY AWS service principals that must
-    #    bypass the deny (S3 access logs, ELB logs, GuardDuty, Firehose)
-    #
-    condition {
-      test     = "StringNotLike"
-      variable = "aws:PrincipalServiceName"
-      values   = [
-        "logging.s3.amazonaws.com",                       # S3 Server Access Logging
-        "logdelivery.elasticloadbalancing.amazonaws.com", # ELB/ALB logging
-        "guardduty.amazonaws.com",                        # GuardDuty Malware Protection
-        "firehose.amazonaws.com"                          # Firehose/WAF logs (if ever needed)
-      ]
-    }
-
-    #
-    #  2. Deny applies ONLY outside approved prefixes
-    #
-    not_resources = [
-      "arn:aws:s3:::ccms-ebs-${local.environment}-logging/s3access/*",
-      "arn:aws:s3:::ccms-ebs-${local.environment}-logging/elb-logs/*",
-      "arn:aws:s3:::ccms-ebs-${local.environment}-logging/athena-results/*"
-    ]
-  }
-}
 
 # ---------------------------------------------
 # S3 Bucket - R-sync
