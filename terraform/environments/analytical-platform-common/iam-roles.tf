@@ -34,10 +34,7 @@ module "snyk_secret_access_iam_role" {
 
   name = "snyk-secret-access"
 
-  oidc_wildcard_subjects = [
-    "ministryofjustice/*",
-    "moj-analytical-services/*"
-  ]
+  oidc_wildcard_subjects = formatlist("%s:*", local.airflow_repositories)
 
   policies = {
     snyk_secret_access = module.snyk_secret_access_iam_policy.arn
