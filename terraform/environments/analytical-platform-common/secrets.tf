@@ -40,7 +40,7 @@ module "airflow_github_app_secret" {
   )
 }
 
-module "snyk_secret" {
+module "snyk_analytical_platform_airflow_container_scanning_secret" {
   #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
   #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
 

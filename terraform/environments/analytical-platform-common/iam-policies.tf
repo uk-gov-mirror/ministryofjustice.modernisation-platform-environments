@@ -82,26 +82,26 @@ module "ecr_access_iam_policy" {
   tags = local.tags
 }
 
-data "aws_iam_policy_document" "snyk_secret_access" {
+data "aws_iam_policy_document" "snyk_analytical_platform_airflow_container_scanning_access" {
   statement {
     sid       = "AllowSecretsManagerAccess"
     effect    = "Allow"
     actions   = ["secretsmanager:GetSecretValue"]
-    resources = [module.snyk_secret.secret_arn]
+    resources = [module.snyk_analytical_platform_airflow_container_scanning_secret.secret_arn]
   }
 }
 
-module "snyk_secret_access_iam_policy" {
+module "snyk_analytical_platform_airflow_container_scanning_iam_policy" {
   #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
   #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
 
   source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
   version = "6.4.0"
 
-  name_prefix = "snyk-secret-access"
+  name_prefix = "snyk-analytical-platform-airflow-container-scanning"
   description = "IAM Policy"
 
-  policy = data.aws_iam_policy_document.snyk_secret_access.json
+  policy = data.aws_iam_policy_document.snyk_analytical_platform_airflow_container_scanning_access.json
 
   tags = local.tags
 }

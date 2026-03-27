@@ -10,7 +10,10 @@ module "ecr_access_iam_role" {
 
   name = "ecr-access"
 
-  oidc_wildcard_subjects = formatlist("%s:*", local.airflow_repositories)
+  oidc_wildcard_subjects = [
+    "ministryofjustice/*",
+    "moj-analytical-services/*"
+  ]
 
   policies = {
     ecr_access = module.ecr_access_iam_policy.arn
@@ -19,7 +22,7 @@ module "ecr_access_iam_role" {
   tags = local.tags
 }
 
-module "snyk_secret_access_iam_role" {
+module "snyk_analytical_platform_airflow_container_scanning_iam_role" {
   #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
   #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
 
@@ -29,9 +32,12 @@ module "snyk_secret_access_iam_role" {
   enable_github_oidc = true
   use_name_prefix    = false
 
-  name = "snyk-secret-access"
+  name = "snyk-analytical-platform-airflow-container-scanning"
 
-  oidc_wildcard_subjects = formatlist("%s:*", local.airflow_repositories)
+  oidc_wildcard_subjects = [
+    "ministryofjustice/*",
+    "moj-analytical-services/*"
+  ]
 
   trust_policy_conditions = [
     {
@@ -42,7 +48,7 @@ module "snyk_secret_access_iam_role" {
   ]
 
   policies = {
-    snyk_secret_access = module.snyk_secret_access_iam_policy.arn
+    snyk_analytical_platform_airflow_container_scanning = module.snyk_analytical_platform_airflow_container_scanning_iam_policy.arn
   }
 
   tags = local.tags
@@ -60,7 +66,10 @@ module "analytical_platform_github_actions_iam_role" {
 
   name = "analytical-platform-github-actions"
 
-  oidc_wildcard_subjects = ["ministryofjustice/analytical-platform-airflow:*"]
+  oidc_wildcard_subjects = [
+    "ministryofjustice/analytical-platform-airflow:*",
+    "moj-analytical-services/analytical-platform-airflow:*"
+  ]
 
   policies = {
     analytical_platform_github_actions = module.analytical_platform_github_actions_iam_policy.arn
