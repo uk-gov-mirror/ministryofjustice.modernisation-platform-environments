@@ -82,6 +82,30 @@ module "ecr_access_iam_policy" {
   tags = local.tags
 }
 
+data "aws_iam_policy_document" "snyk_secret_access" {
+  statement {
+    sid       = "AllowSecretsManagerAccess"
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [module.snyk_secret.secret_arn]
+  }
+}
+
+module "snyk_secret_access_iam_policy" {
+  #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
+  #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
+
+  source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
+  version = "6.4.0"
+
+  name_prefix = "snyk-secret-access"
+  description = "IAM Policy"
+
+  policy = data.aws_iam_policy_document.snyk_secret_access.json
+
+  tags = local.tags
+}
+
 data "aws_iam_policy_document" "analytical_platform_terraform" {
   statement {
     sid    = "AllowKMS"

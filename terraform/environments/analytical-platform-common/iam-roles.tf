@@ -22,6 +22,30 @@ module "ecr_access_iam_role" {
   tags = local.tags
 }
 
+module "snyk_secret_access_iam_role" {
+  #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
+  #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
+
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role"
+  version = "6.4.0"
+
+  enable_github_oidc = true
+  use_name_prefix    = false
+
+  name = "snyk-secret-access"
+
+  oidc_wildcard_subjects = [
+    "ministryofjustice/*",
+    "moj-analytical-services/*"
+  ]
+
+  policies = {
+    snyk_secret_access = module.snyk_secret_access_iam_policy.arn
+  }
+
+  tags = local.tags
+}
+
 module "analytical_platform_github_actions_iam_role" {
   #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
   #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
