@@ -186,6 +186,7 @@ resource "helm_release" "karpenter" {
 
 
 data "kubectl_path_documents" "manifests" {
+  count = contains(local.enabled_workspaces, local.cluster_environment) ? 1 : 0
   pattern = "${path.module}/templates/karpenter.yaml"
   vars = {
     alias_version = "v20260304"
@@ -194,8 +195,8 @@ data "kubectl_path_documents" "manifests" {
 }
 
 resource "kubectl_manifest" "deploy_manifest" {
-  count = contains(local.enabled_workspaces, local.cluster_environment) ? 1 : 0
-  yaml_body = data.kubectl_path_documents.manifests.manifests.value
+  for_each = data.kubectl_path_documents.manifests[0].manifests
+  yaml_body = each.value
   depends_on = [
     helm_release.karpenter[0]
   ]
