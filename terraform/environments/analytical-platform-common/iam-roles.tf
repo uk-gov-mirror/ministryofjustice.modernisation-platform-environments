@@ -12,7 +12,6 @@ module "ecr_access_iam_role" {
 
   oidc_wildcard_subjects = formatlist("%s:*", local.airflow_repositories)
 
-
   policies = {
     ecr_access = module.ecr_access_iam_policy.arn
   }
@@ -33,6 +32,14 @@ module "snyk_secret_access_iam_role" {
   name = "snyk-secret-access"
 
   oidc_wildcard_subjects = formatlist("%s:*", local.airflow_repositories)
+
+  trust_policy_conditions = [
+    {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:job_workflow_ref"
+      values   = ["ministryofjustice/analytical-platform-airflow-github-actions/.github/workflows/shared-scan-container.yml@*"]
+    }
+  ]
 
   policies = {
     snyk_secret_access = module.snyk_secret_access_iam_policy.arn
