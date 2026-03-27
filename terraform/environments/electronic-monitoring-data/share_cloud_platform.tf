@@ -208,6 +208,7 @@ data "aws_iam_policy_document" "em_data_validation_permissions" {
   statement {
     effect = "Allow"
     actions = [
+      "glue:GetDatabases",
       "glue:GetDatabase",
       "glue:GetTables",
       "glue:GetTable",
