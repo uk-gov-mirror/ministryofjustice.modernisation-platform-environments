@@ -208,8 +208,9 @@ data "aws_iam_policy_document" "em_data_validation_permissions" {
   statement {
     effect = "Allow"
     actions = [
-      "glue:GetDatabases",
       "glue:GetDatabase",
+      "glue:GetTables",
+      "glue:GetTable",
     ]
     resources = [
       "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:catalog",
@@ -220,6 +221,7 @@ data "aws_iam_policy_document" "em_data_validation_permissions" {
     actions = [
       "glue:GetDatabase",
       "glue:GetTables",
+      "glue:GetTable",
     ]
     resources = [
       "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/validation${local.dbt_suffix}",
