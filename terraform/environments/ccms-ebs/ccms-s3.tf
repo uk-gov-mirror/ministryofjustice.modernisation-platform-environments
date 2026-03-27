@@ -192,16 +192,6 @@ module "s3-bucket-dbbackup" {
   )
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "s3-bucket-dbbackup" {
-  bucket = module.s3-bucket-dbbackup.bucket.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
 resource "aws_s3_bucket_notification" "dbbackup_bucket_notification" {
   bucket      = module.s3-bucket-dbbackup.bucket.id
   eventbridge = true
