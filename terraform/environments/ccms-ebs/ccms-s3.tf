@@ -12,6 +12,7 @@ module "s3-bucket-logging" {
 
   log_bucket = local.logging_bucket_name
   log_prefix = "s3access/${local.logging_bucket_name}"
+  sse_algorithm = "AES256"
 
 
   # Refer to the below section "Replication" before enabling replication
