@@ -10,10 +10,8 @@ module "ecr_access_iam_role" {
 
   name = "ecr-access"
 
-  oidc_wildcard_subjects = [
-    "ministryofjustice/*",
-    "moj-analytical-services/*"
-  ]
+  oidc_wildcard_subjects = formatlist("%s:*", local.airflow_repositories)
+
 
   policies = {
     ecr_access = module.ecr_access_iam_policy.arn
