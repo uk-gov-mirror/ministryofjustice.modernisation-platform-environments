@@ -121,7 +121,7 @@ resource "aws_iam_role" "gdpr_structured_job_role" {
 resource "aws_iam_role_policy" "gdpr_job_inline_policy" {
   name   = "gdpr-structured-job-permissions"
   role   = aws_iam_role.gdpr_structured_job_role.id
-  policy = data.aws_iam_policy_document.gdpr_structured_job_permissions.json
+  policy = data.aws_iam_policy_document.gdpr_structured_job_policy_document.json
 }
 
 
