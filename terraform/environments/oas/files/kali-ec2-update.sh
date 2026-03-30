@@ -7,8 +7,8 @@ export DEBIAN_FRONTEND=noninteractive
 echo "Updating package lists..."
 apt-get update -y
 
-echo "Installing wget and certificates..."
-apt-get install -y wget ca-certificates
+echo "Installing required packages..."
+apt-get install -y wget ca-certificates git
 
 echo "Downloading Amazon SSM Agent..."
 cd /tmp
