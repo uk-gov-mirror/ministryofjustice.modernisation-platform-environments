@@ -113,9 +113,9 @@ resource "aws_ecs_cluster" "emds-gdpr-cluster" {
   }
 }
 
-resource "aws_ecs_cluster_capacity_providers" "example" {
+resource "aws_ecs_cluster_capacity_providers" "ecd-gdpr-fargate" {
   count        = local.is-development || local.is-preproduction ? 1 : 0
-  cluster_name = aws_ecs_cluster.example.name
+  cluster_name = aws_ecs_cluster.emds-gdpr-cluster.name
 
   capacity_providers = ["FARGATE"]
 
