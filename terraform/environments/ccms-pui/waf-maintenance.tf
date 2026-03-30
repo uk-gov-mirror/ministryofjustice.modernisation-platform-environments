@@ -93,7 +93,7 @@ resource "aws_scheduler_schedule" "waf_allow_schedule" {
   target {
     arn       = aws_lambda_function.waf_maintenance.arn
     input     = jsonencode({ mode = "ALLOW" })
-    role_arn = aws_iam_role.scheduler_invoke_sfn_role.arn
+    role_arn = aws_iam_role.scheduler_invoke_lambda_role.arn
   }
 }
 
@@ -112,13 +112,13 @@ resource "aws_scheduler_schedule" "waf_block_schedule" {
   target {
     arn       = aws_lambda_function.waf_maintenance.arn
     input     = jsonencode({ mode = "BLOCK" })
-    role_arn = aws_iam_role.scheduler_invoke_sfn_role.arn
+    role_arn = aws_iam_role.scheduler_invoke_lambda_role.arn
   }
 }
 
 # IAM Role and Policy for Scheduler to invoke Lambda Functions
 resource "aws_iam_role" "scheduler_invoke_lambda_role" {
-  name = "scheduler-invoke-lambda-functions-role"
+  name = "scheduler-invoke-lambda-function-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
