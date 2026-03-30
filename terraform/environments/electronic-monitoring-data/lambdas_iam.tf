@@ -1589,6 +1589,19 @@ data "aws_iam_policy_document" "ears_sars_iam_role_policy_document" {
       "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:table/*"
     ]
   }
+
+  statement {
+    sid    = "AllowZipStepFunctionExecution"
+    effect = "Allow"
+    actions = [
+      "states:StartSyncExecution",
+      "states:DescribeExecution"
+    ]
+    resources = [
+      module.get_zipped_file_api.arn,
+      "${module.get_zipped_file_api.arn}:*"
+    ]
+  }
 }
 
 resource "aws_iam_role" "ears_sars_iam_role" {
