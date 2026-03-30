@@ -12,6 +12,7 @@ module "s3-bucket-logging" {
 
   log_bucket = local.logging_bucket_name
   log_prefix = "s3access/${local.logging_bucket_name}"
+  sse_algorithm = "AES256"
 
   # Refer to the below section "Replication" before enabling replication
   replication_enabled = false
@@ -71,6 +72,15 @@ module "s3-bucket-logging" {
   tags = merge(local.tags,
     { Name = lower(format("s3-%s-%s-logging", local.application_name, local.environment)) }
   )
+
+  resource "aws_s3_bucket_server_side_encryption_configuration" "s3-bucket-logging" {
+  bucket = module.s3-bucket-logging.bucket.id      
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+   }
+  }
 }
 
 resource "aws_s3_bucket_notification" "logging_bucket_notification" {
