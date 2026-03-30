@@ -4,6 +4,7 @@ module "get_zipped_file_api_api" {
   api_description = "API to trigger step function that gets a zipped file out of storage"
   api_path        = "execute"
   step_function   = module.get_zipped_file_api
+  sfn_type        = "express"
   stages = [
     {
       stage_name             = "test",
@@ -27,12 +28,14 @@ module "get_zipped_file_api_api" {
 }
 
 module "ears_sars_api" {
-  count           = local.is-development || local.is-preproduction ? 1 : 0
-  source          = "./modules/api_step_function"
-  api_name        = "ears_sars_api"
-  api_description = "Ears and Sars API"
-  api_path        = "execute"
-  step_function   = module.ears_sars_step_function[0]
+  count               = local.is-development || local.is-preproduction ? 1 : 0
+  source              = "./modules/api_step_function"
+  api_name            = "ears_sars_api"
+  api_description     = "Ears and Sars API"
+  api_path            = "execute"
+  step_function       = module.ears_sars_step_function[0]
+  sfn_type            = "standard"
+  enable_status_check = true
   stages = [
     {
       stage_name             = "request",
@@ -69,4 +72,49 @@ module "ears_sars_api" {
     ]
   }
   api_version = "0.1.1"
+}
+
+resource "aws_api_gateway_account" "global_usage" {
+  cloudwatch_role_arn = aws_iam_role.cloudwatch.arn
+}
+
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["apigateway.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "cloudwatch" {
+  name               = "api_gateway_cloudwatch_global"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
+
+data "aws_iam_policy_document" "cloudwatch" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+      "logs:PutLogEvents",
+      "logs:GetLogEvents",
+      "logs:FilterLogEvents",
+    ]
+
+    resources = ["*"]
+  }
+}
+resource "aws_iam_role_policy" "cloudwatch" {
+  name   = "default"
+  role   = aws_iam_role.cloudwatch.id
+  policy = data.aws_iam_policy_document.cloudwatch.json
 }
