@@ -93,8 +93,8 @@ data "aws_iam_policy_document" "gdpr_structured_job_policy_document" {
       "s3:DeleteObject"
     ]
     resources = [
-      module.s3-data-bucket.bucket.bucket.arn,
-      "${module.s3-data-bucket.bucket.bucket.arn}/*",
+      module.s3-data-bucket.bucket.arn,
+      "${module.s3-data-bucket.bucket.arn}/*",
     ]
   }
 }
@@ -142,12 +142,12 @@ resource "aws_ecs_task_definition" "emds-gdpr-structured-data-deletion" {
       image     = "${local.core_shared_services_id}.dkr.ecr.eu-west-2.amazonaws.com/${local.ecr_repo_name}:${local.structured_data_image_name}"
       cpu       = 2048
       memory    = 4096
-      essential = "true"
+      essential = true
       logConfiguration : {
         logDriver = "awslogs",
         options = {
-          awslogs-create-group  = "true",
-          awslogs-group         = "/ecs/ubuntu",
+          awslogs-create-group  = true,
+          awslogs-group         = "/ecs/emds-gdpr-structured-deletion",
           awslogs-region        = data.aws_region.current.name,
           awslogs-stream-prefix = "ecs"
       } }
