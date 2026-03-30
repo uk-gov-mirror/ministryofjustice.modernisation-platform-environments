@@ -140,8 +140,8 @@ resource "aws_ecs_task_definition" "emds-gdpr-structured-data-deletion" {
     {
       name      = "emds_gdpr_structured_data_deletion_job"
       image     = "${local.core_shared_services_id}.dkr.ecr.eu-west-2.amazonaws.com/${local.ecr_repo_name}:${local.structured_data_image_name}"
-      cpu       = "1024"
-      memory    = "2048"
+      cpu       = 2048
+      memory    = 4096
       essential = "true"
       logConfiguration : {
         logDriver = "awslogs",
