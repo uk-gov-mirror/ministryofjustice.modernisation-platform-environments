@@ -54,9 +54,9 @@ resource "aws_iam_role_policy_attachment" "ecs_gdpr_execution_role_policy_attach
   policy_arn = aws_iam_policy.ecs_gdpr_execution_policy.arn
 }
 
-
 # ECS STRUCTURED JOB IAM
 data "aws_iam_policy_document" "gdpr_structured_job_policy_document" {
+
   statement {
     sid    = "AthenaQueryActions"
     effect = "Allow"
@@ -101,10 +101,29 @@ data "aws_iam_policy_document" "gdpr_structured_job_policy_document" {
   }
 }
 
-resource "aws_iam_role" "ecs_gdpr_structured_job_task_policy" {
-  name               = "ecs-gdpr-structured-job-task-policy"
-  assume_role_policy = data.aws_iam_policy_document.gdpr_structured_job_policy_document.json
+data "aws_iam_policy_document" "ecs_task_trust_policy" {
+  statement {
+    sid     = "AllowECSTasksToAssumeRole"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+  }
 }
+
+resource "aws_iam_role" "gdpr_structured_job_role" {
+  name               = "ecs-gdpr-structured-job-task-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_trust_policy.json
+}
+
+resource "aws_iam_role_policy" "gdpr_job_inline_policy" {
+  name   = "gdpr-structured-job-permissions"
+  role   = aws_iam_role.gdpr_structured_job_role.id
+  policy = data.aws_iam_policy_document.gdpr_structured_job_permissions.json
+}
+
 
 resource "aws_ecs_cluster" "emds-gdpr-cluster" {
   count = local.is-development || local.is-preproduction ? 1 : 0
@@ -136,7 +155,7 @@ resource "aws_ecs_task_definition" "emds-gdpr-structured-data-deletion" {
   cpu                      = 2048
   memory                   = 4096
   execution_role_arn       = aws_iam_role.ecs_gdpr_execution_role.arn
-  task_role_arn            = aws_iam_role.ecs_gdpr_execution_role.arn
+  task_role_arn            = aws_iam_role.gdpr_structured_job_role.arn
 
   container_definitions = jsonencode([
     {
