@@ -54,6 +54,8 @@ resource "aws_iam_role_policy_attachment" "ecs_gdpr_execution_role_policy_attach
   policy_arn = aws_iam_policy.ecs_gdpr_execution_policy.arn
 }
 
+
+# ECS STRUCTURED JOB IAM
 data "aws_iam_policy_document" "gdpr_structured_job_policy_document" {
   statement {
     sid    = "AthenaQueryActions"
