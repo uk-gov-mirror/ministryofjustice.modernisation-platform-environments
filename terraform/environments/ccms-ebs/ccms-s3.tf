@@ -72,8 +72,9 @@ module "s3-bucket-logging" {
   tags = merge(local.tags,
     { Name = lower(format("s3-%s-%s-logging", local.application_name, local.environment)) }
   )
+}
 
-  resource "aws_s3_bucket_server_side_encryption_configuration" "s3-bucket-logging" {
+resource "aws_s3_bucket_server_side_encryption_configuration" "s3-bucket-logging" {
   bucket = module.s3-bucket-logging.bucket.id      
 
     rule {
@@ -82,7 +83,6 @@ module "s3-bucket-logging" {
     }
    }
   }
-}
 
 resource "aws_s3_bucket_notification" "logging_bucket_notification" {
   bucket      = module.s3-bucket-logging.bucket.id
