@@ -146,7 +146,7 @@ resource "aws_ecs_task_definition" "emds-gdpr-structured-data-deletion" {
       logConfiguration : {
         logDriver = "awslogs",
         options = {
-          awslogs-create-group  = true,
+          awslogs-create-group  = "true",
           awslogs-group         = "/ecs/emds-gdpr-structured-deletion",
           awslogs-region        = data.aws_region.current.name,
           awslogs-stream-prefix = "ecs"
