@@ -95,7 +95,7 @@ resource "helm_release" "karpenter_crd" {
   name       = "karpenter-crd"
   repository = "oci://public.ecr.aws/karpenter"
   chart      = "karpenter-crd"
-  version    = local.cluster_configuration.helm_chart_versions.karpenter_crd
+  version    = local.cluster_configuration.crd_versions.karpenter
   namespace  = module.karpenter_namespace.name
 
   values = [
@@ -323,24 +323,24 @@ resource "helm_release" "external_secrets_secret_stores" {
   depends_on = [helm_release.external_secrets]
 }
 
-resource "helm_release" "shared_services_gateway" {
-  name      = "shared-services-gateway"
-  chart     = "./src/helm/charts/shared-services-gateway"
-  namespace = module.shared_services_namespace.name
+# resource "helm_release" "shared_services_gateway" {
+#   name      = "shared-services-gateway"
+#   chart     = "./src/helm/charts/shared-services-gateway"
+#   namespace = module.shared_services_namespace.name
 
-  values = [
-    templatefile(
-      "${path.module}/configuration/helm/shared-services-gateway/values.yml.tftpl",
-      {
-        gateway_hostname = local.cluster_configuration.shared_services_gateway_hostname
-      }
-    )
-  ]
-  depends_on = [
-    helm_release.cert_manager,
-    helm_release.external_dns
-  ]
-}
+#   values = [
+#     templatefile(
+#       "${path.module}/configuration/helm/shared-services-gateway/values.yml.tftpl",
+#       {
+#         gateway_hostname = local.cluster_configuration.shared_services_gateway_hostname
+#       }
+#     )
+#   ]
+#   depends_on = [
+#     helm_release.cert_manager,
+#     helm_release.external_dns
+#   ]
+# }
 
 resource "helm_release" "keda" {
   /* https://artifacthub.io/packages/helm/kedacore/keda */
