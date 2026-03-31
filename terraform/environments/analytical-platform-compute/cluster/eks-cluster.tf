@@ -191,7 +191,35 @@ module "eks" {
     }
   }
 
-  access_entries = {
+  access_entries = merge(
+    local.environment == "production" ? {
+      # Modernisation Platform Environments (github-actions-plan)
+      github-actions-plan = {
+        principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-actions-plan"
+        policy_associations = {
+          eks-admin = {
+            policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+            access_scope = {
+              type = "cluster"
+            }
+          }
+        }
+      }
+
+      # Modernisation Platform Environments (github-actions-apply)
+      github-actions-apply = {
+        principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-actions-apply"
+        policy_associations = {
+          eks-admin = {
+            policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+            access_scope = {
+              type = "cluster"
+            }
+          }
+        }
+      }
+    } : {},
+    {
     # Modernisation Platform Environments (MemberInfrastructureAccess)access to cluster
     mpe-administrator = {
       principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/MemberInfrastructureAccess"
@@ -251,7 +279,7 @@ module "eks" {
       kubernetes_groups = ["airflow-serviceaccount-management"]
     }
   }
-
+)
   tags = local.tags
 }
 
