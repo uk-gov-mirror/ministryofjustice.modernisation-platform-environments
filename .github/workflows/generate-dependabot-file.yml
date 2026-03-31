@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   fetch-secrets:
-        uses: ministryofjustice/modernisation-platform-github-actions/.github/workflows/aws-secrets-management.yml@63cbaa1433a76ff95f7433b7454915b928c1b955 # v5.0.0
+        uses: ministryofjustice/modernisation-platform-github-actions/.github/workflows/aws-secrets-management.yml@5b44b387694dfa249cfa2dcf289ca871abe9e3e2 # v5.0.1
         permissions:
           id-token: write
           contents: read
