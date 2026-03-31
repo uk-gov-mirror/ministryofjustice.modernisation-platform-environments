@@ -346,32 +346,12 @@ module "s3-athena-bucket" {
         autoclean = "true"
       }
 
-      transition = [
-        {
-          days          = 30
-          storage_class = "STANDARD_IA"
-          }, {
-          days          = 90
-          storage_class = "GLACIER"
-        }
-      ]
-
       expiration = {
-        days = 365
+        days = 1
       }
 
-      noncurrent_version_transition = [
-        {
-          days          = 30
-          storage_class = "STANDARD_IA"
-          }, {
-          days          = 90
-          storage_class = "GLACIER"
-        }
-      ]
-
       noncurrent_version_expiration = {
-        days = 365
+        days = 1
       }
     }
   ]

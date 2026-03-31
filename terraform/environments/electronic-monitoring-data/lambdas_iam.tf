@@ -1512,6 +1512,16 @@ data "aws_iam_policy_document" "ears_sars_iam_role_policy_document" {
   }
 
   statement {
+    sid     = "S3LoggingBucketPerms"
+    effect  = "Allow"
+    actions = ["s3:PutObject", "s3:PutObjectAcl"]
+    resources = [
+      "${module.s3-logging-bucket.bucket.arn}/ears_sars/*",
+      module.s3-logging-bucket.bucket.arn
+    ]
+  }
+
+  statement {
     sid    = "S3PermissionsReportBuckets"
     effect = "Allow"
     actions = [
