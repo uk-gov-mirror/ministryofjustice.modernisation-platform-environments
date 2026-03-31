@@ -104,7 +104,7 @@
           - name: Set IAM Role Name
             id: set-role
             run: |
-              if [[ ("${{ inputs.environment }}" == "development" || "${{ inputs.environment }}" == "test") ]]; then
+              if [[ ("${{ inputs.environment }}" == "development" || "${{ inputs.environment }}" == "test" || "${{ inputs.application }}" == "analytical-platform-compute" || "${{ inputs.application }}" == "data-platform") ]]; then
                 echo "role_name=github-actions" >> $GITHUB_OUTPUT
                 echo "session_name=githubactionsrolesession" >> $GITHUB_OUTPUT
               else
@@ -317,7 +317,7 @@
           - name: Set IAM Role Name
             id: set-role
             run: |
-              if [[ ("${{ inputs.environment }}" == "development" || "${{ inputs.environment }}" == "test") ]]; then
+              if [[ ("${{ inputs.environment }}" == "development" || "${{ inputs.environment }}" == "test" || "${{ inputs.application }}" == "analytical-platform-compute" || "${{ inputs.application }}" == "data-platform") ]]; then
                 echo "role_name=github-actions" >> $GITHUB_OUTPUT
                 echo "session_name=githubactionsrolesession" >> $GITHUB_OUTPUT
               else
