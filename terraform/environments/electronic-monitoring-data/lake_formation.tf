@@ -27,7 +27,7 @@ resource "aws_lakeformation_data_lake_settings" "settings" {
 
     ]
   )
-
+  read_only_admins = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-actions-plan"]
   parameters = {
     "CROSS_ACCOUNT_VERSION" = "4"
   }
