@@ -191,90 +191,102 @@ module "eks" {
     }
   }
 
-  access_entries = {
-    # Modernisation Platform Environments (github-actions-plan) access to cluster
-    github-actions-plan = {
-      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-actions-plan"
-      policy_associations = {
-        eks-admin = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope = {
-            type = "cluster"
+  access_entries = merge(
+    local.environment == "production" ? {
+      # Modernisation Platform Environments (github-actions-plan)
+      github-actions-plan = {
+        principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-actions-plan"
+        policy_associations = {
+          eks-admin = {
+            policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+            access_scope = {
+              type = "cluster"
+            }
           }
         }
       }
-    }
-    # Modernisation Platform Environments (github-actions-apply) access to cluster
-    github-actions-apply = {
-      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-actions-apply"
-      policy_associations = {
-        eks-admin = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope = {
-            type = "cluster"
+
+      # Modernisation Platform Environments (github-actions-apply)
+      github-actions-apply = {
+        principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-actions-apply"
+        policy_associations = {
+          eks-admin = {
+            policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+            access_scope = {
+              type = "cluster"
+            }
           }
         }
       }
-    }
-    # Modernisation Platform Environments (MemberInfrastructureAccess)access to cluster
-    mpe-administrator = {
-      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/MemberInfrastructureAccess"
-      policy_associations = {
-        eks-admin = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope = {
-            type = "cluster"
+    } : {},
+
+    {
+      # Modernisation Platform Environments (MemberInfrastructureAccess)
+      mpe-administrator = {
+        principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/MemberInfrastructureAccess"
+        policy_associations = {
+          eks-admin = {
+            policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+            access_scope = {
+              type = "cluster"
+            }
           }
         }
       }
-    }
-    # Analytical Platform Engineering access to cluster
-    sso-administrator = {
-      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/${data.aws_region.current.region}/${one(data.aws_iam_roles.eks_sso_access_role.names)}"
-      policy_associations = {
-        eks-admin = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope = {
-            type = "cluster"
+
+      # Analytical Platform Engineering access
+      sso-administrator = {
+        principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/${data.aws_region.current.region}/${one(data.aws_iam_roles.eks_sso_access_role.names)}"
+        policy_associations = {
+          eks-admin = {
+            policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+            access_scope = {
+              type = "cluster"
+            }
           }
         }
       }
-    }
-    sso-platform-engineer-admin = {
-      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/${data.aws_region.current.region}/${one(data.aws_iam_roles.platform_engineer_admin_sso_role.names)}"
-      policy_associations = {
-        eks-admin = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope = {
-            type = "cluster"
+
+      sso-platform-engineer-admin = {
+        principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/${data.aws_region.current.region}/${one(data.aws_iam_roles.platform_engineer_admin_sso_role.names)}"
+        policy_associations = {
+          eks-admin = {
+            policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+            access_scope = {
+              type = "cluster"
+            }
           }
         }
       }
+
+      # MWAA
+      apc-mwaa = {
+        principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/mwaa-execution"
+        username          = "apc-mwaa"
+        kubernetes_groups = ["mwaa"]
+      }
+
+      # Analytical Platform Common — MWAA ServiceAccount management
+      gha-mojap-common = {
+        principal_arn     = "arn:aws:iam::${local.environment_management.account_ids["analytical-platform-common-production"]}:role/analytical-platform-github-actions"
+        username          = "github-actions-moj-ap-airflow"
+        kubernetes_groups = ["mwaa-serviceaccount-management", "mwaa-external-secrets"]
+      }
+
+      # Legacy Airflow
+      data-engineering-airflow = {
+        principal_arn     = local.environment_configuration.data_engineering_airflow_execution_role_arn
+        username          = "data-engineering-airflow"
+        kubernetes_groups = ["airflow"]
+      }
+
+      github-actions-mojas-airflow = {
+        principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-actions-mojas-airflow"
+        username          = "github-actions-mojas-airflow"
+        kubernetes_groups = ["airflow-serviceaccount-management"]
+      }
     }
-    # MWAA access to MWAA role in MWAA namespace
-    apc-mwaa = {
-      principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/mwaa-execution"
-      username          = "apc-mwaa"
-      kubernetes_groups = ["mwaa"]
-    }
-    # Analytical Platform Common access to MWAA ServiceAccount management role in MWAA namespace
-    gha-mojap-common = {
-      principal_arn     = "arn:aws:iam::${local.environment_management.account_ids["analytical-platform-common-production"]}:role/analytical-platform-github-actions"
-      username          = "github-actions-moj-ap-airflow"
-      kubernetes_groups = ["mwaa-serviceaccount-management", "mwaa-external-secrets"]
-    }
-    /* Legacy Airflow */
-    data-engineering-airflow = {
-      principal_arn     = local.environment_configuration.data_engineering_airflow_execution_role_arn
-      username          = "data-engineering-airflow"
-      kubernetes_groups = ["airflow"]
-    }
-    github-actions-mojas-airflow = {
-      principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-actions-mojas-airflow"
-      username          = "github-actions-mojas-airflow"
-      kubernetes_groups = ["airflow-serviceaccount-management"]
-    }
-  }
+  )
 
   tags = local.tags
 }
