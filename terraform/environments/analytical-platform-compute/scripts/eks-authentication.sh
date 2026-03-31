@@ -4,8 +4,9 @@
 
 AWS_ACCOUNT_ID=${1}
 EKS_CLUSTER_NAME=${2}
-AWS_ROLE=${3:-MemberInfrastructureAccess}
-ENVIRONMENT=${4}
+ENVIRONMENT=${3}
+AWS_ROLE=${4:-MemberInfrastructureAccess}
+
 
 if [[ "${ENVIRONMENT}" != "production" ]]; then
 
