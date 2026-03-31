@@ -47,6 +47,10 @@ exports.handler = async (event) => {
       console.log(`[auth] using cached secret len=$${cachedSecret ? String(cachedSecret).length : 0} preview=$${preview(cachedSecret)}`);
     }
 
+
+    // Extract actual signature (assuming format: sha256=abcdef123...)
+    const receivedSignature = signatureHeader.replace('sha256=', '');
+
     // IMPORTANT: Use raw body (API Gateway must pass it unmodified)
     const rawBody = event.body;
 
@@ -55,24 +59,17 @@ exports.handler = async (event) => {
         ? Buffer.from(rawBody, 'base64')
         : Buffer.from(rawBody, 'utf8');
 
-    const decodedSecret = Buffer.from(cachedSecret, 'base64').toString();
-
     // Compute HMAC
     const computedSignature = crypto
-        .createHmac('sha256', decodedSecret)
+        .createHmac('sha256', cachedSecret)
         .update(bodyBuffer)
-        .digest('base64');
+        .digest('hex');
         
     // Timing-safe comparison
-    let isValid = false
-    try {
-      isValid = crypto.timingSafeEqual(
-          Buffer.from(signatureHeader, 'base64'),
-          Buffer.from(computedSignature, 'base64')
-      );
-    } catch (error) {
-       console.log("[auth] Error comparing signatures ", error.message);
-    }
+    const isValid = crypto.timingSafeEqual(
+        Buffer.from(receivedSignature, 'hex'),
+        Buffer.from(computedSignature, 'hex')
+    );
 
     if (isValid) {
       console.log("[auth] allow: token matched");
