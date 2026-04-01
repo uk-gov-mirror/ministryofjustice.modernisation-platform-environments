@@ -369,8 +369,8 @@ module "s3-bucket-sftp-client1" {
         "Principal" : "*",
         "Action" : "s3:*",
         "Resource" : [
-          module.s3-bucket-sftp-client1.arn,
-          "${module.s3-bucket-sftp-client1.arn}/*"
+          "arn:aws:s3:::${local.sftp_client1_bucket_name}",
+          "arn:aws:s3:::${local.sftp_client1_bucket_name}/*"
         ],
         "Condition" : {
           "Bool" : {
@@ -396,8 +396,8 @@ module "s3-bucket-sftp-client1" {
           "s3:PutObjectTagging"
         ],
         Resource = [
-          module.s3-bucket-sftp-client1.arn,
-          "${module.s3-bucket-sftp-client1.arn}/*"
+          "arn:aws:s3:::${local.sftp_client1_bucket_name}",
+          "arn:aws:s3:::${local.sftp_client1_bucket_name}/*"
         ]
       }
     ]
