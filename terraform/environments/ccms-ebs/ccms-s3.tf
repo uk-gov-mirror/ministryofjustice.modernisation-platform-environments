@@ -449,7 +449,7 @@ resource "aws_s3_bucket_notification" "sftp_client1_bucket_notification" {
   }
 }
 
-resource "aws_s3_object" "folder" {
+resource "aws_s3_object" "sftp_client1_folder" {
   bucket = module.s3-bucket-sftp-client1.bucket.id
   for_each = {
     for name in local.sftp_client1_folder_name :
