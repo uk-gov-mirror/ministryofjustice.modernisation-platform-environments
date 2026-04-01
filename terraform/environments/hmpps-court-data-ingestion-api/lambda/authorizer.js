@@ -90,7 +90,7 @@ exports.handler = async (event) => {
       };
     }
 
-    console.log("[auth] deny: token mismatch", "tokenPreview=", preview(receivedSignature), "secretPreview=", preview(computedSignature));
+    console.log("[auth] deny: token mismatch", "tokenPreview=", preview(signatureHeader), "secretPreview=", preview(computedSignature));
     return {
       statusCode: 403,
       body: JSON.stringify({ message: "Token did not match" })
