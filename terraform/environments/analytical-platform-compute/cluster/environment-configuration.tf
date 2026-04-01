@@ -40,7 +40,7 @@ locals {
       velero_aws_plugin_version = "v1.14.0"
 
       /* Kube Prometheus Stack */
-      prometheus_operator_crd_version = "v0.90.0"
+      prometheus_operator_crd_version = "v0.89.0"
 
       /* Data Engineering Airflow */
       data_engineering_airflow_execution_role_arn = "arn:aws:iam::${local.environment_management.account_ids["analytical-platform-data-production"]}:role/airflow-dev-execution-role"
