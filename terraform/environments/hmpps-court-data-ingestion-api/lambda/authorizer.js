@@ -55,7 +55,7 @@ exports.handler = async (event) => {
         ? Buffer.from(rawBody, 'base64')
         : Buffer.from(rawBody, 'utf8');
 
-    const decodedSecret = Buffer.from(cachedSecret, 'base64').toString();
+    const decodedSecret = Buffer.from(cachedSecret, 'base64')
 
     // Compute HMAC
     const computedSignature = crypto
