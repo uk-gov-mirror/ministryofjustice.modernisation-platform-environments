@@ -2,6 +2,7 @@
 locals {
   logging_bucket_name            = "${local.application_name}-${local.environment}-logging"
   rsync_bucket_name              = "${local.application_name}-${local.environment}-dbbackup"
+  sftp_client1_bucket_name       = "${local.application_name}-${local.environment}-barclays-inbound-mp"
   lb_log_prefix_ebsapp           = "ebsapps-lb"
   lb_log_prefix_wgate            = "wgate-lb"
   lb_log_prefix_wgate_public     = "wgate-lb-public"

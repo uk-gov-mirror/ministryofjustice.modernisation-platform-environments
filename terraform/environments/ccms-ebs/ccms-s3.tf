@@ -350,3 +350,102 @@ moved {
   from = module.s3-bucket-logging.aws_s3_bucket_logging.default["ccms-ebs-production-logging"]
   to   = module.s3-bucket-logging.aws_s3_bucket_logging.default_single_name["ccms-ebs-production-logging"]
 }
+
+# ---------------------------------------------
+# S3 Bucket - Logging
+# ---------------------------------------------
+module "s3-bucket-sftp-client1" {
+  # v8.2.0 = https://github.com/ministryofjustice/modernisation-platform-terraform-s3-bucket/commit/52a40b0dd18aaef0d7c5565d93cc8997aad79636
+  source = "github.com/ministryofjustice/modernisation-platform-terraform-s3-bucket?ref=52a40b0dd18aaef0d7c5565d93cc8997aad79636"
+
+  bucket_name        = local.sftp_client1_bucket_name
+  versioning_enabled = true
+  bucket_policy      = [data.aws_iam_policy_document.logging_s3_policy.json]
+
+  log_bucket    = local.logging_bucket_name
+  log_prefix    = "s3access/${local.sftp_client1_bucket_name}"
+  sse_algorithm = "AES256"
+
+  # Refer to the below section "Replication" before enabling replication
+  replication_enabled = false
+  # Below three variables and providers configuration are only relevant if 'replication_enabled' is set to true
+  replication_region = "eu-west-2"
+  # replication_role_arn                     = module.s3-bucket-replication-role.role.arn
+  providers = {
+    # Here we use the default provider Region for replication. Destination buckets can be within the same Region as the
+    # source bucket. On the other hand, if you need to enable cross-region replication, please contact the Modernisation
+    # Platform team to add a new provider for the additional Region.
+    aws.bucket-replication = aws
+  }
+
+  lifecycle_rule = [
+    {
+      id     = "delete-noncurrent-versions-after-5-days"
+      status = "Enabled"
+
+      # No filter → applies to whole bucket
+      filter {}
+
+      noncurrent_version_expiration {
+        noncurrent_days = 5
+      }
+    }
+  ]
+
+  tags = merge(local.tags,
+    { Name = lower(format("s3-%s-%s-logging", local.application_name, local.environment)) }
+  )
+}
+
+
+resource "aws_s3_bucket_notification" "logging_bucket_notification" {
+  bucket      = module.s3-bucket-logging.bucket.id
+  eventbridge = true
+  topic {
+    topic_arn     = aws_sns_topic.s3_topic.arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_suffix = ".log"
+  }
+}
+
+data "aws_iam_policy_document" "logging_s3_policy" {
+  statement {
+    sid    = "AllowELBLogDeliveryPutObject"
+    effect = "Allow"
+    principals {
+      type = "Service"
+      identifiers = [
+        "logdelivery.elasticloadbalancing.amazonaws.com"
+      ]
+    }
+    actions   = ["s3:PutObject"]
+    resources = ["${module.s3-bucket-logging.bucket.arn}/*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = ["${data.aws_caller_identity.current.account_id}"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-acl"
+      values   = ["bucket-owner-full-control"]
+    }
+
+  }
+
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["logging.s3.amazonaws.com"]
+    }
+    actions   = ["s3:PutObject"]
+    resources = ["arn:aws:s3:::ccms-ebs-${local.environment}-logging/*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = ["${data.aws_caller_identity.current.account_id}"]
+    }
+  }
+}
