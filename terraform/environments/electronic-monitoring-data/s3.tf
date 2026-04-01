@@ -832,6 +832,7 @@ module "s3-p1-export-bucket" {
   environment_shorthand   = local.environment_shorthand
   security_group_ids      = [aws_security_group.lambda_generic.id]
   subnet_ids              = data.aws_subnets.shared-public.ids
+  filter_suffix           = ".zip"
 
   providers = {
     aws = aws
