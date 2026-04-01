@@ -2,7 +2,7 @@
 locals {
   logging_bucket_name            = "${local.application_name}-${local.environment}-logging"
   rsync_bucket_name              = "${local.application_name}-${local.environment}-dbbackup"
-  sftp_client1_bucket_name       = "${local.application_name}-${local.environment}-barclays-inbound-mp"
+  sftp_client1_bucket_name       = "${local.application_name}-${local.environment}-barclaycard-inbound-mp"
   lb_log_prefix_ebsapp           = "ebsapps-lb"
   lb_log_prefix_wgate            = "wgate-lb"
   lb_log_prefix_wgate_public     = "wgate-lb-public"
@@ -12,7 +12,8 @@ locals {
 
 
   lambda_folder_name = ["lambda_delivery", "ftp_lambda_layer", "payment_lambda_layer", "cloudwatch_sns_layer", "payment_load_monitor_layer"]
-
+  sftp_client1_folder_name = ["inbound", "inprocess", "archive", "error", "rejected"]
+  
   lambda_source_hashes_cloudwatch_alarm_slack_integration = [
     for f in fileset("./lambda/cloudwatch_alarm_slack_integration", "**") :
     sha256(file("${path.module}/lambda/cloudwatch_alarm_slack_integration/${f}"))

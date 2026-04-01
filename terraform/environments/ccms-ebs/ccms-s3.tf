@@ -360,7 +360,48 @@ module "s3-bucket-sftp-client1" {
 
   bucket_name        = local.sftp_client1_bucket_name
   versioning_enabled = true
-  bucket_policy      = [data.aws_iam_policy_document.logging_s3_policy.json]
+  bucket_policy = [jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        "Sid" : "RequireSSLRequests",
+        "Effect" : "Deny",
+        "Principal" : "*",
+        "Action" : "s3:*",
+        "Resource" : [
+          module.s3-bucket-sftp-client1.arn,
+          "${module.s3-bucket-sftp-client1.arn}/*"
+        ],
+        "Condition" : {
+          "Bool" : {
+            "aws:SecureTransport" : "false"
+          }
+        }
+      },
+      {
+        Sid    = "AllowAnalyticalPlatformIngestionService",
+        Effect = "Allow",
+        Principal = {
+          AWS = [
+            "arn:aws:iam::${local.environment_management.account_ids["analytical-platform-ingestion-development"]}:role/transfer",
+            "arn:aws:iam::${local.environment_management.account_ids["analytical-platform-ingestion-production"]}:role/transfer"
+          ]
+        },
+        Action = [
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:GetObjectAcl",
+          "s3:PutObject",
+          "s3:PutObjectAcl",
+          "s3:PutObjectTagging"
+        ],
+        Resource = [
+          module.s3-bucket-sftp-client1.arn,
+          "${module.s3-bucket-sftp-client1.arn}/*"
+        ]
+      }
+    ]
+  })]
 
   log_bucket    = local.logging_bucket_name
   log_prefix    = "s3access/${local.sftp_client1_bucket_name}"
@@ -384,7 +425,7 @@ module "s3-bucket-sftp-client1" {
       status = "Enabled"
 
       # No filter → applies to whole bucket
-      filter {}
+      # filter {}
 
       noncurrent_version_expiration {
         noncurrent_days = 5
@@ -393,13 +434,13 @@ module "s3-bucket-sftp-client1" {
   ]
 
   tags = merge(local.tags,
-    { Name = lower(format("s3-%s-%s-logging", local.application_name, local.environment)) }
+    { Name = lower(format("s3-%s-%s-barclaycard-inbound-mp", local.application_name, local.environment)) }
   )
 }
 
 
-resource "aws_s3_bucket_notification" "logging_bucket_notification" {
-  bucket      = module.s3-bucket-logging.bucket.id
+resource "aws_s3_bucket_notification" "sftp_client1_bucket_notification" {
+  bucket      = module.s3-bucket-sftp-client1.bucket.id
   eventbridge = true
   topic {
     topic_arn     = aws_sns_topic.s3_topic.arn
@@ -408,44 +449,12 @@ resource "aws_s3_bucket_notification" "logging_bucket_notification" {
   }
 }
 
-data "aws_iam_policy_document" "logging_s3_policy" {
-  statement {
-    sid    = "AllowELBLogDeliveryPutObject"
-    effect = "Allow"
-    principals {
-      type = "Service"
-      identifiers = [
-        "logdelivery.elasticloadbalancing.amazonaws.com"
-      ]
-    }
-    actions   = ["s3:PutObject"]
-    resources = ["${module.s3-bucket-logging.bucket.arn}/*"]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = ["${data.aws_caller_identity.current.account_id}"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "s3:x-amz-acl"
-      values   = ["bucket-owner-full-control"]
-    }
-
+resource "aws_s3_object" "folder" {
+  bucket = module.s3-bucket-sftp-client1.bucket.id
+  for_each = {
+    for name in local.sftp_client1_folder_name :
+    name => "${name}/"
   }
 
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["logging.s3.amazonaws.com"]
-    }
-    actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::ccms-ebs-${local.environment}-logging/*"]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = ["${data.aws_caller_identity.current.account_id}"]
-    }
-  }
+  key = each.value
 }
