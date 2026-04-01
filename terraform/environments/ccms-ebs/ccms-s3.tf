@@ -427,7 +427,7 @@ module "s3-bucket-sftp-client1" {
       # No filter → applies to whole bucket
       # filter {}
 
-      noncurrent_version_expiration {
+      noncurrent_version_expiration = {
         noncurrent_days = 5
       }
     }
