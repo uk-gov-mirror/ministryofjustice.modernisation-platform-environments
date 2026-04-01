@@ -12,7 +12,7 @@ locals {
 
 
   lambda_folder_name = ["lambda_delivery", "ftp_lambda_layer", "payment_lambda_layer", "cloudwatch_sns_layer", "payment_load_monitor_layer"]
-  sftp_client1_folder_name = ["inbound", "inprocess", "archive", "error", "rejected"]
+  sftp_client1_folder_name = ["inbound", "archive", "error"]
   
   lambda_source_hashes_cloudwatch_alarm_slack_integration = [
     for f in fileset("./lambda/cloudwatch_alarm_slack_integration", "**") :

@@ -422,15 +422,29 @@ module "s3-bucket-sftp-client1" {
   lifecycle_rule = [
     {
       id     = "delete-noncurrent-versions-after-5-days"
-      status = "Enabled"
+      enabled = "Enabled"
 
       # No filter → applies to whole bucket
-      # filter {}
+      filter = {}
 
       noncurrent_version_expiration = {
-        noncurrent_days = 5
+        days = 5
       }
+
+    },
+    {
+      id     = "delete-archive-folder-file-after-5-days"
+      status = "enabled"
+
+      filter = {
+        prefix = "archive/"
+      }
+
+     expiration = {
+       days = 5 # delete objects 5 days after creation
+     }
     }
+
   ]
 
   tags = merge(local.tags,
