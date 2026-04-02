@@ -104,22 +104,11 @@
               echo "::add-mask::$BACKEND_NUMBER"
               echo "BACKEND_NUMBER=${BACKEND_NUMBER}" >> $GITHUB_ENV
 
-          - name: Set IAM Role Name
-            id: set-role
-            run: |
-              if [[ ("${{ inputs.environment }}" == "development" || "${{ inputs.environment }}" == "test") ]]; then
-                echo "role_name=github-actions" >> $GITHUB_OUTPUT
-                echo "session_name=githubactionsrolesession" >> $GITHUB_OUTPUT
-              else
-                echo "role_name=github-actions-plan" >> $GITHUB_OUTPUT
-                echo "session_name=githubactionsplanrolesession" >> $GITHUB_OUTPUT
-              fi
-
           - name: Configure AWS Credentials
             uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7  # v6.0.0
             with:
-              role-to-assume: "arn:aws:iam::${{ env.ACCOUNT_NUMBER }}:role/${{ steps.set-role.outputs.role_name }}"
-              role-session-name: ${{ steps.set-role.outputs.session_name }}
+              role-to-assume: "arn:aws:iam::${{ env.ACCOUNT_NUMBER }}:role/github-actions-plan"
+              role-session-name: "githubactionsplanrolesession"
               aws-region: "eu-west-2"
 
           - name: Setup Terraform
@@ -317,22 +306,11 @@
               echo "::add-mask::$BACKEND_NUMBER"
               echo "BACKEND_NUMBER=${BACKEND_NUMBER}" >> $GITHUB_ENV
 
-          - name: Set IAM Role Name
-            id: set-role
-            run: |
-              if [[ ("${{ inputs.environment }}" == "development" || "${{ inputs.environment }}" == "test") ]]; then
-                echo "role_name=github-actions" >> $GITHUB_OUTPUT
-                echo "session_name=githubactionsrolesession" >> $GITHUB_OUTPUT
-              else
-                echo "role_name=github-actions-apply" >> $GITHUB_OUTPUT
-                echo "session_name=githubactionsrolesession" >> $GITHUB_OUTPUT
-              fi
-
           - name: Configure AWS Credentials
             uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7  # v6.0.0
             with:
-              role-to-assume: "arn:aws:iam::${{ env.ACCOUNT_NUMBER }}:role/${{ steps.set-role.outputs.role_name }}"
-              role-session-name: ${{ steps.set-role.outputs.session_name }}
+              role-to-assume: "arn:aws:iam::${{ env.ACCOUNT_NUMBER }}:role/github-actions-apply"
+              role-session-name: "githubactionsrolesession"
               aws-region: "eu-west-2"
 
           - name: Setup Terraform
