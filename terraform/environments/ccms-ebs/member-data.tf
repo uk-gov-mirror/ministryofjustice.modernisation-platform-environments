@@ -157,6 +157,9 @@ data "aws_security_groups" "all_security_groups" {
   }
 }
 
+data "aws_s3_bucket" "sftp_client1_bucket" {
+  bucket = "${local.application_name}-${local.environment}-barclaycard-inbound-mp"
+}
 ## S3 NOTIFICATIONS
 data "aws_iam_policy_document" "s3_topic_policy" {
   statement {
@@ -174,6 +177,7 @@ data "aws_iam_policy_document" "s3_topic_policy" {
       test     = "ArnLike"
       variable = "aws:SourceArn"
       values = concat([
+        data.aws_s3_bucket.sftp_client1_bucket.arn,
         module.s3-bucket-logging.bucket.arn,
         module.s3-bucket-dbbackup.bucket.arn,
         ],
