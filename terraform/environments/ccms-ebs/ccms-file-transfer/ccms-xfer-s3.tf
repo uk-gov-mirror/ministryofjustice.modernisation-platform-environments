@@ -2,7 +2,7 @@
 # S3 Bucket - Logging
 # ---------------------------------------------
 module "s3-bucket-sftp-client1" {
-  source = "github.com/ministryofjustice/modernisation-platform-terraform-s3-bucket?ref=9facf9fc8f8b8e3f93ffbda822028534b9a75399"
+  source             = "github.com/ministryofjustice/modernisation-platform-terraform-s3-bucket?ref=9facf9fc8f8b8e3f93ffbda822028534b9a75399"
   bucket_name        = local.sftp_client1_bucket_name
   versioning_enabled = true
   bucket_policy = [jsonencode({
@@ -66,7 +66,7 @@ module "s3-bucket-sftp-client1" {
 
   lifecycle_rule = [
     {
-      id     = "delete-noncurrent-versions-after-5-days"
+      id      = "delete-noncurrent-versions-after-5-days"
       enabled = "Enabled"
 
       # No filter → applies to whole bucket
@@ -85,9 +85,9 @@ module "s3-bucket-sftp-client1" {
         prefix = "archive/"
       }
 
-     expiration = {
-       days = 5 # delete objects 5 days after creation
-     }
+      expiration = {
+        days = 5 # delete objects 5 days after creation
+      }
     }
 
   ]
