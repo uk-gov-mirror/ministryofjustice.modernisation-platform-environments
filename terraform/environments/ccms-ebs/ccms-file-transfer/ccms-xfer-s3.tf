@@ -66,8 +66,8 @@ module "s3-bucket-sftp-client1" {
 
   lifecycle_rule = [
     {
-      id     = "delete-noncurrent-versions-after-5-days"
-      status = "Enabled"
+      id      = "delete-noncurrent-versions-after-5-days"
+      enabled = "Enabled"
 
       # No filter → applies to whole bucket
       filter = {}
@@ -78,8 +78,8 @@ module "s3-bucket-sftp-client1" {
 
     },
     {
-      id     = "delete-archive-folder-file-after-5-days"
-      status = "enabled"
+      id      = "delete-archive-folder-file-after-5-days"
+      enabled = "Enabled"
 
       filter = {
         prefix = "archive/"
