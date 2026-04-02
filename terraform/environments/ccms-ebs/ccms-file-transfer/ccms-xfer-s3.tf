@@ -99,7 +99,7 @@ module "s3-bucket-sftp-client1" {
 
 
 resource "aws_s3_bucket_notification" "sftp_client1_bucket_notification" {
-  bucket      = module.s3-bucket-sftp-client1[count.index].bucket.id
+  bucket      = module.s3-bucket-sftp-client1.bucket.id
   eventbridge = true
   topic {
     topic_arn     = data.aws_sns_topic.s3_topic.arn
