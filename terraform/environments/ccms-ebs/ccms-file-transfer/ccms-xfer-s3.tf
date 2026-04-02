@@ -102,7 +102,7 @@ resource "aws_s3_bucket_notification" "sftp_client1_bucket_notification" {
   bucket      = module.s3-bucket-sftp-client1[count.index].bucket.id
   eventbridge = true
   topic {
-    topic_arn     = aws_sns_topic.s3_topic.arn
+    topic_arn     = data.aws_sns_topic.s3_topic.arn
     events        = ["s3:ObjectCreated:*"]
     filter_suffix = ".log"
   }
