@@ -55,7 +55,7 @@ exports.handler = async (event) => {
         ? Buffer.from(rawBody, 'base64')
         : Buffer.from(rawBody, 'utf8');
 
-    const decodedSecret = Buffer.from(cachedSecret, 'base64').toString();
+    const decodedSecret = Buffer.from(cachedSecret, 'base64')
 
     // Compute HMAC
     const computedSignature = crypto
@@ -90,7 +90,7 @@ exports.handler = async (event) => {
       };
     }
 
-    console.log("[auth] deny: token mismatch", "tokenPreview=", preview(receivedSignature), "secretPreview=", preview(computedSignature));
+    console.log("[auth] deny: token mismatch", "tokenPreview=", preview(signatureHeader), "secretPreview=", preview(computedSignature));
     return {
       statusCode: 403,
       body: JSON.stringify({ message: "Token did not match" })
