@@ -52,6 +52,9 @@ env:
   ACCOUNT_NAME: "${{ inputs.application }}-${{ inputs.environment }}"
   WORKSPACE_NAME: "${{ inputs.application }}-${{ inputs.environment }}"
   SKIP_PLAN_EVALUATOR: '["cloud-platform-development", "data-platform-development", "data-platform-test", "data-platform-preproduction", "data-platform-production"]'
+permissions:
+  id-token: write
+  contents: read
 concurrency:
   group: ${{ inputs.application }}-${{ inputs.environment }}-${{ inputs.component }}
 jobs:
