@@ -31,10 +31,15 @@ resource "aws_instance" "ec2_oracle_ebs_dev_test" {
   }
 
   user_data_replace_on_change = false
-  user_data = base64encode(templatefile("./templates/ec2_user_data_ebs.sh", {
-    environment = "${local.environment}"
-    hostname    = "ebs-dev-test"
-  }))
+  user_data = base64encode(<<EOF
+#!/bin/bash
+set -e
+
+yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+systemctl enable amazon-ssm-agent
+systemctl start amazon-ssm-agent
+EOF
+  )
 
   metadata_options {
     http_endpoint = "enabled"
