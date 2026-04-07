@@ -14,11 +14,6 @@ resource "aws_instance" "ec2_oracle_ebs_dev_test" {
   associate_public_ip_address = false
   iam_instance_profile        = aws_iam_instance_profile.iam_instace_profile_ccms_base.name
 
-  cpu_options {
-    core_count       = 2
-    threads_per_core = 1
-  }
-
   root_block_device {
     volume_type = "gp3"
     volume_size = 100
