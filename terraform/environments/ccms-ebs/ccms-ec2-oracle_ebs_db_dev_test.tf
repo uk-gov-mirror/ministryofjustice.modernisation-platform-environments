@@ -5,7 +5,7 @@ resource "aws_instance" "ec2_oracle_ebs_dev_test" {
   count = local.is-development ? 1 : 0
 
   instance_type               = "t3.large"
-  ami                         = "ami-06cfbaaaecd3210c1"
+  ami                         = local.application_data.accounts[local.environment].ebsdb_ami_id
   key_name                    = local.application_data.accounts[local.environment].key_name
   vpc_security_group_ids      = [aws_security_group.ec2_sg_ebsdb.id]
   subnet_id                   = data.aws_subnet.data_subnets_a.id
@@ -29,6 +29,13 @@ resource "aws_instance" "ec2_oracle_ebs_dev_test" {
   user_data = base64encode(<<EOF
 #!/bin/bash
 set -e
+
+# Detach all non-root volumes except root
+# Get the instance ID
+INSTANCE_ID=$(ec2-metadata --instance-id | cut -d " " -f 2)
+
+# Get all attached volumes except root
+aws ec2 describe-volumes --filters "Name=attachment.instance-id,Values=$INSTANCE_ID" --region eu-west-2 --query 'Volumes[?!RootVolume].VolumeId' --output text | xargs -I {} aws ec2 detach-volume --volume-id {} --region eu-west-2
 
 # Install AWS Systems Manager Agent
 yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
@@ -71,6 +78,7 @@ EOF
 
   lifecycle {
     ignore_changes = [
+      ebs_block_device,
       tags
     ]
   }
