@@ -5,7 +5,7 @@ resource "aws_instance" "ec2_oracle_ebs_dev_test" {
   count = local.is-development ? 1 : 0
 
   instance_type               = "t3.large"
-  ami                         = local.application_data.accounts[local.environment].ebsdb_ami_id
+  ami                         = "ami-06cfbaaaecd3210c1"
   key_name                    = local.application_data.accounts[local.environment].key_name
   vpc_security_group_ids      = [aws_security_group.ec2_sg_ebsdb.id]
   subnet_id                   = data.aws_subnet.data_subnets_a.id
