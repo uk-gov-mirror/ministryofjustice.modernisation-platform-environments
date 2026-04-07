@@ -15,8 +15,8 @@ resource "aws_instance" "ec2_oracle_ebs_dev_test" {
   iam_instance_profile        = aws_iam_instance_profile.iam_instace_profile_ccms_base.name
 
   cpu_options {
-    core_count       = local.application_data.accounts[local.environment].ec2_oracle_instance_cores_ebsdb
-    threads_per_core = local.application_data.accounts[local.environment].ec2_oracle_instance_threads_ebsdb
+    core_count       = 2
+    threads_per_core = 1
   }
 
   root_block_device {
