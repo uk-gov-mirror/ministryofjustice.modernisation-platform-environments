@@ -1,0 +1,60 @@
+# Development-only EC2 instance based on the ebsdb AMI, with only the root volume attached.
+# This resource is created only when the workspace is the development environment.
+
+resource "aws_instance" "ec2_oracle_ebs_dev_test" {
+  count = local.is-development ? 1 : 0
+
+  instance_type               = "t3.large"
+  ami                         = local.application_data.accounts[local.environment].ebsdb_ami_id
+  key_name                    = local.application_data.accounts[local.environment].key_name
+  vpc_security_group_ids      = [aws_security_group.ec2_sg_ebsdb.id]
+  subnet_id                   = data.aws_subnet.data_subnets_a.id
+  monitoring                  = true
+  ebs_optimized               = false
+  associate_public_ip_address = false
+  iam_instance_profile        = aws_iam_instance_profile.iam_instace_profile_ccms_base.name
+
+  cpu_options {
+    core_count       = local.application_data.accounts[local.environment].ec2_oracle_instance_cores_ebsdb
+    threads_per_core = local.application_data.accounts[local.environment].ec2_oracle_instance_threads_ebsdb
+  }
+
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 100
+    encrypted   = true
+    tags = merge(local.tags,
+      {
+        Name = "dev-test-root-block"
+      }
+    )
+  }
+
+  user_data_replace_on_change = false
+  user_data = base64encode(templatefile("./templates/ec2_user_data_ebs.sh", {
+    environment = "${local.environment}"
+    hostname    = "ebs-dev-test"
+  }))
+
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "required"
+  }
+
+  tags = merge(local.tags,
+    { Name = lower(format("ec2-%s-%s-ebsdb-dev-test", local.application_name, local.environment)) },
+    { instance-role = "dev-test-ebsdb" },
+    { instance-scheduling = local.application_data.accounts[local.environment].instance-scheduling },
+    { backup = "false" },
+    { test-instance = "true" },
+    { development-test = "true" }
+  )
+
+  depends_on = [aws_security_group.ec2_sg_ebsdb]
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
