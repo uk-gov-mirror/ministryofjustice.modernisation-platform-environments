@@ -35,9 +35,22 @@ resource "aws_instance" "ec2_oracle_ebs_dev_test" {
 #!/bin/bash
 set -e
 
+# Install AWS Systems Manager Agent
 yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 systemctl enable amazon-ssm-agent
 systemctl start amazon-ssm-agent
+
+# Install AWS Mountpoint for Amazon S3
+yum install -y fuse fuse-libs fuse-devel
+wget https://s3.amazonaws.com/mountpoint-s3-public/latest/x86_64/mount-s3.rpm
+yum install -y ./mount-s3.rpm
+rm -f ./mount-s3.rpm
+
+# Create mount directories for S3 buckets
+mkdir -p /mnt/s3/inbound
+mkdir -p /mnt/s3/outbound
+mkdir -p /mnt/s3/shared
+chmod 755 /mnt/s3/*
 EOF
   )
 
