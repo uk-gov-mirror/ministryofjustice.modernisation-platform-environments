@@ -27,3 +27,45 @@ module "secret_ingestion_api_auth_token" {
 
   tags = local.tags
 }
+
+data "aws_iam_policy_document" "secret_ingestion_api_auth_token_policy_data" {
+  statement {
+    sid    = "AllowCrossAccountAccess"
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::754256621582:role/cloud-platform-irsa-6852dfe05c1167f2-live"
+      ]
+    }
+
+    actions = [
+      "secretsmanager:GetSecretValue"
+    ]
+
+    resources = ["*"]
+  }
+  # statement {
+  #   sid    = "AllowSelfAdmin"
+  #   effect = "Allow"
+
+  #   principals {
+  #     type = "AWS"
+  #     identifiers = [
+  #       "arn:aws:iam::953751538119:root"
+  #     ]
+  #   }
+
+  #   actions = [
+  #     "*"
+  #   ]
+
+  #   resources = ["*"]
+  # }
+}
+
+resource "aws_secretsmanager_secret_policy" "secret_ingestion_api_auth_token_policy" {
+  secret_arn = module.secret_ingestion_api_auth_token.secret_arn
+  policy     = data.aws_iam_policy_document.secret_ingestion_api_auth_token_policy_data.json
+}
