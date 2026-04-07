@@ -46,11 +46,15 @@ wget https://s3.amazonaws.com/mountpoint-s3-public/latest/x86_64/mount-s3.rpm
 yum install -y ./mount-s3.rpm
 rm -f ./mount-s3.rpm
 
-# Create mount directories for S3 buckets
-mkdir -p /mnt/s3/inbound
-mkdir -p /mnt/s3/outbound
-mkdir -p /mnt/s3/shared
-chmod 755 /mnt/s3/*
+# Create mount directory for S3 bucket
+mkdir -p /mnt/s3-dbbackup
+chmod 755 /mnt/s3-dbbackup
+
+# Mount S3 backup bucket using AWS Mountpoint
+mount-s3 ccms-ebs-${environment}-dbbackup /mnt/s3-dbbackup
+
+# Add fstab entry for persistent mounting
+echo "ccms-ebs-${environment}-dbbackup /mnt/s3-dbbackup fuse.mount-s3 _netdev,allow_other 0 0" >> /etc/fstab
 EOF
   )
 
