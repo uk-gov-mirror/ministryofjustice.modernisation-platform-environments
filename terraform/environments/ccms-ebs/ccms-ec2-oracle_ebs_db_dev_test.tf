@@ -51,10 +51,10 @@ mkdir -p /mnt/s3-dbbackup
 chmod 755 /mnt/s3-dbbackup
 
 # Mount S3 backup bucket using AWS Mountpoint
-mount-s3 ccms-ebs-${environment}-dbbackup /mnt/s3-dbbackup
+mount-s3 ccms-ebs-${local.environment}-dbbackup /mnt/s3-dbbackup
 
 # Add fstab entry for persistent mounting
-echo "ccms-ebs-${environment}-dbbackup /mnt/s3-dbbackup fuse.mount-s3 _netdev,allow_other 0 0" >> /etc/fstab
+echo "ccms-ebs-${local.environment}-dbbackup /mnt/s3-dbbackup fuse.mount-s3 _netdev,allow_other 0 0" >> /etc/fstab
 EOF
   )
 
