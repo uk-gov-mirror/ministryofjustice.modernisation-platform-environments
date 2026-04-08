@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>example</groupId>
-  <artifactId>hello-lambda</artifactId>
+  <artifactId>process_file_from_bucket</artifactId>
   <version>1.0</version>
 
   <properties>

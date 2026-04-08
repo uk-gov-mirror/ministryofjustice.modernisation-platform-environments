@@ -123,7 +123,7 @@ resource "aws_s3_bucket_notification" "sftp_client1_file_lambda_notification" {
     lambda_function_arn = aws_lambda_function.process_file_from_bucket.arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix = "inbound/"
-    filter_suffix       = ".log" #asked a question
+    filter_suffix       = ".csv" #asked a question
     
   }
   depends_on = [ module.s3-bucket-sftp-client1 ]
