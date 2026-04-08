@@ -110,6 +110,25 @@ resource "aws_s3_bucket_notification" "sftp_client1_bucket_notification" {
   depends_on = [module.s3-bucket-sftp-client1]
 }
 
+resource "aws_s3_bucket_notification" "sftp_client1_file_lambda_notification" {
+  bucket      = module.s3-bucket-sftp-client1.bucket.id
+  # eventbridge = true
+  # topic {
+  #   topic_arn     = data.aws_sns_topic.s3_topic.arn
+  #   events        = ["s3:ObjectCreated:*"]
+  #   filter_suffix = ".log"
+  # }
+
+  lambda_function {
+    lambda_function_arn = module.s3-file-lambda.function.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix = "inbound/"
+    filter_suffix       = ".log" #asked a question
+    
+  }
+  depends_on = [ module.s3-bucket-sftp-client1 ]
+}
+
 resource "aws_s3_object" "sftp_client1_folder" {
   bucket = module.s3-bucket-sftp-client1.bucket.id
   for_each = {
