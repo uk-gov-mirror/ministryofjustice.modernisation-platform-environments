@@ -280,7 +280,7 @@ resource "aws_lakeformation_permissions" "emdi_fms_db" {
   principal   = module.emdi_trail_maps_role[0].iam_role_arn
   permissions = ["DESCRIBE"]
   database {
-    name = "serco_fms_curated_${local.dbt_suffix}"
+    name = "serco_fms_curated${local.dbt_suffix}"
   }
 }
 
@@ -289,7 +289,7 @@ resource "aws_lakeformation_permissions" "emdi_fms_tables" {
   principal   = module.emdi_trail_maps_role[0].iam_role_arn
   permissions = ["SELECT", "DESCRIBE"]
   table {
-    database_name = "serco_fms_curated_${local.dbt_suffix}"
+    database_name = "serco_fms_curated${local.dbt_suffix}"
     wildcard      = true
   }
 }
@@ -299,7 +299,7 @@ resource "aws_lakeformation_permissions" "emdi_mdss_db" {
   principal   = module.emdi_trail_maps_role[0].iam_role_arn
   permissions = ["DESCRIBE"]
   database {
-    name = "staged_mdss_${local.dbt_suffix}"
+    name = "staged_mdss${local.dbt_suffix}"
   }
 }
 
@@ -308,7 +308,7 @@ resource "aws_lakeformation_permissions" "emdi_mdss_tables" {
   principal   = module.emdi_trail_maps_role[0].iam_role_arn
   permissions = ["SELECT", "DESCRIBE"]
   table {
-    database_name = "staged_mdss_${local.dbt_suffix}"
+    database_name = "staged_mdss${local.dbt_suffix}"
     wildcard      = true
   }
 }
