@@ -82,7 +82,7 @@ resource "aws_lambda_function" "process_file_from_bucket" {
   role             = aws_iam_role.lambda_process_file_from_bucket_role.arn
   handler          = "example.HelloWorldHandler" 
 #   layers           = [aws_lambda_layer_version.lambda_cloudwatch_sns_layer.arn]
-  runtime          = "java21"
+  runtime          = "java17"
   timeout          = 30
   publish          = true
 
