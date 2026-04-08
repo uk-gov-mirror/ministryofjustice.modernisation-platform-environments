@@ -73,7 +73,7 @@ module "s3-bucket-sftp-client1" {
       filter = {}
 
       noncurrent_version_expiration = {
-        days = 5
+        days = 7
       }
 
     },
@@ -86,7 +86,7 @@ module "s3-bucket-sftp-client1" {
       }
 
       expiration = {
-        days = 5 # delete objects 5 days after creation
+        days = 7 # delete objects 5 days after creation
       }
     }
 
