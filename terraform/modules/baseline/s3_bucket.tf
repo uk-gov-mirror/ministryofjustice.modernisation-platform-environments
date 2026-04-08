@@ -56,3 +56,15 @@ module "s3_bucket" {
 
   tags = merge(local.tags, each.value.tags)
 }
+
+resource "aws_s3_bucket_object_lock_configuration" "s3_bucket_object_lock_configuration" {
+  for_each  = {for k, v in var.s3_buckets : k => v if try(v.object_lock_days, 0) > 0}
+  bucket    = module.s3_bucket[each.key].bucket.bucket
+
+  rule {
+    default_retention {
+      mode = "COMPLIANCE"
+      days = each.value.object_lock_days
+    }
+  }
+}
