@@ -345,4 +345,4 @@
               set -o pipefail
               tf_args="${{ inputs.plan_apply_tfargs }} x.tfplan"
               echo "terraform apply ${tf_args}"
-              terraform apply ${tf_args} 2>&1 | bash ${GITHUB_WORKSPACE}/scripts/redact-output.sh | sed -E 's/p-w8ht8v1x/Enforce mandatory tags/g'
+              terraform apply ${tf_args} 2>&1 | bash ${GITHUB_WORKSPACE}/scripts/redact-output.sh | bash ${GITHUB_WORKSPACE}/scripts/enhance-scp-error.sh
