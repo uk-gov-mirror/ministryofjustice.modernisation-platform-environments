@@ -69,8 +69,8 @@ locals {
 
   db_backup_object_lock_days = {
     development   = 3,
-    test          = 0,
-    preproduction = 0,
-    production    = 0
+    test          = null,
+    preproduction = null,
+    production    = null
   }
 }

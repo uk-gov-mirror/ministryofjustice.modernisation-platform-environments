@@ -31,7 +31,7 @@ module "s3_bucket" {
 
   for_each = var.s3_buckets
 
-  source = "git::https://github.com/ministryofjustice/modernisation-platform-terraform-s3-bucket?ref=v9.0.0"
+  source = "git::https://github.com/ministryofjustice/modernisation-platform-terraform-s3-bucket?ref=4dca9f4"
 
   providers = {
     aws.bucket-replication = aws
@@ -53,18 +53,7 @@ module "s3_bucket" {
   replication_role_arn       = each.value.replication_role_arn
   force_destroy              = each.value.force_destroy
   sse_algorithm              = each.value.sse_algorithm
+  object_lock_days           = each.value.object_lock_days
 
   tags = merge(local.tags, each.value.tags)
-}
-
-resource "aws_s3_bucket_object_lock_configuration" "s3_bucket_object_lock_configuration" {
-  for_each  = {for k, v in var.s3_buckets : k => v if try(v.object_lock_days, 0) > 0}
-  bucket    = module.s3_bucket[each.key].bucket.bucket
-
-  rule {
-    default_retention {
-      mode = "COMPLIANCE"
-      days = each.value.object_lock_days
-    }
-  }
 }
