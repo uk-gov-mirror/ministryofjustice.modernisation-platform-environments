@@ -184,6 +184,11 @@ resource "helm_release" "karpenter" {
     <<-EOT
    nodeSelector:
      cloud-platform.justice.gov.uk/system-ng: 'true'
+   tolerations:
+     - key: system-node
+       operator: Equal
+       value: "true"
+       effect: NoSchedule
    dnsPolicy: Default
    settings:
      clusterName: ${module.eks[0].cluster_name}
