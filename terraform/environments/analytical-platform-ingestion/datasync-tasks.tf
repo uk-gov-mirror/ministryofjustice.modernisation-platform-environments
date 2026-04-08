@@ -28,7 +28,7 @@ resource "aws_datasync_task" "opg" {
 
   task_report_config {
     report_overrides {}
-    report_level         = "ERRORS_ONLY"
+    report_level         = "SUCCESSES_AND_ERRORS"
     output_type          = "STANDARD"
     s3_object_versioning = "INCLUDE"
 
