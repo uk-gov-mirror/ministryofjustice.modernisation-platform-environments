@@ -326,7 +326,9 @@
               echo "terraform init"
               terraform init
           
-          - run: terraform force-unlock -force f100ab47-6116-ee41-9ac0-b17bec13c61c
+          - name: Terraform Force Unlock
+            working-directory: "${{ inputs.component != 'root' && format('terraform/environments/{0}/{1}', inputs.application, inputs.component) || format('terraform/environments/{0}', inputs.application) }}"
+            run: terraform force-unlock -force f100ab47-6116-ee41-9ac0-b17bec13c61c
 
           - name: Terraform Workspace Select
             working-directory: "${{ inputs.component != 'root' && format('terraform/environments/{0}/{1}', inputs.application, inputs.component) || format('terraform/environments/{0}', inputs.application) }}"
