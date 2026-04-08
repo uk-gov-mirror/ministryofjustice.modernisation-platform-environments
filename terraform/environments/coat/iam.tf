@@ -11,6 +11,20 @@ resource "aws_iam_role" "coat_github_actions_role" {
   )
 }
 
+resource "aws_iam_role" "test_iam_role" {
+  name = "TestIAMRole"
+  assume_role_policy = templatefile("${path.module}/templates/coat-gh-actions-assume-role-policy.json",
+    {
+      gh_actions_oidc_provider     = "token.actions.githubusercontent.com"
+      gh_actions_oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
+    }
+  )
+
+  tags = {
+    "business-unit" = "lalala"
+  }
+}
+
 resource "aws_iam_policy" "coat_gh_actions_policy" {
   name = "GitHubActionsPolicy"
   policy = templatefile("${path.module}/templates/coat-gh-actions-policy.json",
