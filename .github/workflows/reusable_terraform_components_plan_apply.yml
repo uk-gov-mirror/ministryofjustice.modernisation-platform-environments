@@ -147,8 +147,6 @@
               echo "terraform apply -refresh-only -auto-approve ${tf_args}"
               terraform apply -refresh-only -auto-approve ${tf_args} | bash ${GITHUB_WORKSPACE}/scripts/redact-output.sh
 
-          - run: terraform force-unlock -force f100ab47-6116-ee41-9ac0-b17bec13c61c
-
           #
           # Terraform Plan
           #
