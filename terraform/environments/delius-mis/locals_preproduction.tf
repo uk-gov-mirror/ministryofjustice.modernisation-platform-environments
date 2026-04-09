@@ -261,6 +261,54 @@ locals {
     }
   }
 
+  bcs_config_win_preprod = {
+    instance_count    = 1
+    ami_name          = "delius_mis_windows_server_patch_2025-10-01T13-00-02.504Z"
+    computer_name     = "NDMIS-PP-BCS" # 15 char limit
+    powershell_branch = "TM-2005/ndmis/windows-initial-config"
+
+    ebs_volumes = {
+      "/dev/sda1" = { label = "root", size = 100 }
+      "/dev/xvdf" = { label = "data", size = 300 }
+    }
+
+    ebs_volumes_config = {
+      data = {
+        iops       = 3000
+        throughput = 125
+        type       = "gp3"
+      }
+      root = {
+        iops       = 3000
+        throughput = 125
+        type       = "gp3"
+      }
+    }
+
+    instance_config = {
+      associate_public_ip_address  = false
+      disable_api_termination      = false
+      disable_api_stop             = false
+      instance_type                = "r6i.4xlarge"
+      metadata_endpoint_enabled    = "enabled"
+      key_name                     = null
+      metadata_options_http_tokens = "required"
+      monitoring                   = true
+      ebs_block_device_inline      = true
+
+      private_dns_name_options = {
+        enable_resource_name_dns_aaaa_record = false
+        enable_resource_name_dns_a_record    = true
+        hostname_type                        = "resource-name"
+      }
+
+      tags = merge(
+        local.tags,
+        { backup = true }
+      )
+    }
+  }
+
   # BOE DB config
   boe_db_config_preprod = {
     instance_count = 0
@@ -403,8 +451,8 @@ locals {
   }
 
   fsx_config_preprod = {
-    storage_capacity     = 200
-    throughtput_capacity = 16
+    storage_capacity     = 1000 # temporarily increasing for prod->stage migration, was 200
+    throughtput_capacity = 128  # temporarily increasing for prod->stage migration, was 16
   }
 
   dfi_report_bucket_config_preprod = null
@@ -414,7 +462,7 @@ locals {
   datasync_config_preprod = null
 
   db_backup_config_preprod = {
-    object_lock_days             = 0
+    object_lock_days             = 1
     expire_current_after_days    = 200
     expire_noncurrent_after_days = 10
     transition = [
