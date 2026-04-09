@@ -24,7 +24,7 @@ locals {
       cloudwatch_metric_oam_links_ssm_parameters  = ["hmpps-oem-${local.environment}"]
       cloudwatch_metric_oam_links                 = ["hmpps-oem-${local.environment}"]
       db_backup_bucket_name                       = "nomis-db-backup-bucket"
-      db_backup_object_lock_days                  = local.db_backup_object_lock_days[local.environment]
+      # db_backup_object_lock_days                  = local.db_backup_object_lock_days[local.environment]
       enable_backup_plan_daily_and_weekly         = true
       enable_business_unit_kms_cmks               = true
       enable_ec2_cloud_watch_agent                = true
@@ -67,10 +67,10 @@ locals {
     }
   }
 
-  db_backup_object_lock_days = {
-    development   = 3,
-    test          = null,
-    preproduction = null,
-    production    = null
-  }
+  # db_backup_object_lock_days = {
+  #   development   = 3,
+  #   test          = null,
+  #   preproduction = null,
+  #   production    = null
+  # }
 }

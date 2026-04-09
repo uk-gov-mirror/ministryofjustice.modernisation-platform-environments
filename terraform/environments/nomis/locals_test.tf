@@ -12,6 +12,7 @@ locals {
           pagerduty = "nomis-test"
         }
       }
+      db_backup_object_lock_days = null
     }
   }
 
