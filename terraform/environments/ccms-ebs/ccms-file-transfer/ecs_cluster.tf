@@ -16,8 +16,8 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
 # ECS Task Definition
 
 
-resource "aws_ecs_task_definition" "api" {
-  family             = "${local.application_name}-task"
+resource "aws_ecs_task_definition" "ftp_client1" {
+  family             = "${local.application_name}-ftp-client1task"
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   network_mode       = "awsvpc"
   requires_compatibilities = [
@@ -31,66 +31,14 @@ resource "aws_ecs_task_definition" "api" {
     {
       app_name                                                      = local.application_name
       app_image                                                     = local.application_data.accounts[local.environment].app_image
-      pui_server_port                                               = local.application_data.accounts[local.environment].api_server_port
+      api_server_port                                               = local.application_data.accounts[local.environment].api_server_port
       aws_region                                                    = local.application_data.accounts[local.environment].aws_region
       container_version                                             = local.application_data.accounts[local.environment].container_version
-      spring_profiles_active                                        = local.application_data.accounts[local.environment].spring_profiles_active
-      spring_datasource_username                                    = "${aws_secretsmanager_secret.api_secrets.arn}:spring_datasource_username::"
-      spring_datasource_password                                    = "${aws_secretsmanager_secret.api_secrets.arn}:spring_datasource_password::"
-      spring_datasource_url                                         = "${aws_secretsmanager_secret.api_secrets.arn}:spring_datasource_url::"
-      idp_cert                                                      = "${aws_secretsmanager_secret.api_secrets.arn}:idp_cert::"
-      spcert                                                        = "${aws_secretsmanager_secret.api_secrets.arn}:spcert::"
-      spprivatekey                                                  = "${aws_secretsmanager_secret.api_secrets.arn}:spprivatekey::"
-      idpLogoutUrl                                                  = local.application_data.accounts[local.environment].idpLogoutUrl
-      idpMetadataUrl                                                = "${aws_secretsmanager_secret.api_secrets.arn}:idpMetadataUrl::"
-      loginUrl                                                      = "${aws_secretsmanager_secret.api_secrets.arn}:loginUrl::"
-      postcodeApiUrl                                                = "${aws_secretsmanager_secret.api_secrets.arn}:postcodeApiUrl::"
-      postcodeApiKey                                                = "${aws_secretsmanager_secret.api_secrets.arn}:postcodeApiKey::"
-      aws_endpoint                                                  = local.application_data.accounts[local.environment].aws_endpoint
-      ccms_s3_documents                                             = local.application_data.accounts[local.environment].ccms_s3_documents
-      ccms_api_feedback_url                                         = local.application_data.accounts[local.environment].ccms_api_feedback_url
-      ccms_api_owd_return_url                                       = local.application_data.accounts[local.environment].ccms_api_owd_return_url
-      ccms_soa_url_opaBillingAssessmentEndpoint                     = local.application_data.accounts[local.environment].ccms_soa_url_opaBillingAssessmentEndpoint
-      ccms_soa_url_opaPOAAssessmentEndpoint                         = local.application_data.accounts[local.environment].ccms_soa_url_opaPOAAssessmentEndpoint
-      ccms_soa_url_ebsClientEndpoint                                = local.application_data.accounts[local.environment].ccms_soa_url_ebsClientEndpoint
-      ccms_soa_url_ebsCaseEndpoint                                  = local.application_data.accounts[local.environment].ccms_soa_url_ebsCaseEndpoint
-      ccms_soa_url_ebsAddressEndpoint                               = local.application_data.accounts[local.environment].ccms_soa_url_ebsAddressEndpoint
-      ccms_soa_url_ebsReferenceDataEndpoint                         = local.application_data.accounts[local.environment].ccms_soa_url_ebsReferenceDataEndpoint
-      ccms_soa_url_ebsContractDetailsEndpoint                       = local.application_data.accounts[local.environment].ccms_soa_url_ebsContractDetailsEndpoint
-      ccms_soa_url_ebsProviderRequestEndpoint                       = local.application_data.accounts[local.environment].ccms_soa_url_ebsProviderRequestEndpoint
-      ccms_soa_url_ebsStatementOfAccountEndpoint                    = local.application_data.accounts[local.environment].ccms_soa_url_ebsStatementOfAccountEndpoint
-      ccms_soa_url_ebsNotificationEndpoint                          = local.application_data.accounts[local.environment].ccms_soa_url_ebsNotificationEndpoint
-      ccms_soa_url_ebsDocumentEndpoint                              = local.application_data.accounts[local.environment].ccms_soa_url_ebsDocumentEndpoint
-      ccms_soa_url_ebsCreateInvoiceEndpoint                         = local.application_data.accounts[local.environment].ccms_soa_url_ebsCreateInvoiceEndpoint
-      ccms_soa_url_ebsCoverSheetEndpoint                            = local.application_data.accounts[local.environment].ccms_soa_url_ebsCoverSheetEndpoint
-      ccms_soa_url_ebsCommonOrgEndpoint                             = local.application_data.accounts[local.environment].ccms_soa_url_ebsCommonOrgEndpoint
-      ccms_soa_url_ebsPrintInvoiceEndpoint                          = local.application_data.accounts[local.environment].ccms_soa_url_ebsPrintInvoiceEndpoint
-      ccms_soa_url_ebsGetInvoiceDetailsEndpoint                     = local.application_data.accounts[local.environment].ccms_soa_url_ebsGetInvoiceDetailsEndpoint
-      ccms_soa_url_ebsUpdateUserEndpoint                            = local.application_data.accounts[local.environment].ccms_soa_url_ebsUpdateUserEndpoint
-      ccms_soa_soapHeaderUserPassword                               = "${aws_secretsmanager_secret.api_secrets.arn}:ccms_soa_soapHeaderUserPassword::"
-      ccms_soa_soapHeaderUserName                                   = "${aws_secretsmanager_secret.api_secrets.arn}:ccms_soa_soapHeaderUserName::"
-      user_management_api_access_token                              = "${aws_secretsmanager_secret.api_secrets.arn}:user_management_api_access_token::"
-      user_management_api_hostname                                  = "${aws_secretsmanager_secret.api_secrets.arn}:user_management_api_hostname::"
-      entra_custom_user_id_claim                                    = local.application_data.accounts[local.environment].entra_custom_user_id_claim
-      is_silas_enabled                                              = local.application_data.accounts[local.environment].is_silas_enabled
-      idpIdentityID                                                 = "${aws_secretsmanager_secret.api_secrets.arn}:idpIdentityID::"
-      IdpSamlMockEnabled                                            = local.application_data.accounts[local.environment].IdpSamlMockEnabled
-      SpEntityId                                                    = "${aws_secretsmanager_secret.api_secrets.arn}:SpEntityId::"
-      SpEntityUrl                                                   = "${aws_secretsmanager_secret.api_secrets.arn}:SpEntityUrl::"
-      opa_security_password                                         = "${aws_secretsmanager_secret.api_secrets.arn}:opa_security_password::"
-      opa12_assess_service_servlet                                  = local.application_data.accounts[local.environment].opa12_assess_service_servlet
-      ccms_owd_rulebase_baseurl                                     = local.application_data.accounts[local.environment].ccms_owd_rulebase_baseurl
-      ccms_api_av_port                                              = local.application_data.accounts[local.environment].ccms_api_av_port
-      ccms_api_av_host                                              = local.application_data.accounts[local.environment].ccms_api_av_host
-      ccms_api_av_socketTimeout                                     = local.application_data.accounts[local.environment].ccms_api_av_socketTimeout
-      ccms_api_av_scannerEnabled                                    = local.application_data.accounts[local.environment].ccms_api_av_scannerEnabled
-      ccms_api_auditLogin_enabled                                   = local.application_data.accounts[local.environment].ccms_api_auditLogin_enabled
-      logging_level_root                                            = local.application_data.accounts[local.environment].logging_level_root
-      logging_level_com_ezgov                                       = local.application_data.accounts[local.environment].logging_level_com_ezgov
-      logging_level_com_legalservices                               = local.application_data.accounts[local.environment].logging_level_com_legalservices
-      logging_level_uk_gov_laa_opa                                  = local.application_data.accounts[local.environment].logging_level_uk_gov_laa_opa
-      logging_level_com_ezgov_roof_view_vim_control_BundleAwareText = local.application_data.accounts[local.environment].logging_level_com_ezgov_roof_view_vim_control_BundleAwareText
-      logging_level_root                                            = local.application_data.accounts[local.environment].logging_level_root
+      ccms_s3_bucket                                                = local.application_data.accounts[local.environment].ccms_s3_documents
+      ebs_db_username                                               = "${aws_secretsmanager_secret.api_secrets.arn}:ebs_db_username::"
+      ebs_db_password                                               = "${aws_secretsmanager_secret.api_secrets.arn}:ebs_db_password::"
+      ebs_db_endpoint                                               = "${aws_secretsmanager_secret.api_secrets.arn}:ebs_db_endpoint::"
+      file_transfer_slack_webhook                                   = "${aws_secretsmanager_secret.api_secrets.arn}:file_transfer_slack_webhook::"
     }
   )
 
@@ -101,12 +49,12 @@ resource "aws_ecs_task_definition" "api" {
 
 # ECS Service
 
-resource "aws_ecs_service" "sftp" {
+resource "aws_ecs_service" "ftp_client1" {
   name            = local.application_name
   cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.sftp.arn
+  task_definition = aws_ecs_task_definition.ftp_client1.arn
   desired_count   = local.application_data.accounts[local.environment].app_count
-  launch_type     = "EC2"
+  launch_type     = "FARGATE"
 
   health_check_grace_period_seconds = 120
   lifecycle {
@@ -120,7 +68,7 @@ resource "aws_ecs_service" "sftp" {
   }
 
   network_configuration {
-    security_groups = [aws_security_group.ecs_tasks_api.id]
+    security_groups = [aws_security_group.cluster_fargate_sg.id]
     subnets         = data.aws_subnets.shared-private.ids
   }
 
@@ -131,7 +79,7 @@ resource "aws_ecs_service" "sftp" {
   }
 
   depends_on = [
-    aws_lb_listener.pui,
+    aws_lb_listener.api_listener,
     aws_iam_role_policy_attachment.ecs_task_execution_role,
     aws_autoscaling_group.cluster-scaling-group
   ]
