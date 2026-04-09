@@ -28,12 +28,10 @@ resource "aws_cloudwatch_event_rule" "alarm_state_change_threader" {
     "detail" : {
       "alarmName" : concat(
         [
-          aws_cloudwatch_metric_alarm.load_mdss_dlq_alarm.alarm_name,
-          aws_cloudwatch_metric_alarm.clean_dlt_dlq_alarm.alarm_name,
           aws_cloudwatch_metric_alarm.glue_database_count_high.alarm_name
         ],
         [
-          for _, alarm in aws_cloudwatch_metric_alarm.additional_dlq_has_messages :
+          for _, alarm in aws_cloudwatch_metric_alarm.sqs_dlq_has_messages :
           alarm.alarm_name
         ]
       )
