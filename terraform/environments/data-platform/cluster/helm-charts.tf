@@ -175,6 +175,44 @@ resource "helm_release" "karpenter_configuration" {
   depends_on = [helm_release.karpenter]
 }
 
+resource "helm_release" "aws_load_balancer_controller" {
+  /* https://artifacthub.io/packages/helm/aws/aws-load-balancer-controller */
+
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  version    = local.cluster_configuration.helm_chart_versions.aws_load_balancer_controller
+  namespace  = "kube-system"
+  values = [
+    templatefile(
+      "${path.module}/configuration/helm/aws-load-balancer-controller/values.yml.tftpl",
+      {
+        cluster_name = module.eks.cluster_name
+        aws_region   = data.aws_region.current.region
+        vpc_id       = data.aws_vpc.main.id
+      }
+    )
+  ]
+
+  depends_on = [kubernetes_manifest.aws_load_balancer_controller_crds]
+}
+
+resource "helm_release" "gateway_configuration" {
+  name      = "gateway-configuration"
+  chart     = "./src/helm/charts/gateway-configuration"
+  namespace = "kube-system"
+
+  values = [
+    templatefile(
+      "${path.module}/configuration/helm/gateway-configuration/values.yml.tftpl", {}
+    )
+  ]
+  depends_on = [
+    helm_release.cilium,
+    helm_release.aws_load_balancer_controller
+  ]
+}
+
 resource "helm_release" "aws_cloudwatch_observability" {
   /* https://github.com/aws-observability/helm-charts/releases */
 
@@ -323,24 +361,25 @@ resource "helm_release" "external_secrets_secret_stores" {
   depends_on = [helm_release.external_secrets]
 }
 
-# resource "helm_release" "shared_services_gateway" {
-#   name      = "shared-services-gateway"
-#   chart     = "./src/helm/charts/shared-services-gateway"
-#   namespace = module.shared_services_namespace.name
+resource "helm_release" "shared_services_gateway" {
+  name      = "shared-services-gateway"
+  chart     = "./src/helm/charts/shared-services-gateway"
+  namespace = module.shared_services_namespace.name
 
-#   values = [
-#     templatefile(
-#       "${path.module}/configuration/helm/shared-services-gateway/values.yml.tftpl",
-#       {
-#         gateway_hostname = local.cluster_configuration.shared_services_gateway_hostname
-#       }
-#     )
-#   ]
-#   depends_on = [
-#     helm_release.cert_manager,
-#     helm_release.external_dns
-#   ]
-# }
+  values = [
+    templatefile(
+      "${path.module}/configuration/helm/shared-services-gateway/values.yml.tftpl",
+      {
+        gateway_hostname = local.cluster_configuration.shared_services_gateway_hostname
+      }
+    )
+  ]
+  depends_on = [
+    helm_release.cert_manager,
+    helm_release.external_dns,
+    helm_release.gateway_configuration
+  ]
+}
 
 resource "helm_release" "keda" {
   /* https://artifacthub.io/packages/helm/kedacore/keda */
@@ -352,30 +391,7 @@ resource "helm_release" "keda" {
   namespace  = module.keda_namespace.name
   values = [
     templatefile(
-      "${path.module}/configuration/helm/keda/values.yml.tftpl",
-      {}
+      "${path.module}/configuration/helm/keda/values.yml.tftpl", {}
     )
   ]
-}
-
-resource "helm_release" "aws_load_balancer_controller" {
-  /* https://artifacthub.io/packages/helm/aws/aws-load-balancer-controller */
-
-  name       = "aws-load-balancer-controller"
-  repository = "https://aws.github.io/eks-charts"
-  chart      = "aws-load-balancer-controller"
-  version    = local.cluster_configuration.helm_chart_versions.aws_load_balancer_controller
-  namespace  = "kube-system"
-  values = [
-    templatefile(
-      "${path.module}/configuration/helm/aws-load-balancer-controller/values.yml.tftpl",
-      {
-        cluster_name = module.eks.cluster_name
-        aws_region   = data.aws_region.current.region
-        vpc_id       = data.aws_vpc.main.id
-      }
-    )
-  ]
-
-  depends_on = [kubernetes_manifest.aws_load_balancer_controller_crds]
 }
