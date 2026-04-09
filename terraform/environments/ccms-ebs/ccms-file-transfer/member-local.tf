@@ -17,11 +17,11 @@ locals {
 
   # Subject Alternative Names based on environment
   nonprod_sans = [
-    format("%s.%s-%s.modernisation-platform.service.justice.gov.uk", local.application_name, var.networking[0].business-unit, local.environment)
+    format("%s-sftp-barclaycard.%s-%s.modernisation-platform.service.justice.gov.uk", local.application_name, var.networking[0].business-unit, local.environment)
   ]
 
   prod_sans = [
-    format("%s.%s", local.application_name, local.prod_domain)
+    format("%s-sftp-barclaycard.%s", local.application_name, local.prod_domain)
   ]
 
   subject_alternative_names = local.is-production ? local.prod_sans : local.nonprod_sans
