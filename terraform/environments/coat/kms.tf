@@ -16,6 +16,24 @@ module "coat_github_repos_s3_kms" {
   tags = local.tags
 }
 
+module "test_kms" {
+  #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
+  #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
+
+  source  = "terraform-aws-modules/kms/aws"
+  version = "4.0.0"
+
+  aliases               = ["s3/test"]
+  description           = "test KMS key"
+  enable_default_policy = true
+
+  deletion_window_in_days = 7
+
+  tags = {
+    "business-unit" = "lalala"
+  }
+}
+
 module "cur_s3_kms" {
   #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
   #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
