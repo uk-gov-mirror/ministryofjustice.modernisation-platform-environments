@@ -100,7 +100,7 @@ locals {
       /* EKS */
       eks_sso_access_role = "modernisation-platform-developer"
       eks_cluster_version = "1.35"
-      eks_node_version    = "1.51.0-47438798"
+      eks_node_version    = "1.57.0-beaadc52"
       eks_cluster_addon_versions = {
         kube_proxy                        = "v1.35.2-eksbuild.4"
         aws_efs_csi_driver                = "v2.3.1-eksbuild.1"
