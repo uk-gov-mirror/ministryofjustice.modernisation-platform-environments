@@ -1,6 +1,6 @@
 # ECS Task Execution Role
 
-data "aws_iam_policy_document" "barclaycard_ecs_task_execution_role" {
+data "aws_iam_policy_document" "barclaycard_ecs_task_execution_assume_role_policy" {
   version = "2012-10-17"
   statement {
     sid    = ""
@@ -21,10 +21,10 @@ data "aws_iam_policy_document" "barclaycard_ecs_task_execution_role" {
 # ECS task execution role
 resource "aws_iam_role" "barclaycard_ecs_task_execution_role" {
   name               = "${local.application_name}-barclaycard-ecs-task-execution-role"
-  assume_role_policy = data.aws_iam_policy_document.barclaycard_ecs_task_execution_role.json
+  assume_role_policy = data.aws_iam_policy_document.barclaycard_ecs_task_execution_assume_role_policy.json
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-barclaycard-%s-ecs-role", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-barclaycard-%s-ecs-role", local.application_name, local.environment)) }
   )
 }
 

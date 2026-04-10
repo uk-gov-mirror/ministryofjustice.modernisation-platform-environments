@@ -27,7 +27,7 @@ locals {
   subject_alternative_names = local.is-production ? local.prod_sans : local.nonprod_sans
 
   # Domain validation options mapping (following the example pattern)
-  domain_types = { for dvo in aws_acm_certificate.external_sftp_barclaycard : dvo.domain_name => {
+  domain_types = { for dvo in aws_acm_certificate.external_sftp_barclaycard.domain_validation_options : dvo.domain_name => {
     name   = dvo.resource_record_name
     record = dvo.resource_record_value
     type   = dvo.resource_record_type

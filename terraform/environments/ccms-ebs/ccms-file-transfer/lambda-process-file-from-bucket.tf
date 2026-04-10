@@ -75,10 +75,10 @@ resource "null_resource" "build_lambda" {
   }
 }
 
-resource "aws_lambda_function" "process_file_from_bucket" {
+resource "aws_lambda_function" "process_file_from_bucket_lambda_function" {
   filename         = "./lambda/process_file_from_bucket/target/HelloWorldHandler-1.0.jar"
   source_code_hash = base64sha256(join("", local.lambda_source_hashes_process_file_from_bucket))
-  function_name    = "${local.application_name}-${local.environment}-process-file-from-bucket"
+  function_name    = "${local.application_name}-${local.environment}-process-file-from-bucket-lambda-function"
   role             = aws_iam_role.lambda_process_file_from_bucket_role.arn
   handler          = "example.HelloWorldHandler" 
 #   layers           = [aws_lambda_layer_version.lambda_cloudwatch_sns_layer.arn]
@@ -103,7 +103,7 @@ resource "aws_lambda_function" "process_file_from_bucket" {
 resource "aws_lambda_permission" "allow_s3_invoke" {
   statement_id  = "AllowExecutionFromS3"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.process_file_from_bucket.function_name
+  function_name = aws_lambda_function.process_file_from_bucket_lambda_function.function_name
   principal     = "s3.amazonaws.com"
   source_arn    = module.s3-bucket-sftp-barclaycard.bucket.arn
 }
