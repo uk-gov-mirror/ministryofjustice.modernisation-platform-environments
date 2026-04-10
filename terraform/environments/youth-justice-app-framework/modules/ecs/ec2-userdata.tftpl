@@ -1,5 +1,5 @@
 #!/bin/bash
-yum install amazon-cloudwatch-agent -y
+dnf install amazon-cloudwatch-agent -y
 cat >>/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<EOF
 {
     "agent": {
@@ -47,3 +47,6 @@ echo KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman
 
 #set Ciphers
 echo  "Ciphers aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+
+# restart sshd to apply the KexAlgorithms and Ciphers changes above
+systemctl restart sshd
