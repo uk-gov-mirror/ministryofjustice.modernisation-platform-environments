@@ -1,5 +1,5 @@
 module "eks" {
-  source = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git?ref=42693d40bceb3ad80d49b0574cc3046455c2def6" # v21.15.1
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git?ref=6bac707d5496f4b494ce8bf63bfc8d245aead592" # v21.17.1
 
   name               = local.eks_cluster_name
   kubernetes_version = local.cluster_configuration.kubernetes_version
@@ -109,7 +109,29 @@ module "eks" {
         }
       }
     }
-    PlatformEngineerAAdmin = {
+    GitHubActionsPlan = {
+      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-actions-plan"
+      policy_associations = {
+        eks-admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+    GitHubActionsApply = {
+      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-actions-apply"
+      policy_associations = {
+        eks-admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+    PlatformEngineerAdmin = {
       principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/${data.aws_region.current.region}/${one(data.aws_iam_roles.platform_engineer_admin_sso_role.names)}"
       policy_associations = {
         eks-admin = {
@@ -124,7 +146,7 @@ module "eks" {
 }
 
 module "eks_managed_node_group_system" {
-  source = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git//modules/eks-managed-node-group?ref=42693d40bceb3ad80d49b0574cc3046455c2def6" # v21.15.1
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git//modules/eks-managed-node-group?ref=6bac707d5496f4b494ce8bf63bfc8d245aead592" # v21.17.1
 
   name         = "system"
   cluster_name = module.eks.cluster_name
@@ -213,7 +235,7 @@ module "eks_managed_node_group_system" {
 }
 
 module "karpenter" {
-  source = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git//modules/karpenter?ref=42693d40bceb3ad80d49b0574cc3046455c2def6" # v21.15.1
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git//modules/karpenter?ref=6bac707d5496f4b494ce8bf63bfc8d245aead592" # v21.17.1
 
   cluster_name = module.eks.cluster_name
 

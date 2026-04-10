@@ -54,3 +54,7 @@ data "aws_route53_zone" "route53_zones" {
 data "aws_ssm_parameter" "network_monitor_scope_arn" {
   name = "/cloudwatch/network-monitor/scope-arn"
 }
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = module.eks.cluster_name
+}

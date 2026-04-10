@@ -23,17 +23,14 @@ prometheus:
       enabled: true
 
 metricsServer:
-  # Required on EKS with custom CNI so the control plane can reach the metrics API server.
+  # Required on custom CNI EKS clusters so the control plane can reach this endpoint.
   useHostNetwork: true
-  # Use host-network DNS behaviour when host networking is enabled.
   dnsPolicy: ClusterFirstWithHostNet
 
 webhooks:
-  # Required on EKS with custom CNI so the control plane can reach admission webhooks.
+  # Required on custom CNI EKS clusters so the control plane can reach this endpoint.
   useHostNetwork: true
-  # Explicit host port to avoid clashes when host networking is enabled.
   port: 10262
 
 service:
-  # Explicit HTTPS target port used by the metrics API server container.
   portHttpsTarget: 10263
