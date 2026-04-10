@@ -5,3 +5,10 @@ data "aws_sns_topic" "s3_topic" {
 data "aws_s3_bucket" "logging_bucket" {
   bucket = "${local.application_name}-${local.environment}-logging"
 }
+
+# PROD DNS Zones
+data "aws_route53_zone" "laa" {
+  provider     = aws.core-network-services
+  name         = "laa.service.justice.gov.uk"
+  private_zone = false
+}

@@ -73,7 +73,7 @@ resource "aws_ecs_service" "ftp_barclaycard" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.api_target_group.id
+    target_group_arn = aws_lb_target_group.sftp_barclaycard_target_group.arn
     container_name   = local.application_name
     container_port   = local.application_data.accounts[local.environment].api_server_port
   }
