@@ -34,8 +34,8 @@ resource "aws_iam_role_policy" "lambda_process_file_from_bucket_policy" {
           "s3:PutObjectVersionTagging"
         ]
         Resource = [
-          module.s3-bucket-sftp-client1.bucket.arn,
-          "${module.s3-bucket-sftp-client1.bucket.arn}/*"
+          module.s3-bucket-sftp-barclaycard.bucket.arn,
+          "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
         ]
       },
       {
@@ -105,5 +105,5 @@ resource "aws_lambda_permission" "allow_s3_invoke" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.process_file_from_bucket.function_name
   principal     = "s3.amazonaws.com"
-  source_arn    = module.s3-bucket-sftp-client1.bucket.arn
+  source_arn    = module.s3-bucket-sftp-barclaycard.bucket.arn
 }

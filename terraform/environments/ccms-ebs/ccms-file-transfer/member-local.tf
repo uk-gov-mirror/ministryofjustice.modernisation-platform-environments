@@ -1,6 +1,6 @@
 locals {
-  sftp_client1_folder_name = ["inbound", "archive", "error"]
-  sftp_client1_bucket_name = "${local.application_name}-${local.environment}-barclaycard-inbound-mp"
+  sftp_barclaycard_folder_name = ["inbound", "archive", "error"]
+  sftp_barclaycard_bucket_name = "${local.application_name}-${local.environment}-barclaycard-inbound-mp"
   logging_bucket_name      = "${local.application_name}-${local.environment}-logging"
 
   lambda_source_hashes_process_file_from_bucket = [
