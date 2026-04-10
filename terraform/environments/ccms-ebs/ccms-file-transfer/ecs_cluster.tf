@@ -32,6 +32,8 @@ resource "aws_ecs_task_definition" "ftp_barclaycard_task_definition" {
       app_name                                                      = local.application_data.accounts[local.environment].app_name
       app_image                                                     = local.application_data.accounts[local.environment].app_image
       api_server_port                                               = local.application_data.accounts[local.environment].api_server_port
+      cpu                                                            = local.application_data.accounts[local.environment].container_cpu
+      memory                                                         = local.application_data.accounts[local.environment].container_memory
       aws_region                                                    = local.application_data.accounts[local.environment].aws_region
       container_version                                             = local.application_data.accounts[local.environment].container_version
       ccms_s3_bucket                                                = local.application_data.accounts[local.environment].sftp_barclaycard_bucket
