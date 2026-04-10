@@ -1,6 +1,6 @@
 # API Load Balancer Configuration
 
-resource "aws_lb" "sftp_barclaycard" {
+resource "aws_lb" "sftp_barclaycard_load_balancer" {
   name               = "${local.application_name}-sftp-barclaycard-lb"
   internal           = true
   load_balancer_type = "application"

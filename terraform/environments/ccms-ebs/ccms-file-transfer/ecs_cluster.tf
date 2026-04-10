@@ -1,6 +1,6 @@
 # ECS Cluster
 
-resource "aws_ecs_cluster" "main" {
+resource "aws_ecs_cluster" "main_cluster" {
   name = "${local.application_name}-sftp-cluster"
   setting {
     name  = "containerInsights"
@@ -16,7 +16,7 @@ resource "aws_ecs_cluster" "main" {
 # ECS Task Definition
 
 
-resource "aws_ecs_task_definition" "ftp_barclaycard" {
+resource "aws_ecs_task_definition" "ftp_barclaycard_task_definition" {
   family             = "${local.application_name}-ftp-barclaycard-task"
   execution_role_arn = aws_iam_role.barclaycard_ecs_task_execution_role.arn
   network_mode       = "awsvpc"
@@ -43,7 +43,7 @@ resource "aws_ecs_task_definition" "ftp_barclaycard" {
   )
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-barclaycard-%s-task", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-barclaycard-%s-task", local.application_name, local.environment)) }
   )
 }
 
@@ -51,8 +51,8 @@ resource "aws_ecs_task_definition" "ftp_barclaycard" {
 
 resource "aws_ecs_service" "ftp_barclaycard" {
   name            = local.application_name
-  cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.ftp_barclaycard.arn
+  cluster         = aws_ecs_cluster.main_cluster.id
+  task_definition = aws_ecs_task_definition.ftp_barclaycard_task_definition.arn
   desired_count   = local.application_data.accounts[local.environment].app_count
   launch_type     = "FARGATE"
 
