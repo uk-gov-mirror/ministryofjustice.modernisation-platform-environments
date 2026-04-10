@@ -105,6 +105,8 @@ module "cwalarm" {
 module "pagerduty_core_alerts" {
   count = local.environment == "development" ? 1 : 0
 
+  depends_on = [module.cwalarm]
+
   source                    = "github.com/ministryofjustice/modernisation-platform-terraform-pagerduty-integration?ref=v2.0.0"
   sns_topics                = [local.sns_topic_name]
   pagerduty_integration_key = local.pagerduty_integration_keys[local.pagerduty_integration_key_name]
