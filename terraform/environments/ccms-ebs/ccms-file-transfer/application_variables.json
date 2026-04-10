@@ -9,8 +9,8 @@
       "aws_region": "eu-west-2",
       "app_image": "374269020027.dkr.ecr.eu-west-2.amazonaws.com/ccms-pui",
       "container_version": "0.0.29-dev",
-      "container_cpu": "1024",
-      "container_memory": "512",
+      "container_cpu": "512",
+      "container_memory": "1024",
       "lz_aws_workspace_nonprod_prod": "10.200.0.0/19",
       "lz_aws_appstream_subnet_a_b": "10.200.32.0/23",
       "sftp_barclaycard_bucket": "ccms-ebs-development-barclaycard-inbound-mp"
