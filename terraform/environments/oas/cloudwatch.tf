@@ -78,34 +78,4 @@ locals {
 
     }
   }
-
-}
-
-data "aws_secretsmanager_secret" "pagerduty_integration_keys" {
-  count    = local.environment == "development" ? 1 : 0
-  provider = aws.modernisation-platform
-  name     = "pagerduty_integration_keys"
-}
-
-data "aws_secretsmanager_secret_version" "pagerduty_integration_keys" {
-  count     = local.environment == "development" ? 1 : 0
-  provider  = aws.modernisation-platform
-  secret_id = data.aws_secretsmanager_secret.pagerduty_integration_keys[0].id
-}
-
-module "cwalarm" {
-  count                           = local.environment == "development" ? 1 : 0
-  source                          = "./modules/cloudwatch"
-  snsTopicName                    = local.sns_topic_name
-  cloudwatch_metric_alarms        = local.cloudwatch_metric_alarms
-  dashboard_name                  = local.dashboard_name
-  dashboard_widget_refresh_period = try(local.application_data.accounts[local.environment].dashboard_widget_period, 60)
-}
-
-module "pagerduty_core_alerts" {
-  count = local.environment == "development" ? 1 : 0
-
-  source                    = "github.com/ministryofjustice/modernisation-platform-terraform-pagerduty-integration?ref=v2.0.0"
-  sns_topics                = [local.sns_topic_name]
-  pagerduty_integration_key = local.pagerduty_integration_keys[local.pagerduty_integration_key_name]
 }
