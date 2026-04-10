@@ -1,5 +1,11 @@
 #!/bin/bash
-dnf install amazon-cloudwatch-agent -y
+# Retry install until success
+max_attempts=5
+attempt=0
+until dnf install -y amazon-cloudwatch-agent || [ $attempt -ge $max_attempts ]; do
+    attempt=$((attempt + 1))
+    echo "Install failed, attempt $attempt of $max_attempts, retrying..."
+    slee
 cat >>/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<EOF
 {
     "agent": {
