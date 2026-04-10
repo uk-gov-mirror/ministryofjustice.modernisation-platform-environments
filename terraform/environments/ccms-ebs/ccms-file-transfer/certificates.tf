@@ -48,11 +48,11 @@ resource "aws_acm_certificate_validation" "external_sftp_barclaycard_nonprod" {
   count = local.is-production ? 0 : 1
 
   depends_on = [
-    aws_route53_record.external_validation_nonprod
+    aws_route53_record.external_validation_sftp_barclaycard_nonprod
   ]
 
   certificate_arn         = aws_acm_certificate.external_sftp_barclaycard.arn
-  validation_record_fqdns = [for record in aws_route53_record.external_validation_nonprod : record.fqdn]
+  validation_record_fqdns = [for record in aws_route53_record.external_validation_sftp_barclaycard_nonprod : record.fqdn]
 
   timeouts {
     create = "10m"
@@ -63,11 +63,11 @@ resource "aws_acm_certificate_validation" "external_sftp_barclaycard_prod" {
   count = local.is-production ? 1 : 0
 
   depends_on = [
-    aws_route53_record.external_validation_prod
+    aws_route53_record.external_validation_sftp_barclaycard_prod
   ]
 
   certificate_arn         = aws_acm_certificate.external_sftp_barclaycard.arn
-  validation_record_fqdns = [for record in aws_route53_record.external_validation_prod : record.fqdn]
+  validation_record_fqdns = [for record in aws_route53_record.external_validation_sftp_barclaycard_prod : record.fqdn]
 
   timeouts {
     create = "10m"
