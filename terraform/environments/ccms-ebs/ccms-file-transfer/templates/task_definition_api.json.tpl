@@ -39,6 +39,14 @@
         "name": "ebs_db_endpoint",
         "valueFrom": "${ebs_db_endpoint}"
       },
+      {
+        "name": "TLS_CERT",
+        "valueFrom": "${TLS_CERT}"
+      },
+      {
+        "name": "TLS_KEY",
+        "valueFrom": "${TLS_KEY}"
+      }
     ]
   }
 ]
