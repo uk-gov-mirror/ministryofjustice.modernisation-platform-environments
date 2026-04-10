@@ -342,7 +342,7 @@ resource "aws_iam_policy" "lambda_policies_v2" {
         Resource = ["arn:aws:acm:eu-west-2:${local.environment_management.account_ids[each.value.env_config.account_key]}:certificate/*"]
         } : each.value.policy_name == "get_list_waf_web_acls" ? {
         Effect   = "Allow"
-        Action   = ["wafv2:GetWebACL", "wafv2:ListWebACL"]
+        Action   = ["wafv2:GetWebACL", "wafv2:ListWebACLs"]
         Resource = ["arn:aws:wafv2:eu-west-2:${local.environment_management.account_ids[each.value.env_config.account_key]}:*"]
         } : {
         Effect   = "Deny" # Fallback deny for any unexpected policy names
