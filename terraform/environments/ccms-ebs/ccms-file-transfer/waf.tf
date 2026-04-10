@@ -1,7 +1,7 @@
 # WAF FOR SFTP CLIENT 1 APP
 
-resource "aws_wafv2_ip_set" "sftp_client1_waf_ip_set" {
-  name               = "${local.application_name}-sftp-client1-waf-ip-set"
+resource "aws_wafv2_ip_set" "sftp_barclaycard_waf_ip_set" {
+  name               = "${local.application_name}-sftp-barclaycard-waf-ip-set"
   scope              = "REGIONAL"
   ip_address_version = "IPV4"
   description        = "List of trusted IP Addresses allowing access via WAF"
@@ -15,13 +15,13 @@ resource "aws_wafv2_ip_set" "sftp_client1_waf_ip_set" {
 
   tags = merge(
     local.tags,
-    { Name = lower(format("%s-sftp-client1-%s-ip-set", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-barclaycard-%s-ip-set", local.application_name, local.environment)) }
   )
 }
 
 
-resource "aws_wafv2_web_acl" "sftp_client1_web_acl" {
-  name        = "${local.application_name}-sftp-client1-web-acl"
+resource "aws_wafv2_web_acl" "sftp_barclaycard_web_acl" {
+  name        = "${local.application_name}-sftp-barclaycard-web-acl"
   scope       = "REGIONAL"
   description = "AWS WAF Web ACL for SFTP Client 1 Application Load Balancer"
 
@@ -92,7 +92,7 @@ resource "aws_wafv2_web_acl" "sftp_client1_web_acl" {
   dynamic "rule" {
     for_each = !local.is-production ? [1] : [1] # Temprorarily enable for Prod as well - to be removed when Geo Match is live
     content {
-      name     = "${local.application_name}-sftp-client1-waf-ip-set"
+      name     = "${local.application_name}-sftp-barclaycard-waf-ip-set"
       priority = 2
 
       action {
@@ -101,13 +101,13 @@ resource "aws_wafv2_web_acl" "sftp_client1_web_acl" {
 
       statement {
         ip_set_reference_statement {
-          arn = aws_wafv2_ip_set.sftp_client1_waf_ip_set.arn
+          arn = aws_wafv2_ip_set.sftp_barclaycard_waf_ip_set.arn
         }
       }
 
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "${local.application_name}-sftp-client1-waf-ip-set"
+        metric_name                = "${local.application_name}-sftp-barclaycard-waf-ip-set"
         sampled_requests_enabled   = true
       }
     }
@@ -144,33 +144,33 @@ resource "aws_wafv2_web_acl" "sftp_client1_web_acl" {
 
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-sftp-client1-%s-web-acl", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-barclaycard-%s-web-acl", local.application_name, local.environment)) }
   )
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name                = "${local.application_name}-sftp-client1-waf-metrics"
+    metric_name                = "${local.application_name}-sftp-barclaycard-waf-metrics"
     sampled_requests_enabled   = true
   }
 }
 
 # WAF Logging to CloudWatch
-resource "aws_cloudwatch_log_group" "sftp_client1_waf_logs" {
-  name              = "aws-waf-logs-${local.application_name}-sftp-client1-${local.environment}"
+resource "aws_cloudwatch_log_group" "sftp_barclaycard_waf_logs" {
+  name              = "aws-waf-logs-${local.application_name}-sftp-barclaycard-${local.environment}"
   retention_in_days = 30
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-sftp-client1-%s-waf-logs", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-barclaycard-%s-waf-logs", local.application_name, local.environment)) }
   )
 }
 
-resource "aws_wafv2_web_acl_logging_configuration" "sftp_client1_waf_logging" {
-  log_destination_configs = [aws_cloudwatch_log_group.sftp_client1_waf_logs.arn]
-  resource_arn            = aws_wafv2_web_acl.sftp_client1_web_acl.arn
+resource "aws_wafv2_web_acl_logging_configuration" "sftp_barclaycard_waf_logging" {
+  log_destination_configs = [aws_cloudwatch_log_group.sftp_barclaycard_waf_logs.arn]
+  resource_arn            = aws_wafv2_web_acl.sftp_barclaycard_web_acl.arn
 }
 
-# Associate the WAF with the SFTP Client1 Application Load Balancer
-resource "aws_wafv2_web_acl_association" "sftp_client1_waf_association" {
-  resource_arn = aws_lb.sftp_client1.arn
-  web_acl_arn  = aws_wafv2_web_acl.sftp_client1_web_acl.arn
+# Associate the WAF with the SFTP Barclaycard Application Load Balancer
+resource "aws_wafv2_web_acl_association" "sftp_barclaycard_waf_association" {
+  resource_arn = aws_lb.sftp_barclaycard.arn
+  web_acl_arn  = aws_wafv2_web_acl.sftp_barclaycard_web_acl.arn
 }

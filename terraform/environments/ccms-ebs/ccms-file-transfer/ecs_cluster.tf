@@ -1,24 +1,24 @@
 # ECS Cluster
 
 resource "aws_ecs_cluster" "main" {
-  name = "${local.application_name}-cluster"
+  name = "${local.application_name}-sftp-cluster"
   setting {
     name  = "containerInsights"
     value = "enabled"
   }
 }
 
-resource "aws_ecs_cluster_capacity_providers" "main" {
-  cluster_name       = aws_ecs_cluster.main.name
-  capacity_providers = [aws_ecs_capacity_provider.capacity-provider.name]
-}
+# resource "aws_ecs_cluster_capacity_providers" "main" {
+#   cluster_name       = aws_ecs_cluster.main.name
+#   capacity_providers = [aws_ecs_capacity_provider.capacity-provider.name]
+# }
 
 # ECS Task Definition
 
 
-resource "aws_ecs_task_definition" "ftp_client1" {
-  family             = "${local.application_name}-ftp-client1task"
-  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+resource "aws_ecs_task_definition" "ftp_barclaycard" {
+  family             = "${local.application_name}-ftp-barclaycard-task"
+  execution_role_arn = aws_iam_role.barclaycard_ecs_task_execution_role.arn
   network_mode       = "awsvpc"
   requires_compatibilities = [
     "FARGATE",
@@ -34,25 +34,25 @@ resource "aws_ecs_task_definition" "ftp_client1" {
       api_server_port                                               = local.application_data.accounts[local.environment].api_server_port
       aws_region                                                    = local.application_data.accounts[local.environment].aws_region
       container_version                                             = local.application_data.accounts[local.environment].container_version
-      ccms_s3_bucket                                                = local.application_data.accounts[local.environment].ccms_s3_documents
-      ebs_db_username                                               = "${aws_secretsmanager_secret.api_secrets.arn}:ebs_db_username::"
-      ebs_db_password                                               = "${aws_secretsmanager_secret.api_secrets.arn}:ebs_db_password::"
-      ebs_db_endpoint                                               = "${aws_secretsmanager_secret.api_secrets.arn}:ebs_db_endpoint::"
-      file_transfer_slack_webhook                                   = "${aws_secretsmanager_secret.api_secrets.arn}:file_transfer_slack_webhook::"
+      ccms_s3_bucket                                                = local.application_data.accounts[local.environment].sftp_barclaycard_bucket
+      ebs_db_username                                               = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_username::"
+      ebs_db_password                                               = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_password::"
+      ebs_db_endpoint                                               = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_endpoint::"
+      file_transfer_slack_webhook                                   = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:file_transfer_slack_webhook::"
     }
   )
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-%s-task", local.application_name, local.environment)) }
+    { Name = lower(format("%s-barclaycard-%s-task", local.application_name, local.environment)) }
   )
 }
 
 # ECS Service
 
-resource "aws_ecs_service" "ftp_client1" {
+resource "aws_ecs_service" "ftp_barclaycard" {
   name            = local.application_name
   cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.ftp_client1.arn
+  task_definition = aws_ecs_task_definition.ftp_barclaycard.arn
   desired_count   = local.application_data.accounts[local.environment].app_count
   launch_type     = "FARGATE"
 
@@ -79,8 +79,7 @@ resource "aws_ecs_service" "ftp_client1" {
   }
 
   depends_on = [
-    aws_lb_listener.api_listener,
-    aws_iam_role_policy_attachment.ecs_task_execution_role,
-    aws_autoscaling_group.cluster-scaling-group
+    aws_lb_listener.sftp_barclaycard_listener,
+    aws_iam_role_policy_attachment.barclaycard_ecs_task_execution_role
   ]
 }

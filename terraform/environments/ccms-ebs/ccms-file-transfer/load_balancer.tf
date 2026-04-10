@@ -1,7 +1,7 @@
 # API Load Balancer Configuration
 
-resource "aws_lb" "sftp_client1" {
-  name               = "${local.application_name}-sftp-client1-lb"
+resource "aws_lb" "sftp_barclaycard" {
+  name               = "${local.application_name}-sftp-barclaycard-lb"
   internal           = true
   load_balancer_type = "application"
   subnets            = data.aws_subnets.shared-private.ids
@@ -10,19 +10,19 @@ resource "aws_lb" "sftp_client1" {
 
   access_logs {
     bucket  = module.s3-bucket-logging.bucket.id
-    prefix  = "${local.application_name}-sftp-client1-lb"
+    prefix  = "${local.application_name}-sftp-barclaycard-lb"
     enabled = true
   }
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-sftp-client1-%s-lb", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-barclaycard-%s-lb", local.application_name, local.environment)) }
   )
 
   depends_on = [module.s3-bucket-logging]
 }
 
-resource "aws_lb_target_group" "sftp_client1_target_group" {
-  name                 = "${local.application_name}-sftp-client1-tg"
+resource "aws_lb_target_group" "sftp_barclaycard_target_group" {
+  name                 = "${local.application_name}-sftp-barclaycard-tg"
   port                 = local.application_data.accounts[local.environment].api_server_port
   protocol             = "HTTP"
   vpc_id               = data.aws_vpc.shared.id
@@ -46,7 +46,7 @@ resource "aws_lb_target_group" "sftp_client1_target_group" {
   }
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-sftp-client1-%s-tg", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-barclaycard-%s-tg", local.application_name, local.environment)) }
   )
 
   lifecycle {
@@ -55,16 +55,16 @@ resource "aws_lb_target_group" "sftp_client1_target_group" {
 }
 
 # Redirect all traffic from the lb to the target group
-resource "aws_lb_listener" "sftp_client1" {
-  load_balancer_arn = aws_lb.sftp_client1.id
+resource "aws_lb_listener" "sftp_barclaycard_listener" {
+  load_balancer_arn = aws_lb.sftp_barclaycard.id
   port              = 443
   protocol          = "HTTPS"
 
   ssl_policy      = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  certificate_arn = aws_acm_certificate.external_sftp_client1.arn
+  certificate_arn = aws_acm_certificate.external_sftp_barclaycard.arn
 
   default_action {
-    target_group_arn = aws_lb_target_group.sftp_client1_target_group.id
+    target_group_arn = aws_lb_target_group.sftp_barclaycard_target_group.id
     type             = "forward"
   }
 }

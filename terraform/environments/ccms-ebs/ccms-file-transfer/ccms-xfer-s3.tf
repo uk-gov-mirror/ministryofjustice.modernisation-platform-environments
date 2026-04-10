@@ -1,9 +1,15 @@
 # ---------------------------------------------
 # S3 Bucket - Logging
 # ---------------------------------------------
-module "s3-bucket-sftp-client1" {
+
+# moved {
+#   from = module.s3-bucket-sftp-client1.s3.bucket
+#   to   = module.s3-bucket-sftp-barclaycard.s3.bucket
+# }
+
+module "s3-bucket-sftp-barclaycard" {
   source             = "github.com/ministryofjustice/modernisation-platform-terraform-s3-bucket?ref=9facf9fc8f8b8e3f93ffbda822028534b9a75399"
-  bucket_name        = local.sftp_client1_bucket_name
+  bucket_name        = local.sftp_barclaycard_bucket_name
   versioning_enabled = true
   bucket_policy = [jsonencode({
     Version = "2012-10-17",
@@ -14,8 +20,8 @@ module "s3-bucket-sftp-client1" {
         "Principal" : "*",
         "Action" : "s3:*",
         "Resource" : [
-          module.s3-bucket-sftp-client1.bucket.arn,
-          "${module.s3-bucket-sftp-client1.bucket.arn}/*"
+          module.s3-bucket-sftp-barclaycard.bucket.arn,
+          "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
         ],
         "Condition" : {
           "Bool" : {
@@ -41,15 +47,15 @@ module "s3-bucket-sftp-client1" {
           "s3:PutObjectTagging"
         ],
         Resource = [
-          module.s3-bucket-sftp-client1.bucket.arn,
-          "${module.s3-bucket-sftp-client1.bucket.arn}/*"
+          module.s3-bucket-sftp-barclaycard.bucket.arn,
+          "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
         ]
       }
     ]
   })]
 
   log_bucket    = local.logging_bucket_name
-  log_prefix    = "s3access/${local.sftp_client1_bucket_name}"
+  log_prefix    = "s3access/${local.sftp_barclaycard_bucket_name}"
   sse_algorithm = "AES256"
 
   # Refer to the below section "Replication" before enabling replication
@@ -98,8 +104,8 @@ module "s3-bucket-sftp-client1" {
 }
 
 
-resource "aws_s3_bucket_notification" "sftp_client1_bucket_notification" {
-  bucket      = module.s3-bucket-sftp-client1.bucket.id
+resource "aws_s3_bucket_notification" "sftp_barclaycard_bucket_notification" {
+  bucket      = module.s3-bucket-sftp-barclaycard.bucket.id
   eventbridge = true
   topic {
     topic_arn     = data.aws_sns_topic.s3_topic.arn
@@ -107,11 +113,11 @@ resource "aws_s3_bucket_notification" "sftp_client1_bucket_notification" {
     filter_suffix = ".log"
   }
 
-  depends_on = [module.s3-bucket-sftp-client1]
+  depends_on = [ module.s3-bucket-sftp-barclaycard ]
 }
 
-resource "aws_s3_bucket_notification" "sftp_client1_file_lambda_notification" {
-  bucket      = module.s3-bucket-sftp-client1.bucket.id
+resource "aws_s3_bucket_notification" "sftp_barclaycard_file_lambda_notification" {
+  bucket      = module.s3-bucket-sftp-barclaycard.bucket.id
   # eventbridge = true
   # topic {
   #   topic_arn     = data.aws_sns_topic.s3_topic.arn
@@ -126,13 +132,13 @@ resource "aws_s3_bucket_notification" "sftp_client1_file_lambda_notification" {
     filter_suffix       = ".csv" #asked a question
     
   }
-  depends_on = [ module.s3-bucket-sftp-client1 ]
+  depends_on = [ module.s3-bucket-sftp-barclaycard ]
 }
 
-resource "aws_s3_object" "sftp_client1_folder" {
-  bucket = module.s3-bucket-sftp-client1.bucket.id
+resource "aws_s3_object" "sftp_barclaycard_folder" {
+  bucket = module.s3-bucket-sftp-barclaycard.bucket.id
   for_each = {
-    for name in local.sftp_client1_folder_name :
+    for name in local.sftp_barclaycard_folder_name :
     name => "${name}/"
   }
 
