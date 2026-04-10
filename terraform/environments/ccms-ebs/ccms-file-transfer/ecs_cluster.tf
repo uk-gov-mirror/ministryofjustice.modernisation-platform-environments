@@ -49,7 +49,7 @@ resource "aws_ecs_task_definition" "ftp_barclaycard_task_definition" {
 
 # ECS Service
 
-resource "aws_ecs_service" "ftp_barclaycard" {
+resource "aws_ecs_service" "ftp_barclaycard_ecs_service" {
   name            = local.application_name
   cluster         = aws_ecs_cluster.main_cluster.id
   task_definition = aws_ecs_task_definition.ftp_barclaycard_task_definition.arn
