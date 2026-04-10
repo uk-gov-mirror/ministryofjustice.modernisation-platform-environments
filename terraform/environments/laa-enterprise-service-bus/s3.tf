@@ -99,3 +99,9 @@ resource "aws_s3_bucket_logging" "lambda_files" {
     }
   }
 }
+
+# Temporary resource to use as an example
+resource "aws_s3_bucket" "example" {
+  bucket = "${local.application_name_short}-${local.environment}-example-bucket"
+}
+
