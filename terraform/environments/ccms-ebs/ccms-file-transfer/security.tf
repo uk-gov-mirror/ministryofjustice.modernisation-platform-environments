@@ -20,13 +20,13 @@ resource "aws_vpc_security_group_ingress_rule" "sftp_barclaycard_lb_ingress_443"
   to_port     = 443
 }
 
-resource "aws_vpc_security_group_egress_rule" "sftp_barclaycard_lb_egress_all" {
+resource "aws_vpc_security_group_egress_rule" "sftp_barclaycard_lb_egress_api" {
   security_group_id = aws_security_group.sftp_barclaycard_load_balancer.id
 
   cidr_ipv4   = "0.0.0.0/0"
   ip_protocol = "tcp"
-  from_port   = 443
-  to_port     = 443
+  from_port   = local.application_data.accounts[local.environment].api_server_port
+  to_port     = local.application_data.accounts[local.environment].api_server_port
 }
 
 ### Container Security Group
@@ -67,7 +67,7 @@ resource "aws_security_group" "cluster_fargate_sg" {
   vpc_id      = data.aws_vpc.shared.id
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-%s-fargate-sg", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-%s-fargate-sg", local.application_name, local.environment)) }
   )
 }
 

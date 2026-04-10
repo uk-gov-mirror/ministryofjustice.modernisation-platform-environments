@@ -171,6 +171,6 @@ resource "aws_wafv2_web_acl_logging_configuration" "sftp_barclaycard_waf_logging
 
 # Associate the WAF with the SFTP Barclaycard Application Load Balancer
 resource "aws_wafv2_web_acl_association" "sftp_barclaycard_waf_association" {
-  resource_arn = aws_lb.sftp_barclaycard.arn
+  resource_arn = aws_lb.sftp_barclaycard_load_balancer.arn
   web_acl_arn  = aws_wafv2_web_acl.sftp_barclaycard_web_acl.arn
 }
