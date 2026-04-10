@@ -78,7 +78,7 @@ locals {
     ] : local.is-preproduction ? [
     "arn:aws:iam::${local.account_ids["cloud-platform"]}:role/${var.cloud-platform-crime-matching-api-iam-preprod}",
   ] : []
-  iam_role_validation_db = local.is-test ? "arn:aws:iam::${local.account_ids["cloud-platform"]}:role/cloud-platform-irsa-7255c33b35507f31-live" : ""
+  iam_role_validation_db = local.is-test ? "arn:aws:iam::${local.account_ids["cloud-platform"]}:role/cloud-platform-irsa-7255c33b35507f31-live" : local.is-production ? "arn:aws:iam::${local.account_ids["cloud-platform"]}:role/cloud-platform-irsa-a7f6cc937a0f63ce-live" : ""
 }
 
 variable "cloud-platform-iam-dev" {
@@ -138,7 +138,7 @@ resource "aws_lakeformation_resource" "data_bucket" {
 module "emd_validation_db_role" {
   #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
   #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
-  count   = local.is-test ? 1 : 0
+  count   = local.is-test || local.is-production ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
   version = "5.48.0"
 
@@ -156,7 +156,7 @@ module "emd_validation_db_role" {
 }
 
 resource "aws_lakeformation_permissions" "em_data_validation_db" {
-  count       = local.is-test ? 1 : 0
+  count       = local.is-test || local.is-production ? 1 : 0
   principal   = module.emd_validation_db_role[0].iam_role_arn
   permissions = ["DESCRIBE"]
   database {
@@ -165,7 +165,7 @@ resource "aws_lakeformation_permissions" "em_data_validation_db" {
 }
 
 resource "aws_lakeformation_permissions" "em_data_validation_table" {
-  count       = local.is-test ? 1 : 0
+  count       = local.is-test || local.is-production ? 1 : 0
   principal   = module.emd_validation_db_role[0].iam_role_arn
   permissions = ["DESCRIBE", "SELECT"]
   table {
@@ -175,7 +175,7 @@ resource "aws_lakeformation_permissions" "em_data_validation_table" {
 }
 
 resource "aws_lakeformation_permissions" "em_data_validation_s3" {
-  count = local.is-test ? 1 : 0
+  count = local.is-test || local.is-production ? 1 : 0
   principal = module.emd_validation_db_role[0].iam_role_arn
   permissions = ["DATA_LOCATION_ACCESS"]
   data_location {
@@ -184,7 +184,7 @@ resource "aws_lakeformation_permissions" "em_data_validation_s3" {
 }
 
 resource "aws_iam_role_policy_attachment" "standard_athena_access_em_data_validation" {
-  count      = local.is-test ? 1 : 0
+  count      = local.is-test || local.is-production ? 1 : 0
   policy_arn = aws_iam_policy.standard_athena_access.arn
   role       = module.emd_validation_db_role[0].iam_role_name
 }
@@ -241,14 +241,14 @@ data "aws_iam_policy_document" "em_data_validation_permissions" {
 }
 
 resource "aws_iam_policy" "em_data_validation_permissions" {
-  count       = local.is-test ? 1 : 0
+  count       = local.is-test || local.is-production ? 1 : 0
   name_prefix = "em_data_validation_permissions"
   description = "Permissions for environment class for emd tool."
   policy      = data.aws_iam_policy_document.em_data_validation_permissions.json
 }
 
 resource "aws_iam_role_policy_attachment" "em_data_validation_permissions" {
-  count      = local.is-test ? 1 : 0
+  count      = local.is-test || local.is-production ? 1 : 0
   policy_arn = aws_iam_policy.em_data_validation_permissions[0].arn
   role       = module.emd_validation_db_role[0].iam_role_name
 }
