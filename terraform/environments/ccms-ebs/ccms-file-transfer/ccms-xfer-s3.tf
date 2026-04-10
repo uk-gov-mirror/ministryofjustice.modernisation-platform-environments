@@ -1,11 +1,6 @@
 # ---------------------------------------------
-# S3 Bucket - Logging
+# S3 Bucket - Barclaycard
 # ---------------------------------------------
-
-# moved {
-#   from = module.s3-bucket-sftp-client1.s3.bucket
-#   to   = module.s3-bucket-sftp-barclaycard.s3.bucket
-# }
 
 module "s3-bucket-sftp-barclaycard" {
   source             = "github.com/ministryofjustice/modernisation-platform-terraform-s3-bucket?ref=9facf9fc8f8b8e3f93ffbda822028534b9a75399"
