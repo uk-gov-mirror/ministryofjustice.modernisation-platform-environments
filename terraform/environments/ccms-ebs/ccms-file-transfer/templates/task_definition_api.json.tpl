@@ -2,8 +2,8 @@
   {
     "name": "${app_name}",
     "image": "${app_image}:${container_version}",
-    "cpu": "${cpu}",
-    "memory": "${memory}",
+    "cpu": ${cpu},
+    "memory": ${memory},
     "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
