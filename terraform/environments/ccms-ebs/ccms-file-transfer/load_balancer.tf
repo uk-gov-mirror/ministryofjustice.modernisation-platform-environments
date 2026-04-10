@@ -6,10 +6,10 @@ resource "aws_lb" "sftp_barclaycard" {
   load_balancer_type = "application"
   subnets            = data.aws_subnets.shared-private.ids
 
-  security_groups = [aws_security_group.load_balancer.id]
+  security_groups = [aws_security_group.sftp_barclaycard_load_balancer.id]
 
   access_logs {
-    bucket  = module.s3-bucket-logging.bucket.id
+    bucket  = data.aws_s3_bucket.logging_bucket.id
     prefix  = "${local.application_name}-sftp-barclaycard-lb"
     enabled = true
   }
@@ -17,8 +17,6 @@ resource "aws_lb" "sftp_barclaycard" {
   tags = merge(local.tags,
     { Name = lower(format("%s-sftp-barclaycard-%s-lb", local.application_name, local.environment)) }
   )
-
-  depends_on = [module.s3-bucket-logging]
 }
 
 resource "aws_lb_target_group" "sftp_barclaycard_target_group" {
