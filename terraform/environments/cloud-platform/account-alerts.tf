@@ -62,8 +62,8 @@ resource "aws_cloudwatch_log_metric_filter" "iam_user_created" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "iam_user_created" {
-  alarm_name        = "A New IAM User Created in ${terraform.workspace} (${data.aws_caller_identity.current.account_id})"
-  alarm_description = "A new IAM user was created in AWS account ${terraform.workspace} (ID: ${data.aws_caller_identity.current.account_id}). IAM users should not be created and please investigate immediately."
+  alarm_name        = "A New IAM User Created in ${terraform.workspace}"
+  alarm_description = "A new IAM user was created in AWS account ${terraform.workspace}. IAM users should not be created and please investigate immediately."
   alarm_actions     = [aws_sns_topic.high_priority_alerts.arn]
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
