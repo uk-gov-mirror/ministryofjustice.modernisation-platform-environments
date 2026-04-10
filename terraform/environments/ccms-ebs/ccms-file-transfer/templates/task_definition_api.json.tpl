@@ -32,12 +32,12 @@
         "valueFrom": "${ebs_db_password}"
       },
       {
-        "name": "file_transfer_slack_webhook",
-        "value": "${file_transfer_slack_webhook}"
-      },
-      {
         "name": "ebs_db_endpoint",
         "valueFrom": "${ebs_db_endpoint}"
+      },
+      {
+        "name": "file_transfer_slack_webhook",
+        "value": "${file_transfer_slack_webhook}"
       },
       {
         "name": "TLS_CERT",
