@@ -65,17 +65,11 @@ webhooksCleanup:
 
 config:
   resourceFiltersExcludeNamespaces:
-    # Default
+    # System and platform namespaces excluded from Kyverno resource filtering.
     - kube-system
-    # Cilium
     - cilium-secrets
-    # AWS GuardDuty EKS addon
     - amazon-guardduty
-    # AWS Network Flow Monitor EKS addon
     - amazon-network-flow-monitor
-    # Cluster Autoscaler
     - cluster-autoscaler
-    # Prometheus
     - prometheus
-    # Fluent bit
     - fluent-bit

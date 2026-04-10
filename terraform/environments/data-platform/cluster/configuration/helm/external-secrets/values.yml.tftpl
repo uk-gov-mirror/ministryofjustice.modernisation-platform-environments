@@ -1,14 +1,14 @@
 ---
 serviceAccount:
   create: true
-  annotations: 
+  annotations:
     eks.amazonaws.com/role-arn: ${eks_role_arn}
 
 serviceMonitor:
   enabled: true
 
 webhook:
-  # Required on EKS with custom CNI so the control plane can reach the webhook.
+  # Required on custom CNI EKS clusters so the control plane can reach this endpoint.
   hostNetwork: true
   # Avoid conflict with kubelet's 10250 when hostNetwork is enabled.
   port: 10260
