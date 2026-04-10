@@ -54,7 +54,7 @@ resource "aws_lb_target_group" "sftp_barclaycard_target_group" {
 
 # Redirect all traffic from the lb to the target group
 resource "aws_lb_listener" "sftp_barclaycard_listener" {
-  load_balancer_arn = aws_lb.sftp_barclaycard.id
+  load_balancer_arn = aws_lb.sftp_barclaycard_load_balancer.arn
   port              = 443
   protocol          = "HTTPS"
 
