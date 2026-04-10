@@ -37,7 +37,7 @@
       },
       {
         "name": "file_transfer_slack_webhook",
-        "value": "${file_transfer_slack_webhook}"
+        "valueFrom": "${file_transfer_slack_webhook}"
       },
       {
         "name": "TLS_CERT",
