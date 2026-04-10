@@ -95,7 +95,7 @@ resource "aws_cloudwatch_metric_alarm" "sqs_dlq_has_messages" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "mdss_reconciler_errors_alarm" {
-  count               = local.is-preproduction || local.is-production ? 0 : 1
+  count               = 1
   alarm_name          = "mdss_reconciler_errors"
   alarm_description   = "Triggered when the mdss_reconciler Lambda records errors"
   comparison_operator = "GreaterThanThreshold"
