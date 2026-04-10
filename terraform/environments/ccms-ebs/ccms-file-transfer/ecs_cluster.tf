@@ -29,7 +29,7 @@ resource "aws_ecs_task_definition" "ftp_barclaycard_task_definition" {
   container_definitions = templatefile(
     "${path.module}/templates/task_definition_api.json.tpl",
     {
-      app_name                                                      = local.application_name
+      app_name                                                      = local.application_data.accounts[local.environment].app_name
       app_image                                                     = local.application_data.accounts[local.environment].app_image
       api_server_port                                               = local.application_data.accounts[local.environment].api_server_port
       aws_region                                                    = local.application_data.accounts[local.environment].aws_region
