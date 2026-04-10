@@ -229,16 +229,7 @@ resource "aws_s3_bucket" "ccms_ebs_shared" {
   )
 }
 
-resource "aws_s3_bucket_object_lock_configuration" "dbbackup" {
-  bucket = module.s3-bucket-dbbackup.bucket.id
 
-  rule {
-    default_retention {
-      mode = "GOVERNANCE"
-      days = local.application_data.accounts[local.environment].rman_s3_lifecycle_days_expiration_current
-    }
-  }
-}
 
 resource "aws_s3_object" "folder" {
   bucket = aws_s3_bucket.ccms_ebs_shared.bucket
@@ -366,13 +357,13 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "object_lock_test"
   }
 }
 
-resource "aws_s3_bucket_object_lock_configuration" "object_lock_test" {
-  bucket = aws_s3_bucket.object_lock_test.id
+resource "aws_s3_bucket_object_lock_configuration" "dbbackup" {
+  bucket = module.s3-bucket-dbbackup.bucket.id
 
   rule {
     default_retention {
       mode = "GOVERNANCE"
-      days = 7
+      days = local.application_data.accounts[local.environment].rman_s3_lifecycle_days_expiration_current
     }
   }
 }
