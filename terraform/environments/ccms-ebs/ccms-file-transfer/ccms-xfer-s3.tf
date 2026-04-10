@@ -121,7 +121,7 @@ resource "aws_s3_bucket_notification" "sftp_barclaycard_file_lambda_notification
   # }
 
   lambda_function {
-    lambda_function_arn = aws_lambda_function.process_file_from_bucket.arn
+    lambda_function_arn = aws_lambda_function.process_file_from_bucket_lambda_function.arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix = "inbound/"
     filter_suffix       = ".csv" #asked a question
