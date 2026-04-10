@@ -1,5 +1,6 @@
 locals {
-  ecs_services = {
+  ecs_services = merge(
+    {
     auth = {
       name                              = "auth"
       image                             = "374269020027.dkr.ecr.eu-west-2.amazonaws.com/youth-justice-app-framework:auth-preprod"
@@ -565,25 +566,6 @@ locals {
       ]
       enable_postgres_secret = false
     },
-    yjsm-hub-svc = {
-      name                              = "yjsm-hub-svc"
-      internal_only                     = false
-      image                             = "374269020027.dkr.ecr.eu-west-2.amazonaws.com/youth-justice-app-framework:yjsm-hub-svc-preprod"
-      task_cpu                          = 1024
-      task_memory                       = 3584
-      health_check_grace_period_seconds = 420
-      additional_environment_variables = [
-        {
-          "name" : "GATEWAY_SERVICE_URI"
-          "value" : "http://private-lb.${local.environment}.yjaf:8080"
-        },
-        {
-          "name" : "JAVA_OPTS",
-          "value" : "-Xmx2048m -Xms512m -Ddd.jmxfetch.enabled=true -Ddd.profiling.enabled=true -XX:FlightRecorderOptions=stackdepth=256 -Ddd.logs.injection=true -Ddd.trace.sample.rate=1 -Ddd.service=yjsm-hub-svc -XX:-HeapDumpOnOutOfMemoryError"
-        }
-      ]
-      enable_postgres_secret = false
-    },
     assets = {
       name                              = "assets"
       image                             = "374269020027.dkr.ecr.eu-west-2.amazonaws.com/youth-justice-app-framework:assets-preprod"
@@ -601,6 +583,28 @@ locals {
         }
       ]
       enable_postgres_secret = false
-    }
-  }
+      }
+    },
+    local.application_data.accounts[local.environment].create_svc_pilot ? {
+      yjsm-hub-svc = {
+        name                              = "yjsm-hub-svc"
+        internal_only                     = false
+        image                             = "374269020027.dkr.ecr.eu-west-2.amazonaws.com/youth-justice-app-framework:yjsm-hub-svc-preprod"
+        task_cpu                          = 1024
+        task_memory                       = 3584
+        health_check_grace_period_seconds = 420
+        additional_environment_variables = [
+          {
+            "name" : "GATEWAY_SERVICE_URI"
+            "value" : "http://private-lb.${local.environment}.yjaf:8080"
+          },
+          {
+            "name" : "JAVA_OPTS",
+            "value" : "-Xmx2048m -Xms512m -Ddd.jmxfetch.enabled=true -Ddd.profiling.enabled=true -XX:FlightRecorderOptions=stackdepth=256 -Ddd.logs.injection=true -Ddd.trace.sample.rate=1 -Ddd.service=yjsm-hub-svc -XX:-HeapDumpOnOutOfMemoryError"
+          }
+        ]
+        enable_postgres_secret = false
+      }
+    } : {}
+  )
 }
