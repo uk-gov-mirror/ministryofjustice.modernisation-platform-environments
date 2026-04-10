@@ -39,6 +39,8 @@ resource "aws_ecs_task_definition" "ftp_barclaycard_task_definition" {
       ebs_db_password                                               = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_password::"
       ebs_db_endpoint                                               = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_endpoint::"
       file_transfer_slack_webhook                                   = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:file_transfer_slack_webhook::"
+      TLS_CERT                                                      = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:tls_cert::"
+      TLS_KEY                                                       = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:tls_key::"
     }
   )
 
