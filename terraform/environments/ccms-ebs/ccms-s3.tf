@@ -229,6 +229,17 @@ resource "aws_s3_bucket" "ccms_ebs_shared" {
   )
 }
 
+resource "aws_s3_bucket_object_lock_configuration" "dbbackup" {
+  bucket = module.s3-bucket-dbbackup.bucket.id
+
+  rule {
+    default_retention {
+      mode = "GOVERNANCE"
+      days = local.application_data.accounts[local.environment].rman_s3_lifecycle_days_expiration_current
+    }
+  }
+}
+
 resource "aws_s3_object" "folder" {
   bucket = aws_s3_bucket.ccms_ebs_shared.bucket
   for_each = {
