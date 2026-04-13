@@ -16,8 +16,8 @@ resource "aws_cloudwatch_metric_alarm" "alb_sftp_barclaycard_5xx" {
     LoadBalancer = aws_lb.sftp_barclaycard_load_balancer.arn_suffix
   }
   treat_missing_data = "notBreaching"
-  alarm_actions      = [aws_sns_topic.cloudwatch_alerts.arn]
-  ok_actions         = [aws_sns_topic.cloudwatch_alerts.arn]
+  alarm_actions      = [data.aws_sns_topic.cw_alerts.arn]
+  ok_actions         = [data.aws_sns_topic.cw_alerts.arn]
 
   tags = local.tags
 }
@@ -38,8 +38,8 @@ resource "aws_cloudwatch_metric_alarm" "container_sftp_barclaycard_count" {
   }
   alarm_description         = "The number of sftp_barclaycard ECS tasks is less than ${local.application_data.accounts[local.environment].app_count}. Runbook: https://dsdmoj.atlassian.net/wiki/spaces/CCMS/pages/1408598133/Monitoring+and+Alerts"
   treat_missing_data        = "breaching"
-  alarm_actions             = [aws_sns_topic.cloudwatch_alerts.arn]
-  ok_actions                = [aws_sns_topic.cloudwatch_alerts.arn]
+  alarm_actions             = [data.aws_sns_topic.cw_alerts.arn]
+  ok_actions                = [data.aws_sns_topic.cw_alerts.arn]
   insufficient_data_actions = []
 
   tags = local.tags
@@ -64,8 +64,8 @@ resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_waf_high_blocked_reques
     Scope  = "REGIONAL"
   }
 
-  alarm_actions = [aws_sns_topic.cloudwatch_alerts.arn]
-  ok_actions    = [aws_sns_topic.cloudwatch_alerts.arn]
+  alarm_actions = [data.aws_sns_topic.cw_alerts.arn]
+  ok_actions    = [data.aws_sns_topic.cw_alerts.arn]
 
   tags = local.tags
 }
@@ -81,8 +81,8 @@ resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_alb_healthyhosts" {
   threshold           = local.application_data.accounts[local.environment].app_count
   alarm_description   = "Number of healthy nodes in Target Group"
   actions_enabled     = true
-  alarm_actions       = [aws_sns_topic.cloudwatch_alerts.arn]
-  ok_actions          = [aws_sns_topic.cloudwatch_alerts.arn]
+  alarm_actions       = [data.aws_sns_topic.cw_alerts.arn]
+  ok_actions          = [data.aws_sns_topic.cw_alerts.arn]
   dimensions = {
     TargetGroup  = aws_lb_target_group.sftp_barclaycard_target_group.arn_suffix
     LoadBalancer = aws_lb.sftp_barclaycard_load_balancer.arn_suffix
