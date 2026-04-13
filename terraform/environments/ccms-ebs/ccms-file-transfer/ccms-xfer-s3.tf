@@ -108,11 +108,11 @@ resource "aws_s3_bucket_notification" "sftp_barclaycard_bucket_notification" {
     filter_suffix = ".log"
   }
 
-  depends_on = [ module.s3-bucket-sftp-barclaycard ]
+  depends_on = [module.s3-bucket-sftp-barclaycard]
 }
 
 resource "aws_s3_bucket_notification" "sftp_barclaycard_file_lambda_notification" {
-  bucket      = module.s3-bucket-sftp-barclaycard.bucket.id
+  bucket = module.s3-bucket-sftp-barclaycard.bucket.id
   # eventbridge = true
   # topic {
   #   topic_arn     = data.aws_sns_topic.s3_topic.arn
@@ -123,11 +123,11 @@ resource "aws_s3_bucket_notification" "sftp_barclaycard_file_lambda_notification
   lambda_function {
     lambda_function_arn = aws_lambda_function.process_file_from_bucket_lambda_function.arn
     events              = ["s3:ObjectCreated:*"]
-    filter_prefix = "inbound/"
+    filter_prefix       = "inbound/"
     filter_suffix       = ".csv" #asked a question
-    
+
   }
-  depends_on = [ module.s3-bucket-sftp-barclaycard ]
+  depends_on = [module.s3-bucket-sftp-barclaycard]
 }
 
 resource "aws_s3_object" "sftp_barclaycard_folder" {
