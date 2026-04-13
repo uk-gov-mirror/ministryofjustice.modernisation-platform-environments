@@ -16,7 +16,7 @@ resource "aws_ecs_cluster" "main_cluster" {
 # ECS Task Definition
 
 
-resource "aws_ecs_task_definition" "ftp_barclaycard_task_definition" {
+resource "aws_ecs_task_definition" "sftp_barclaycard_task_definition" {
   family             = "${local.application_name}-ftp-barclaycard-task"
   execution_role_arn = aws_iam_role.barclaycard_ecs_task_execution_role.arn
   network_mode       = "awsvpc"
@@ -53,7 +53,7 @@ resource "aws_ecs_task_definition" "ftp_barclaycard_task_definition" {
 
 # ECS Service
 
-resource "aws_ecs_service" "ftp_barclaycard_ecs_service" {
+resource "aws_ecs_service" "sftp_barclaycard_ecs_service" {
   name            = local.application_data.accounts[local.environment].app_name
   cluster         = aws_ecs_cluster.main_cluster.id
   task_definition = aws_ecs_task_definition.ftp_barclaycard_task_definition.arn

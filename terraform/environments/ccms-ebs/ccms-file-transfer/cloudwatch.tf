@@ -33,7 +33,7 @@ resource "aws_cloudwatch_metric_alarm" "container_sftp_barclaycard_count" {
   statistic           = "Average"
   threshold           = local.application_data.accounts[local.environment].app_count
   dimensions = {
-    ClusterName = aws_ecs_cluster.main.name
+    ClusterName = aws_ecs_cluster.main_cluster.name
     ServiceName = aws_ecs_service.sftp_barclaycard_ecs_service.name
   }
   alarm_description         = "The number of sftp_barclaycard ECS tasks is less than ${local.application_data.accounts[local.environment].app_count}. Runbook: https://dsdmoj.atlassian.net/wiki/spaces/CCMS/pages/1408598133/Monitoring+and+Alerts"
@@ -60,7 +60,7 @@ resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_waf_high_blocked_reques
   treat_missing_data  = "notBreaching"
 
   dimensions = {
-    WebACL = aws_wafv2_web_acl.sftp_barclaycard_waf.name
+    WebACL = aws_wafv2_web_acl.sftp_barclaycard_web_acl.name
     Scope  = "REGIONAL"
   }
 
