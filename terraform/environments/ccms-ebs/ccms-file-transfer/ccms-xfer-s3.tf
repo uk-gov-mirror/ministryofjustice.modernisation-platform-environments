@@ -107,7 +107,7 @@ resource "aws_s3_bucket_notification" "sftp_client1_bucket_notification" {
     filter_suffix = ".log"
   }
 
-  depends_on = [ module.s3-bucket-sftp-client1 ]
+  depends_on = [module.s3-bucket-sftp-client1]
 }
 
 resource "aws_s3_object" "sftp_client1_folder" {
