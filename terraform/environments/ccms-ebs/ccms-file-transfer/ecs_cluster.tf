@@ -56,7 +56,7 @@ resource "aws_ecs_task_definition" "sftp_barclaycard_task_definition" {
 resource "aws_ecs_service" "sftp_barclaycard_ecs_service" {
   name            = local.application_data.accounts[local.environment].app_name
   cluster         = aws_ecs_cluster.main_cluster.id
-  task_definition = aws_ecs_task_definition.ftp_barclaycard_task_definition.arn
+  task_definition = aws_ecs_task_definition.sftp_barclaycard_task_definition.arn
   desired_count   = local.application_data.accounts[local.environment].app_count
   launch_type     = "FARGATE"
 
