@@ -536,8 +536,26 @@ module "mdss_daily_failure_digest" {
     NAMESPACE      = "EMDS/MDSS"
     LOOKBACK_HOURS = "24"
 
-    LOAD_MDSS_DLQ_NAME = module.load_mdss_event_queue.sqs_dlq.name
-    CLEAN_DLT_DLQ_NAME = aws_sqs_queue.clean_dlt_load_dlq.name
+    LOAD_MDSS_DLQ_NAME  = module.load_mdss_event_queue.sqs_dlq.name
+    CLEAN_DLT_DLQ_NAME  = aws_sqs_queue.clean_dlt_load_dlq.name
+    LOAD_FMS_DLQ_NAME   = module.load_fms_event_queue.sqs_dlq.name
+
+    PROCESS_LANDING_BUCKET_FILES_FMS_GENERAL_DLQ_NAME  = "-process_landing_bucket_files_fms_general-dlq"
+    PROCESS_LANDING_BUCKET_FILES_FMS_HO_DLQ_NAME       = "-process_landing_bucket_files_fms_ho-dlq"
+    PROCESS_LANDING_BUCKET_FILES_FMS_SPECIALS_DLQ_NAME = "-process_landing_bucket_files_fms_specials-dlq"
+
+    PROCESS_LANDING_BUCKET_FILES_MDSS_GENERAL_DLQ_NAME  = "-process_landing_bucket_files_mdss_general-dlq"
+    PROCESS_LANDING_BUCKET_FILES_MDSS_HO_DLQ_NAME       = "-process_landing_bucket_files_mdss_ho-dlq"
+    PROCESS_LANDING_BUCKET_FILES_MDSS_SPECIALS_DLQ_NAME = "-process_landing_bucket_files_mdss_specials-dlq"
+
+    SCAN_DLQ_NAME                  = "-scan-dlq"
+    PROCESS_FMS_METADATA_DLQ_NAME  = "-process_fms_metadata-dlq"
+    FORMAT_FMS_JSON_DLQ_NAME       = aws_sqs_queue.format_fms_json_event_dlq.name
+    PUSH_DATA_EXPORT_TO_P1_DLQ_NAME = "-push_data_export_to_p1-dlq"
+
+    LOAD_FMS_FUNCTION_NAME             = module.load_fms_lambda.lambda_function_name
+    PROCESS_FMS_METADATA_FUNCTION_NAME = module.process_fms_metadata.lambda_function_name
+    FORMAT_JSON_FMS_DATA_FUNCTION_NAME = module.format_json_fms_data.lambda_function_name
   }
 }
 
