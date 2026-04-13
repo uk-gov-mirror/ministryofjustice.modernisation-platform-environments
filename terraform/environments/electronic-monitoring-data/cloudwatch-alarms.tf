@@ -17,35 +17,35 @@ locals {
     }
 
     process_landing_bucket_files_fms_general_dlq = {
-      queue_name = "-process_landing_bucket_files_fms_general-dlq"
+      queue_name = local.live_feed_dlq_names.process_landing_bucket_files_fms_general
     }
 
     process_landing_bucket_files_fms_ho_dlq = {
-      queue_name = "-process_landing_bucket_files_fms_ho-dlq"
+      queue_name = local.live_feed_dlq_names.process_landing_bucket_files_fms_ho
     }
 
     process_landing_bucket_files_fms_specials_dlq = {
-      queue_name = "-process_landing_bucket_files_fms_specials-dlq"
+      queue_name = local.live_feed_dlq_names.process_landing_bucket_files_fms_specials
     }
 
     process_landing_bucket_files_mdss_general_dlq = {
-      queue_name = "-process_landing_bucket_files_mdss_general-dlq"
+      queue_name = local.live_feed_dlq_names.process_landing_bucket_files_mdss_general
     }
 
     process_landing_bucket_files_mdss_ho_dlq = {
-      queue_name = "-process_landing_bucket_files_mdss_ho-dlq"
+      queue_name = local.live_feed_dlq_names.process_landing_bucket_files_mdss_ho
     }
 
     process_landing_bucket_files_mdss_specials_dlq = {
-      queue_name = "-process_landing_bucket_files_mdss_specials-dlq"
+      queue_name = local.live_feed_dlq_names.process_landing_bucket_files_mdss_specials
     }
 
     scan_dlq = {
-      queue_name = "-scan-dlq"
+      queue_name = local.live_feed_dlq_names.scan
     }
 
     process_fms_metadata_dlq = {
-      queue_name = "-process_fms_metadata-dlq"
+      queue_name = local.live_feed_dlq_names.process_fms_metadata
     }
 
     format_fms_json_dlq = {
@@ -53,7 +53,7 @@ locals {
     }
 
     push_data_export_to_p1_dlq = {
-      queue_name = "-push_data_export_to_p1-dlq"
+      queue_name = local.live_feed_dlq_names.push_data_export_to_p1
     }
   }
 }
