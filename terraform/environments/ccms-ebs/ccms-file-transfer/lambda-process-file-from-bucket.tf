@@ -93,7 +93,7 @@ resource "aws_lambda_function" "process_file_from_bucket_lambda_function" {
   # #     }
   #   }
 
-  depends_on = [null_resource.build_lambda]
+  # depends_on = [null_resource.build_lambda]
 
   tags = merge(local.tags, {
     Name = "${local.application_name}-${local.environment}-process-file-from-bucket"
