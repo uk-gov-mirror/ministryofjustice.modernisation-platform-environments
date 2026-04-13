@@ -54,18 +54,18 @@ resource "aws_ecs_task_definition" "ftp_barclaycard_task_definition" {
 # ECS Service
 
 resource "aws_ecs_service" "ftp_barclaycard_ecs_service" {
-  name            = local.application_name
+  name            = local.application_data.accounts[local.environment].app_name
   cluster         = aws_ecs_cluster.main_cluster.id
   task_definition = aws_ecs_task_definition.ftp_barclaycard_task_definition.arn
   desired_count   = local.application_data.accounts[local.environment].app_count
   launch_type     = "FARGATE"
 
   health_check_grace_period_seconds = 120
-  lifecycle {
-    ignore_changes = [
-      task_definition
-    ]
-  }
+  # lifecycle {
+  #   ignore_changes = [
+  #     task_definition
+  #   ]
+  # }
   # ordered_placement_strategy {
   #   field = "attribute:ecs.availability-zone"
   #   type  = "spread"
