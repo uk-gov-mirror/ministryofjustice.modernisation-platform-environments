@@ -47,14 +47,14 @@ resource "aws_iam_role_policy" "lambda_process_file_from_bucket_policy" {
         ]
         Resource = "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${aws_lambda_function.process_file_from_bucket_lambda_function.function_name}:*"
       }
-    #   {
-    #     Effect = "Allow"
-    #     Action = [
-    #       "kms:GenerateDataKey*",
-    #       "kms:Decrypt"
-    #     ]
-    #     Resource = [aws_kms_key.cloudwatch_sns_alerts_key.arn]
-    #   }
+      #   {
+      #     Effect = "Allow"
+      #     Action = [
+      #       "kms:GenerateDataKey*",
+      #       "kms:Decrypt"
+      #     ]
+      #     Resource = [aws_kms_key.cloudwatch_sns_alerts_key.arn]
+      #   }
     ]
   })
 }
@@ -80,20 +80,20 @@ resource "aws_lambda_function" "process_file_from_bucket_lambda_function" {
   source_code_hash = base64sha256(join("", local.lambda_source_hashes_process_file_from_bucket))
   function_name    = "${local.application_name}-${local.environment}-process-file-from-bucket-lambda-function"
   role             = aws_iam_role.lambda_process_file_from_bucket_role.arn
-  handler          = "example.HelloWorldHandler" 
-#   layers           = [aws_lambda_layer_version.lambda_cloudwatch_sns_layer.arn]
-  runtime          = "java21"
-  timeout          = 30
-  publish          = true
+  handler          = "example.HelloWorldHandler"
+  #   layers           = [aws_lambda_layer_version.lambda_cloudwatch_sns_layer.arn]
+  runtime = "java21"
+  timeout = 30
+  publish = true
 
-#   environment {
-#     variables = {
-#       # This secret now contains slack_channel_webhook, slack_channel_webhook_guardduty, slack_channel_webhook_s3
-#       SECRET_NAME = aws_secretsmanager_secret.ebs_cw_alerts_secrets.name
-# #     }
-#   }
+  #   environment {
+  #     variables = {
+  #       # This secret now contains slack_channel_webhook, slack_channel_webhook_guardduty, slack_channel_webhook_s3
+  #       SECRET_NAME = aws_secretsmanager_secret.ebs_cw_alerts_secrets.name
+  # #     }
+  #   }
 
-  depends_on = [ null_resource.build_lambda ]
+  depends_on = [null_resource.build_lambda]
 
   tags = merge(local.tags, {
     Name = "${local.application_name}-${local.environment}-process-file-from-bucket"
