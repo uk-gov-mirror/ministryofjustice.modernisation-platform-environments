@@ -66,10 +66,10 @@ resource "aws_ecs_service" "ftp_barclaycard_ecs_service" {
       task_definition
     ]
   }
-  ordered_placement_strategy {
-    field = "attribute:ecs.availability-zone"
-    type  = "spread"
-  }
+  # ordered_placement_strategy {
+  #   field = "attribute:ecs.availability-zone"
+  #   type  = "spread"
+  # }
 
   network_configuration {
     security_groups = [aws_security_group.cluster_fargate_sg.id]
