@@ -703,7 +703,7 @@ module "fan_out_tags" {
 #-----------------------------------------------------------------------------------
 
 module "mdss_reconciler" {
-  count = 1
+  count                          = 1
   source                         = "./modules/lambdas"
   is_image                       = true
   function_name                  = "mdss_reconciler"

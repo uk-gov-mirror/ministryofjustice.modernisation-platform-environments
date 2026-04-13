@@ -158,7 +158,7 @@ data "aws_security_groups" "all_security_groups" {
 }
 
 data "aws_s3_bucket" "sftp_client1_bucket" {
-  count = local.sftp_enabled ? 1 : 0
+  count  = local.sftp_enabled ? 1 : 0
   bucket = "${local.application_name}-${local.environment}-barclaycard-inbound-mp"
 }
 ## S3 NOTIFICATIONS
