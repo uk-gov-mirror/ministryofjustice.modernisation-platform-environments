@@ -77,7 +77,7 @@ resource "aws_iam_role_policy" "lambda_process_file_from_bucket_policy" {
 
 resource "aws_lambda_function" "process_file_from_bucket_lambda_function" {
   filename         = "./lambda/process_file_from_bucket/target/HelloWorldHandler-1.0.jar"
-  source_code_hash = base64sha256(join("", local.lambda_source_hashes_process_file_from_bucket))
+  # source_code_hash = base64sha256(join("", local.lambda_source_hashes_process_file_from_bucket))
   function_name    = "${local.application_name}-${local.environment}-process-file-from-bucket-lambda-function"
   role             = aws_iam_role.lambda_process_file_from_bucket_role.arn
   handler          = "example.HelloWorldHandler"
