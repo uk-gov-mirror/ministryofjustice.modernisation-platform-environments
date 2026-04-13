@@ -252,13 +252,6 @@ locals {
         }
       )
     }
-    # Load balancer configuration for DFI
-    lb_target_config = {
-      endpoint             = "ndl-dfi"
-      port                 = 8080
-      health_check_path    = "/DataServices/"
-      health_check_matcher = "200,302,301"
-    }
   }
 
   bcs_config_win_preprod = {
@@ -457,7 +450,9 @@ locals {
 
   dfi_report_bucket_config_preprod = null
 
-  lb_config_preprod = null
+  lb_config_preprod = {
+    bucket_policy_enabled = true
+  }
 
   datasync_config_preprod = null
 
