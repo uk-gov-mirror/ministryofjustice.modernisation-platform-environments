@@ -65,18 +65,18 @@ resource "aws_iam_role_policy" "lambda_process_file_from_bucket_policy" {
 #   output_path = "${path.module}/lambda/process_file_from_bucket.zip"
 # }
 
-resource "null_resource" "build_lambda" {
-  triggers = {
-    source_hash = filesha256("./lambda/process_file_from_bucket/pom.xml")
-  }
+# resource "null_resource" "build_lambda" {
+#   triggers = {
+#     source_hash = filesha256("./lambda/process_file_from_bucket/pom.xml")
+#   }
 
-  provisioner "local-exec" {
-    command = "cd ./lambda/process_file_from_bucket && mvn clean package"
-  }
-}
+#   provisioner "local-exec" {
+#     command = "cd ./lambda/process_file_from_bucket && mvn clean package"
+#   }
+# }
 
 resource "aws_lambda_function" "process_file_from_bucket_lambda_function" {
-  filename         = "./lambda/process_file_from_bucket/target/HelloWorldHandler-1.0-SNAPSHOT-shaded.jar"
+  filename         = "./lambda/process_file_from_bucket/target/HelloWorldHandler-1.0.jar"
   source_code_hash = base64sha256(join("", local.lambda_source_hashes_process_file_from_bucket))
   function_name    = "${local.application_name}-${local.environment}-process-file-from-bucket-lambda-function"
   role             = aws_iam_role.lambda_process_file_from_bucket_role.arn
