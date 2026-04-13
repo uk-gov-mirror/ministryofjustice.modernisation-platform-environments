@@ -1,7 +1,7 @@
 locals {
   sftp_barclaycard_folder_name = ["inbound", "archive", "error"]
   sftp_barclaycard_bucket_name = "${local.application_name}-${local.environment}-barclaycard-inbound-mp"
-  logging_bucket_name      = "${local.application_name}-${local.environment}-logging"
+  logging_bucket_name          = "${local.application_name}-${local.environment}-logging"
 
   lambda_source_hashes_process_file_from_bucket = [
     for f in fileset("./lambda/process_file_from_bucket", "**") :
@@ -37,5 +37,5 @@ locals {
   # Split domain validation by domain type
   modernisation_platform_validations = [for k, v in local.domain_types : v if strcontains(k, "modernisation-platform.service.justice.gov.uk")]
   laa_validations                    = [for k, v in local.domain_types : v if strcontains(k, "laa.service.justice.gov.uk")]
-  
+
 }

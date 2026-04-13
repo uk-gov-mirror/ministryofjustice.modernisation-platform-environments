@@ -29,20 +29,20 @@ resource "aws_ecs_task_definition" "ftp_barclaycard_task_definition" {
   container_definitions = templatefile(
     "${path.module}/templates/task_definition_api.json.tpl",
     {
-      app_name                                                      = local.application_data.accounts[local.environment].app_name
-      app_image                                                     = local.application_data.accounts[local.environment].app_image
-      api_server_port                                               = local.application_data.accounts[local.environment].api_server_port
-      cpu                                                            = local.application_data.accounts[local.environment].container_cpu
-      memory                                                         = local.application_data.accounts[local.environment].container_memory
-      aws_region                                                    = local.application_data.accounts[local.environment].aws_region
-      container_version                                             = local.application_data.accounts[local.environment].container_version
-      ccms_s3_bucket                                                = local.application_data.accounts[local.environment].sftp_barclaycard_bucket
-      ebs_db_username                                               = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_username::"
-      ebs_db_password                                               = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_password::"
-      ebs_db_endpoint                                               = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_endpoint::"
-      file_transfer_slack_webhook                                   = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:file_transfer_slack_webhook::"
-      TLS_CERT                                                      = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:tls_cert::"
-      TLS_KEY                                                       = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:tls_key::"
+      app_name                    = local.application_data.accounts[local.environment].app_name
+      app_image                   = local.application_data.accounts[local.environment].app_image
+      api_server_port             = local.application_data.accounts[local.environment].api_server_port
+      cpu                         = local.application_data.accounts[local.environment].container_cpu
+      memory                      = local.application_data.accounts[local.environment].container_memory
+      aws_region                  = local.application_data.accounts[local.environment].aws_region
+      container_version           = local.application_data.accounts[local.environment].container_version
+      ccms_s3_bucket              = local.application_data.accounts[local.environment].sftp_barclaycard_bucket
+      ebs_db_username             = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_username::"
+      ebs_db_password             = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_password::"
+      ebs_db_endpoint             = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_endpoint::"
+      file_transfer_slack_webhook = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:file_transfer_slack_webhook::"
+      TLS_CERT                    = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:tls_cert::"
+      TLS_KEY                     = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:tls_key::"
     }
   )
 
