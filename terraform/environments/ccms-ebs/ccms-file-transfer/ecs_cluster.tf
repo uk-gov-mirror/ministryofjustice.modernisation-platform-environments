@@ -26,6 +26,11 @@ resource "aws_ecs_task_definition" "sftp_barclaycard_task_definition" {
   cpu    = local.application_data.accounts[local.environment].container_cpu
   memory = local.application_data.accounts[local.environment].container_memory
 
+# Forcing ARM64 architecture for Fargate tasks
+  runtime_platform {
+    cpu_architecture = "ARM64"
+  }
+
   container_definitions = templatefile(
     "${path.module}/templates/task_definition_api.json.tpl",
     {
