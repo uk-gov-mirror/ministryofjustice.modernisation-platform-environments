@@ -377,7 +377,7 @@ resource "aws_security_group_rule" "egress_traffic_ebsdb_2525" {
 }
 
 ### SES:587
-resource "aws_security_group_rule" "egress_traffic_mailrelay_587" {
+resource "aws_security_group_rule" "egress_traffic_ebsdb_587" {
   count             = local.is-production ? 1 : 0
   security_group_id = aws_security_group.ec2_sg_ebsdb.id
   type              = "egress"
