@@ -178,7 +178,7 @@ data "aws_iam_policy_document" "s3_topic_policy" {
       test     = "ArnLike"
       variable = "aws:SourceArn"
       values = concat([
-        try(data.aws_s3_bucket.sftp_client1_bucket[0].arn, null),
+        try(data.aws_s3_bucket.sftp_client1_bucket[0].arn, ""),
         module.s3-bucket-logging.bucket.arn,
         module.s3-bucket-dbbackup.bucket.arn,
         ],
