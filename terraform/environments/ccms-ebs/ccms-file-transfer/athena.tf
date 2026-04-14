@@ -46,7 +46,7 @@ resource "aws_athena_named_query" "http_requests_sftp_barclaycard_internal_query
   query = templatefile(
     "./templates/lb_internal_http_gets.sql",
     {
-      bucket     = module.s3-bucket-logging.bucket.id
+      bucket     = data.aws_s3_bucket.logging_bucket.id
       key        = local.sftp_barclaycard_bucket_name
       account_id = data.aws_caller_identity.current.id
       region     = data.aws_region.current.id
