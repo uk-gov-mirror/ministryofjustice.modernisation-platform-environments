@@ -11,7 +11,11 @@ module "eks" {
   enable_irsa        = true
 
   endpoint_private_access = true
-  endpoint_public_access  = true
+  endpoint_public_access  = false
+
+  endpoint_public_access_cidrs = [
+    "20.58.27.30/32"
+  ]
 
   cloudwatch_log_group_retention_in_days = 30
 
