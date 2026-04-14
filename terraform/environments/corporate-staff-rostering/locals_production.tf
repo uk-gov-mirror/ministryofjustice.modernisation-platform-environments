@@ -556,21 +556,6 @@ locals {
           }
         ]
       }
-      Ec2PrisonerRetailPolicy = {
-        description = "Permissions required for prisoner retail"
-        statements = [
-          {
-            effect = "Allow"
-            actions = [
-              "secretsmanager:GetSecretValue",
-              "secretsmanager:PutSecretValue",
-            ]
-            resources = [
-              "arn:aws:secretsmanager:*:*:secret:/prisoner-retail/*",
-            ]
-          }
-        ]
-      }
     }
 
     lbs = {
