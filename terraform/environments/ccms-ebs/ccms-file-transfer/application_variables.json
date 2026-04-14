@@ -3,7 +3,7 @@
     "development": {
       "short_env": "dev",
       "dns": "laa-development",
-      "app_name": "ccms-sftp-barclaycard",
+      "app_name": "ccms-ebs-sftp-barclaycard",
       "app_count": "1",
       "api_server_port": "8443",
       "aws_region": "eu-west-2",
