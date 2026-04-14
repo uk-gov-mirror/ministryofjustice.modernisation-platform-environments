@@ -1,5 +1,5 @@
 resource "aws_athena_database" "lb-access-logs" {
-  name   = "loadbalancer_access_logs"
+  name   = "loadbalancer_sftp_barclaycard_access_logs"
   bucket = data.aws_s3_bucket.logging_bucket.id
   encryption_configuration {
     encryption_option = "SSE_S3"
