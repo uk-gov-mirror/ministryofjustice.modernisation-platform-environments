@@ -542,6 +542,31 @@ resource "aws_instance" "s618358rgsw025" {
   }
 }
 
+# Private Certificate Authority
+
+resource "aws_instance" "s618358rgvw026" {
+  # checkov:skip=CKV_AWS_135: "EBS volumes are enabled by default for all PPUD EC2 instance types"
+  # checkov:skip=CKV_AWS_8: "EBS volumes are encrypted by default and do not require the launch configuration encryption"
+  count                  = local.is-preproduction == true ? 1 : 0
+  ami                    = "ami-0bb237afb99e3a912"
+  instance_type          = "m5.large"
+  source_dest_check      = true
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.id
+  vpc_security_group_ids = [aws_security_group.WAM-Portal.id]
+  subnet_id              = data.aws_subnet.data_subnets_b.id
+
+  metadata_options {
+    http_tokens   = "required"
+    http_endpoint = "enabled"
+  }
+
+  tags = {
+    Name        = "s618358rgvw026"
+    patch_group = "uat_win_patch"
+    backup      = true
+  }
+}
+
 # UAT Doc Server
 
 resource "aws_instance" "s618358rgvw028" {
