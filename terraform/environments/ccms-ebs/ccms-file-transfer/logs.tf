@@ -4,7 +4,7 @@ resource "aws_cloudwatch_log_group" "log_group_sftp_barclaycard" {
   retention_in_days = 90
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-sftp-barclaycard-logs", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-barclaycard-%s-logs", local.application_name, local.environment)) }
   )
 }
 
