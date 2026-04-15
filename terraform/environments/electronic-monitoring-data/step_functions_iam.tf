@@ -80,3 +80,52 @@ resource "aws_iam_policy" "ears_sars_step_function_policy" {
   name   = "ears_sars_step_function_role"
   policy = data.aws_iam_policy_document.ears_sars_policy_document[0].json
 }
+
+# ------------------------------------------
+# GDPR
+# ------------------------------------------
+
+data "aws_iam_policy_document" "gdpr_delete_policy_document" {
+  count = local.is-development || local.is-preproduction ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecs:RunTask"
+    ]
+    resources = [
+      "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}${module.aws_ecs_task_definition[0].name}/*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "iam:PassRole"
+    ]
+    resources = [
+      "arn:aws:iam::account-id:role/your-ecs-task-execution-role",
+      "arn:aws:iam::account-id:role/your-ecs-task-role"
+    ]
+    condition {
+      test     = "StringLike"
+      variable = "iam:PassedToService"
+      values   = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecs:DescribeTasks",
+      "events:PutTargets",
+      "events:PutRule",
+      "events:DescribeRule"
+    ]
+    resources = ["*"] 
+  }
+}
+
+resource "aws_iam_policy" "gdpr_delete_policy_document" {
+  count  = local.is-development || local.is-preproduction ? 1 : 0
+  name   = "gdpr_deletetion_step_function_role"
+  policy = data.aws_iam_policy_document.gdpr_deletetion_policy_document[0].json
+}
