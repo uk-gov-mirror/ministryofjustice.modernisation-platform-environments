@@ -1,0 +1,63 @@
+
+data "aws_iam_policy_document" "s3_sftp_barclaycard_kms_policy" {
+  statement {
+    sid = "AllowRootAccountAdmin"
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
+  statement {
+    sid = "AllowUseForS3UseOfKeyInThisAccount"
+    principals {
+      type        = "AWS"
+      identifiers = ["s3.amazonaws.com"]
+    }
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
+    ]
+    resources = [
+      module.s3-bucket-sftp-barclaycard.bucket.arn,
+      "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "kms:CallerAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+  }
+  statement {
+      sid = "AllowAnalyticalPlatformIngestionService"
+      effect = "Allow"
+      principals {
+        type        = "AWS"
+        identifiers = [
+            "arn:aws:iam::${local.environment_management.account_ids["analytical-platform-ingestion-development"]}:role/transfer",
+            "arn:aws:iam::${local.environment_management.account_ids["analytical-platform-ingestion-production"]}:role/transfer"
+        ]
+      }
+      actions = [
+        "kms:GenerateDataKey",
+        "kms:Encrypt"
+      ]
+      resources = ["*"]
+  }
+}
+
+resource "aws_kms_alias" "s3_sftop_barclaycard_kms_alias" {
+  name          = "alias/s3-sftp-barclaycard-alias"
+  target_key_id = aws_kms_key.s3_kms[0].key_id
+}
+
+resource "aws_kms_key" "s3_sftp_barclaycard_kms_key" {
+  description         = "KMS for S3 Bucket used by SFTP Barclaycard application in ${local.environment} environment"
+  enable_key_rotation = true
+  policy              = data.aws_iam_policy_document.s3_sftp_barclaycard_kms_policy.json
+  tags                = { Environment = local.environment }
+}
