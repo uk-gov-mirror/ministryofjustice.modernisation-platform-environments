@@ -71,3 +71,22 @@ module "ears_sars_step_function" {
   )
   type = "STANDARD"
 }
+
+
+# ------------------------------------------
+# GDPR Step Function
+# ------------------------------------------
+
+module "gdpr_deletion_step_function" {
+  count = local.is-development || local.is-preproduction ? 1 : 0
+
+  source       = "./modules/step_function"
+  name         = "gdpr_deletion"
+  iam_policies = tomap({ "gdpr_deletion_step_function_policy" = aws_iam_policy.gdpr_deletion_step_function_policy[0] })
+  variable_dictionary = tomap(
+    {
+      "structured_data_deletion" = module.aws_ecs_task_definition[0].name,
+    }
+  )
+  type = "STANDARD"
+}
