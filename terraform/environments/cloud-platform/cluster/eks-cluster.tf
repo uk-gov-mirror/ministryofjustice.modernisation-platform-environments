@@ -118,17 +118,19 @@ module "eks" {
 
     aws-ebs-csi-driver = {
       configuration_values = jsonencode({
-        nodeSelector = {
-          "cloud-platform.justice.gov.uk/system-ng" = "true"
-        }
-        tolerations = [
-          {
-            key      = "system-node"
-            value    = "true"
-            effect   = "NoSchedule"
-            operator = "Equal"
+        controller = {
+          nodeSelector = {
+            "cloud-platform.justice.gov.uk/system-ng" = "true"
           }
-        ]
+          tolerations = [
+            {
+              key      = "system-node"
+              value    = "true"
+              effect   = "NoSchedule"
+              operator = "Equal"
+            }
+          ]
+        }
       })
     }
 
