@@ -37,10 +37,6 @@ service:
 
 # Setting GOMAXPROCS explicitly prevents automaxprocs from reading cgroup files at startup.
 # This is required on Bottlerocket arm64 nodes where /sys/fs/cgroup/cpu.max is not accessible.
-# env:
-#   - name: GOMAXPROCS
-#     value: "1"
-
 env:
   - name: GOMAXPROCS
     valueFrom:
