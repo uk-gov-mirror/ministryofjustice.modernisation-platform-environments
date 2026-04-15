@@ -1,5 +1,7 @@
 ---
 admissionController:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
   replicas: 3
   serviceMonitor:
     enabled: true
@@ -73,3 +75,8 @@ config:
     - cluster-autoscaler
     - prometheus
     - fluent-bit
+
+features:
+  controllerRuntimeMetrics:
+    # -- Bind address for controller-runtime metrics (use "0" to disable it)
+    bindAddress: ":7070"
