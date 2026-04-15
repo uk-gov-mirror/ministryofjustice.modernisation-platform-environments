@@ -89,9 +89,17 @@ module "eks" {
     coredns = {
       #   addon_version = local.environment_configuration.eks_cluster_addon_versions.coredns
       configuration_values = jsonencode({
-
-        nodeSelector = local.environment_configuration.system_ng.labels
-        tolerations = local.environment_configuration.system_ng.taints
+        nodeSelector = {
+          "cloud-platform.justice.gov.uk/system-ng" = "true"
+        }
+        tolerations = [
+          {
+            key      = "system-node"
+            value    = "true"
+            effect   = "NoSchedule"
+            operator = "Equal"
+          }
+        ]
       })
     }
     kube-proxy = {
@@ -110,8 +118,17 @@ module "eks" {
 
     aws-ebs-csi-driver = {
       configuration_values = jsonencode({
-        nodeSelector = local.environment_configuration.system_ng.labels
-        tolerations = local.environment_configuration.system_ng.taints
+        nodeSelector = {
+          "cloud-platform.justice.gov.uk/system-ng" = "true"
+        }
+        tolerations = [
+          {
+            key      = "system-node"
+            value    = "true"
+            effect   = "NoSchedule"
+            operator = "Equal"
+          }
+        ]
       })
     }
 
