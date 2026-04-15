@@ -82,7 +82,7 @@ resource "aws_iam_policy" "ears_sars_step_function_policy" {
 }
 
 # ------------------------------------------
-# GDPR
+# GDPR 
 # ------------------------------------------
 
 data "aws_iam_policy_document" "gdpr_delete_policy_document" {
