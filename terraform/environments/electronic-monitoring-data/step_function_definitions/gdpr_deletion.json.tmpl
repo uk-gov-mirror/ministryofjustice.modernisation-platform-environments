@@ -4,7 +4,7 @@
       "RunContainerTask": {  
          "Type": "Task",
          "Resource": "arn:aws:states:::ecs:runTask.sync",
-         "Arguments": {  
+         "Parameters": {  
             "LaunchType": "FARGATE",
             "Cluster": "${cluster_arn}",
             "TaskDefinition": "${task_definition_family}",
