@@ -51,7 +51,8 @@ module "s3-bucket-sftp-barclaycard" {
 
   log_bucket    = local.logging_bucket_name
   log_prefix    = "s3access/${local.sftp_barclaycard_bucket_name}"
-  sse_algorithm = "AES256"
+  custom_kms_key = aws_kms_key.s3_sftp_barclaycard_kms_key.arn
+  sse_algorithm = "aws:kms"
 
   # Refer to the below section "Replication" before enabling replication
   replication_enabled = false
