@@ -2,7 +2,6 @@
 data "aws_iam_policy_document" "s3_sftp_barclaycard_kms_policy" {
   statement {
     sid = "AllowRootAccountAdmin"
-    effect = "Allow"
     principals {
       type        = "AWS"
       identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
@@ -12,9 +11,8 @@ data "aws_iam_policy_document" "s3_sftp_barclaycard_kms_policy" {
   }
   statement {
     sid = "AllowUseForS3UseOfKeyInThisAccount"
-    effect = "Allow"
     principals {
-      type        = "AWS"
+      type        = "Service"
       identifiers = ["s3.amazonaws.com"]
     }
     actions = [
