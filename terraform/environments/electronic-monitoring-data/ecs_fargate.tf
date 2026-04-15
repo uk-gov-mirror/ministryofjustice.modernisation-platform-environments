@@ -152,7 +152,7 @@ resource "aws_ecs_task_definition" "emds-gdpr-structured-data-deletion" {
   network_mode             = "awsvpc"
   cpu                      = 2048
   memory                   = 4096
-  execution_role_arn       = aws_iam_role.ecs_gdpr_execution_role[0].arn
+  execution_role_arn       = aws_iam_role.ecs_gdpr_execution_role.arn
   task_role_arn            = aws_iam_role.gdpr_structured_job_role[0].arn
 
   container_definitions = jsonencode([
