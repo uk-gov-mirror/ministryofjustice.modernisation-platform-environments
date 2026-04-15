@@ -117,12 +117,12 @@ data "aws_iam_policy_document" "gdpr_delete_policy_document" {
     actions = [
       "ecs:DescribeTasks",
     ]
-    resources = ["arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:emds_gdpr_structured_data_deletion_job*"] 
+    resources = ["arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:emds_gdpr_structured_data_deletion_job*"]
   }
 }
 
-resource "aws_iam_policy" "gdpr_delete_policy_document" {
+resource "aws_iam_policy" "gdpr_delete_iam_policy" {
   count  = local.is-development || local.is-preproduction ? 1 : 0
   name   = "gdpr_deletetion_step_function_role"
-  policy = data.aws_iam_policy_document.gdpr_deletetion_policy_document[0].json
+  policy = data.aws_iam_policy_document.gdpr_delete_policy_document[0].json
 }
