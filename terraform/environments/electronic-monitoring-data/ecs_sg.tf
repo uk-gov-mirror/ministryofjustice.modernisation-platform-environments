@@ -12,11 +12,11 @@ resource "aws_security_group_rule" "ecs_egress_ecr" {
   type              = "egress"
   security_group_id = aws_security_group.ecs_generic.id
 
-  from_port   = 443
-  to_port     = 443
-  protocol    = "tcp"
-  
+  from_port = 443
+  to_port   = 443
+  protocol  = "tcp"
+
   cidr_blocks = [data.aws_vpc.shared.cidr_block, ]
-  
+
   description = "Allow HTTPS outbound for ECR and CloudWatch logs"
 }

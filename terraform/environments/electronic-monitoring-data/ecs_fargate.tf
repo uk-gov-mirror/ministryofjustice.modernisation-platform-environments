@@ -50,7 +50,7 @@ resource "aws_iam_policy" "ecs_gdpr_execution_policy" {
   policy = data.aws_iam_policy_document.ecs_execution_policy.json
 }
 resource "aws_iam_role_policy_attachment" "ecs_gdpr_execution_role_policy_attach" {
-  role       = aws_iam_role.ecs_gdpr_execution_role.name
+  role       = aws_iam_role.ecs_gdpr_execution_role[0].name
   policy_arn = aws_iam_policy.ecs_gdpr_execution_policy.arn
 }
 
@@ -76,7 +76,7 @@ data "aws_iam_policy_document" "gdpr_structured_job_policy_document" {
       "glue:GetPartitions",
       "glue:BatchDeletePartition"
     ]
-     resources = [
+    resources = [
       "arn:aws:glue:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:catalog",
       "arn:aws:glue:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:database/*",
       "arn:aws:glue:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/*/*"
@@ -113,14 +113,14 @@ data "aws_iam_policy_document" "ecs_task_trust_policy" {
 }
 
 resource "aws_iam_role" "gdpr_structured_job_role" {
-  count                    = local.is-development || local.is-preproduction ? 1 : 0
+  count              = local.is-development || local.is-preproduction ? 1 : 0
   name               = "ecs-gdpr-structured-job-task-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_trust_policy.json
 }
 resource "aws_iam_role_policy" "gdpr_job_inline_policy" {
-  count                    = local.is-development || local.is-preproduction ? 1 : 0
+  count  = local.is-development || local.is-preproduction ? 1 : 0
   name   = "gdpr-structured-job-permissions"
-  role   = aws_iam_role.gdpr_structured_job_role.id
+  role   = aws_iam_role.gdpr_structured_job_role[0].id
   policy = data.aws_iam_policy_document.gdpr_structured_job_policy_document.json
 }
 resource "aws_ecs_cluster" "emds-gdpr-cluster" {
@@ -152,8 +152,8 @@ resource "aws_ecs_task_definition" "emds-gdpr-structured-data-deletion" {
   network_mode             = "awsvpc"
   cpu                      = 2048
   memory                   = 4096
-  execution_role_arn       = aws_iam_role.ecs_gdpr_execution_role.arn
-  task_role_arn            = aws_iam_role.gdpr_structured_job_role.arn
+  execution_role_arn       = aws_iam_role.ecs_gdpr_execution_role[0].arn
+  task_role_arn            = aws_iam_role.gdpr_structured_job_role[0].arn
 
   container_definitions = jsonencode([
     {
