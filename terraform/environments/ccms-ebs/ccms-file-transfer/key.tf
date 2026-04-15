@@ -22,10 +22,7 @@ data "aws_iam_policy_document" "s3_sftp_barclaycard_kms_policy" {
       "kms:GenerateDataKey*",
       "kms:DescribeKey"
     ]
-    resources = [
-      module.s3-bucket-sftp-barclaycard.bucket.arn,
-      "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
-    ]
+    resources = ["*"]
     condition {
       test     = "StringEquals"
       variable = "kms:CallerAccount"
