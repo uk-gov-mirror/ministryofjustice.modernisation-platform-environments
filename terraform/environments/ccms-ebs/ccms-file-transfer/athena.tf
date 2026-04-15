@@ -31,7 +31,7 @@ resource "aws_athena_named_query" "main_table_sftp_barclaycard_internal_query" {
     "./templates/create_internal_table.sql",
     {
       bucket     = data.aws_s3_bucket.logging_bucket.id
-      key        = local.sftp_barclaycard_bucket_name
+      key        = "${local.application_name}-sftp-barclaycard-lb"
       account_id = data.aws_caller_identity.current.id
       region     = data.aws_region.current.id
     }
@@ -47,7 +47,7 @@ resource "aws_athena_named_query" "http_requests_sftp_barclaycard_internal_query
     "./templates/lb_internal_http_gets.sql",
     {
       bucket     = data.aws_s3_bucket.logging_bucket.id
-      key        = local.sftp_barclaycard_bucket_name
+      key        = "${local.application_name}-sftp-barclaycard-lb"
       account_id = data.aws_caller_identity.current.id
       region     = data.aws_region.current.id
     }
