@@ -93,7 +93,7 @@ data "aws_iam_policy_document" "gdpr_delete_policy_document" {
       "ecs:RunTask"
     ]
     resources = [
-      "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}${module.aws_ecs_task_definition[0].name}/*"
+      "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:emds_gdpr_structured_data_deletion_job/*"
     ]
   }
 
@@ -103,8 +103,8 @@ data "aws_iam_policy_document" "gdpr_delete_policy_document" {
       "iam:PassRole"
     ]
     resources = [
-      "arn:aws:iam::account-id:role/your-ecs-task-execution-role",
-      "arn:aws:iam::account-id:role/your-ecs-task-role"
+      aws_iam_role.ecs_execution_role.arn,
+      aws_iam_role.ecs_gdpr_execution_role.arn
     ]
     condition {
       test     = "StringLike"
@@ -116,11 +116,8 @@ data "aws_iam_policy_document" "gdpr_delete_policy_document" {
     effect = "Allow"
     actions = [
       "ecs:DescribeTasks",
-      "events:PutTargets",
-      "events:PutRule",
-      "events:DescribeRule"
     ]
-    resources = ["*"] 
+    resources = ["arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:emds_gdpr_structured_data_deletion_job*"] 
   }
 }
 

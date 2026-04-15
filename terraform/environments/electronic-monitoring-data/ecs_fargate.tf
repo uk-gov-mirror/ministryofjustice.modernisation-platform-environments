@@ -56,7 +56,6 @@ resource "aws_iam_role_policy_attachment" "ecs_gdpr_execution_role_policy_attach
 
 # ECS STRUCTURED JOB IAM
 data "aws_iam_policy_document" "gdpr_structured_job_policy_document" {
-
   statement {
     sid    = "AthenaQueryActions"
     effect = "Allow"
@@ -114,17 +113,16 @@ data "aws_iam_policy_document" "ecs_task_trust_policy" {
 }
 
 resource "aws_iam_role" "gdpr_structured_job_role" {
+  count                    = local.is-development || local.is-preproduction ? 1 : 0
   name               = "ecs-gdpr-structured-job-task-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_trust_policy.json
 }
-
 resource "aws_iam_role_policy" "gdpr_job_inline_policy" {
+  count                    = local.is-development || local.is-preproduction ? 1 : 0
   name   = "gdpr-structured-job-permissions"
   role   = aws_iam_role.gdpr_structured_job_role.id
   policy = data.aws_iam_policy_document.gdpr_structured_job_policy_document.json
 }
-
-
 resource "aws_ecs_cluster" "emds-gdpr-cluster" {
   count = local.is-development || local.is-preproduction ? 1 : 0
   name  = "emds-gdpr-cluster"
