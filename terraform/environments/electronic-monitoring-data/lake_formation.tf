@@ -21,10 +21,6 @@ data "aws_iam_roles" "mp_data_scientist" {
   path_prefix = "/aws-reserved/sso.amazonaws.com/"
 }
 
-data "aws_iam_role" "mp_data_scientist" {
-  name = one(data.aws_iam_roles.mp_data_scientist.names)
-}
-
 resource "aws_lakeformation_data_lake_settings" "settings" {
   admins = flatten(
     [
@@ -87,7 +83,7 @@ resource "aws_lakeformation_permissions" "sensitive_grant" {
 
 resource "aws_lakeformation_permissions" "data_scientist_test_db_permissions" {
   count     = local.is-test ? 1 : 0
-  principal = data.aws_iam_role.mp_data_scientist.arn
+  principal = one(data.aws_iam_roles.mp_data_scientist.arns)
 
   database {
     name = "your_safe_test_database"
@@ -98,7 +94,7 @@ resource "aws_lakeformation_permissions" "data_scientist_test_db_permissions" {
 
 resource "aws_lakeformation_permissions" "data_scientist_test_table_permissions" {
   count     = local.is-test ? 1 : 0
-  principal = data.aws_iam_role.mp_data_scientist.arn
+  principal = one(data.aws_iam_roles.mp_data_scientist.arns)
 
   table {
     database_name = "your_safe_test_database"
