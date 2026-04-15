@@ -121,6 +121,40 @@ resource "aws_s3_bucket_policy" "terraform_state" {
 }
 
 #####################################
+# DynamoDB Table for State Locking
+#####################################
+
+resource "aws_dynamodb_table" "terraform_state_lock" {
+  # checkov:skip=CKV_AWS_28: Point-in-time recovery not required for lock table
+  # checkov:skip=CKV_AWS_119: Server-side encryption enabled by default with AWS managed key
+
+  name         = "${local.application_name}-terraform-state-lock"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = aws_kms_key.terraform_state.arn
+  }
+
+  point_in_time_recovery {
+    enabled = true
+  }
+
+  tags = merge(
+    local.tags,
+    {
+      Name = "${local.application_name}-terraform-state-lock"
+    }
+  )
+}
+
+#####################################
 # Outputs
 #####################################
 
@@ -137,6 +171,11 @@ output "terraform_state_bucket_arn" {
 output "terraform_state_lock_table_name" {
   description = "Name of the DynamoDB table for Terraform state locking"
   value       = aws_dynamodb_table.terraform_state_lock.name
+}
+
+output "terraform_state_lock_table_arn" {
+  description = "ARN of the DynamoDB table for Terraform state locking"
+  value       = aws_dynamodb_table.terraform_state_lock.arn
 }
 
 output "terraform_state_kms_key_arn" {
