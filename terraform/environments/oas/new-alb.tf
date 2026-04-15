@@ -155,6 +155,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "lb_access_logs" {
     id     = "main"
     status = "Enabled"
 
+    filter {}
+
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
     }
