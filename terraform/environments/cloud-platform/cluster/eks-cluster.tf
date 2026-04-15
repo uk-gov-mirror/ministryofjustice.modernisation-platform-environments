@@ -88,6 +88,10 @@ module "eks" {
   addons = {
     coredns = {
       #   addon_version = local.environment_configuration.eks_cluster_addon_versions.coredns
+      configuration_values = {
+        nodeSelector = local.environment_configuration.system_ng.labels
+        tolerations = local.environment_configuration.system_ng.taints
+      }
     }
     kube-proxy = {
       #   addon_version = local.environment_configuration.eks_cluster_addon_versions.kube_proxy
@@ -104,6 +108,10 @@ module "eks" {
     }
 
     aws-ebs-csi-driver = {
+      configuration_values = {
+        nodeSelector = local.environment_configuration.system_ng.labels
+        tolerations = local.environment_configuration.system_ng.taints
+      }
     }
 
   }
