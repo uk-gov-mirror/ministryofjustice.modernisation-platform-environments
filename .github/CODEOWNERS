@@ -15,6 +15,7 @@
 /terraform/environments/ccms-ebs @ministryofjustice/laa-ccms-developers @ministryofjustice/laa-ccms-instance-access @ministryofjustice/laa-ccms-migration-team @ministryofjustice/laa-sre-admins @ministryofjustice/modernisation-platform-security @ministryofjustice/octo-cyber-team @ministryofjustice/modernisation-platform
 /terraform/environments/ccms-ebs/workspaces-secure-browser @ministryofjustice/aws-root-account-admin-team @ministryofjustice/modernisation-platform
 /terraform/environments/ccms-ebs/ccms-ebs-ssogen @ministryofjustice/laa-sre-admins @ministryofjustice/modernisation-platform
+/terraform/environments/ccms-ebs/ccms-file-transfer @ministryofjustice/laa-sre-admins @ministryofjustice/modernisation-platform
 /terraform/environments/ccms-edrms @ministryofjustice/laa-sre-admins @ministryofjustice/modernisation-platform
 /terraform/environments/ccms-oia @ministryofjustice/laa-ccms-developers @ministryofjustice/laa-dba @ministryofjustice/laa-sre-admins @ministryofjustice/octo-cyber-team @ministryofjustice/modernisation-platform
 /terraform/environments/ccms-pui-internal @ministryofjustice/laa-sre-admins @ministryofjustice/modernisation-platform
@@ -55,7 +56,6 @@
 /terraform/environments/hmpps-domain-services @ministryofjustice/hosting-migrations @ministryofjustice/studio-webops @ministryofjustice/modernisation-platform
 /terraform/environments/hmpps-esupervision @ministryofjustice/stg-pathfinders @ministryofjustice/modernisation-platform
 /terraform/environments/hmpps-oem @ministryofjustice/hmpps-dba @ministryofjustice/hmpps-migration @ministryofjustice/hosting-migrations @ministryofjustice/studio-webops @ministryofjustice/modernisation-platform
-/terraform/environments/justice-digital-document-hub @ministryofjustice/justice-digital-document-hub @ministryofjustice/modernisation-platform
 /terraform/environments/laa-ccms-soa @ministryofjustice/laa-sre-admins @ministryofjustice/modernisation-platform
 /terraform/environments/laa-ccms-soa/ccms-soa-sandbox @ministryofjustice/laa-sre-admins @ministryofjustice/modernisation-platform
 /terraform/environments/laa-cis @ministryofjustice/v1-cis-mod @ministryofjustice/modernisation-platform

@@ -78,6 +78,7 @@ locals {
     ] : local.is-preproduction ? [
     "arn:aws:iam::${local.account_ids["cloud-platform"]}:role/${var.cloud-platform-crime-matching-api-iam-preprod}",
   ] : []
+  iam_role_validation_db = local.is-test ? "arn:aws:iam::${local.account_ids["cloud-platform"]}:role/cloud-platform-irsa-7255c33b35507f31-live" : local.is-production ? "arn:aws:iam::${local.account_ids["cloud-platform"]}:role/cloud-platform-irsa-a7f6cc937a0f63ce-live" : ""
 }
 
 variable "cloud-platform-iam-dev" {
@@ -134,6 +135,124 @@ resource "aws_lakeformation_resource" "data_bucket" {
   role_arn = module.lakeformation_registration_iam_role.arn
 }
 
+module "emd_validation_db_role" {
+  #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
+  #checkov:skip=CKV_TF_2:Module registry does not support tags for versions
+  count   = local.is-test || local.is-production ? 1 : 0
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
+  version = "5.48.0"
+
+  trusted_role_arns = flatten([
+    data.aws_iam_roles.mod_plat_roles.arns,
+    local.iam_role_validation_db,
+  ])
+
+  create_role       = true
+  role_requires_mfa = false
+
+  role_name = "emd_validation_db_read_data_${local.environment_shorthand}"
+
+  tags = local.tags
+}
+
+resource "aws_lakeformation_permissions" "em_data_validation_db" {
+  count       = local.is-test || local.is-production ? 1 : 0
+  principal   = module.emd_validation_db_role[0].iam_role_arn
+  permissions = ["DESCRIBE"]
+  database {
+    name = "validation${local.dbt_suffix}"
+  }
+}
+
+resource "aws_lakeformation_permissions" "em_data_validation_table" {
+  count       = local.is-test || local.is-production ? 1 : 0
+  principal   = module.emd_validation_db_role[0].iam_role_arn
+  permissions = ["DESCRIBE", "SELECT"]
+  table {
+    database_name = "validation${local.dbt_suffix}"
+    wildcard      = true
+  }
+}
+
+resource "aws_lakeformation_permissions" "em_data_validation_s3" {
+  count       = local.is-test || local.is-production ? 1 : 0
+  principal   = module.emd_validation_db_role[0].iam_role_arn
+  permissions = ["DATA_LOCATION_ACCESS"]
+  data_location {
+    arn = module.s3-create-a-derived-table-bucket.bucket.arn
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "standard_athena_access_em_data_validation" {
+  count      = local.is-test || local.is-production ? 1 : 0
+  policy_arn = aws_iam_policy.standard_athena_access.arn
+  role       = module.emd_validation_db_role[0].iam_role_name
+}
+
+data "aws_iam_policy_document" "em_data_validation_permissions" {
+  statement {
+    sid       = "ListAccountAliasForEnvironmentClass"
+    effect    = "Allow"
+    actions   = ["iam:ListAccountAliases"]
+    resources = ["*"]
+  }
+  statement {
+    sid    = "ListAllBucketsForEnvironmentClass"
+    effect = "Allow"
+    actions = [
+      "s3:ListAllMyBuckets",
+      "s3:GetBucketLocation"
+    ]
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "glue:GetDatabases",
+      "glue:GetDatabase",
+      "glue:GetTables",
+      "glue:GetTable",
+    ]
+    resources = [
+      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:catalog",
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "glue:GetDatabase",
+      "glue:GetTables",
+      "glue:GetTable",
+    ]
+    resources = [
+      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/validation${local.dbt_suffix}",
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "glue:GetTables",
+      "glue:GetTable",
+    ]
+    resources = [
+      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:table/validation${local.dbt_suffix}/*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "em_data_validation_permissions" {
+  count       = local.is-test || local.is-production ? 1 : 0
+  name_prefix = "em_data_validation_permissions"
+  description = "Permissions for environment class for emd tool."
+  policy      = data.aws_iam_policy_document.em_data_validation_permissions.json
+}
+
+resource "aws_iam_role_policy_attachment" "em_data_validation_permissions" {
+  count      = local.is-test || local.is-production ? 1 : 0
+  policy_arn = aws_iam_policy.em_data_validation_permissions[0].arn
+  role       = module.emd_validation_db_role[0].iam_role_name
+}
+
 
 module "emdi_trail_maps_role" {
   #checkov:skip=CKV_TF_1:Module registry does not support commit hashes for versions
@@ -161,7 +280,7 @@ resource "aws_lakeformation_permissions" "emdi_fms_db" {
   principal   = module.emdi_trail_maps_role[0].iam_role_arn
   permissions = ["DESCRIBE"]
   database {
-    name = "serco_fms_${local.environment_shorthand}"
+    name = "serco_fms_curated${local.dbt_suffix}"
   }
 }
 
@@ -170,7 +289,7 @@ resource "aws_lakeformation_permissions" "emdi_fms_tables" {
   principal   = module.emdi_trail_maps_role[0].iam_role_arn
   permissions = ["SELECT", "DESCRIBE"]
   table {
-    database_name = "serco_fms_${local.environment_shorthand}"
+    database_name = "serco_fms_curated${local.dbt_suffix}"
     wildcard      = true
   }
 }
@@ -180,7 +299,7 @@ resource "aws_lakeformation_permissions" "emdi_mdss_db" {
   principal   = module.emdi_trail_maps_role[0].iam_role_arn
   permissions = ["DESCRIBE"]
   database {
-    name = "allied_mdss_${local.environment_shorthand}"
+    name = "staged_mdss${local.dbt_suffix}"
   }
 }
 
@@ -189,7 +308,7 @@ resource "aws_lakeformation_permissions" "emdi_mdss_tables" {
   principal   = module.emdi_trail_maps_role[0].iam_role_arn
   permissions = ["SELECT", "DESCRIBE"]
   table {
-    database_name = "allied_mdss_${local.environment_shorthand}"
+    database_name = "staged_mdss${local.dbt_suffix}"
     wildcard      = true
   }
 }
@@ -443,7 +562,9 @@ data "aws_iam_policy_document" "emac_di_permissions" {
     ]
     resources = local.is-development || local.is-test ? [
       "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/serco_fms*",
-      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/allied_mdss*"
+      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/allied_mdss*",
+      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/serco_fms_curated*",
+      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/staged_mdss*"
     ] : []
   }
   statement {
@@ -453,8 +574,10 @@ data "aws_iam_policy_document" "emac_di_permissions" {
       "glue:GetTable",
     ]
     resources = local.is-development || local.is-test ? [
-      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:table/serco_fms*/*",
-      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:table/allied_mdss*/*"
+      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/serco_fms*/",
+      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:database/allied_mdss*/",
+      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:table/serco_fms_curated*/*",
+      "arn:aws:glue:${data.aws_region.current.name}:${local.env_account_id}:table/staged_mdss*/*"
     ] : []
   }
 }
