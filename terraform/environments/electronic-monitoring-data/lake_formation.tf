@@ -86,7 +86,7 @@ resource "aws_lakeformation_permissions" "data_scientist_test_db_permissions" {
   principal = one(data.aws_iam_roles.mp_data_scientist.arns)
 
   database {
-    name = "your_safe_test_database"
+    name = "curated_fms_test_dbt"
   }
 
   permissions = ["DESCRIBE"]
@@ -97,8 +97,8 @@ resource "aws_lakeformation_permissions" "data_scientist_test_table_permissions"
   principal = one(data.aws_iam_roles.mp_data_scientist.arns)
 
   table {
-    database_name = "your_safe_test_database"
-    name          = "your_safe_test_table"
+    database_name = "curated_fms_test_dbt"
+    wildcard      = true
   }
 
   permissions = ["SELECT", "DESCRIBE"]
