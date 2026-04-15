@@ -233,7 +233,8 @@ resource "helm_release" "aws_cloudwatch_observability" {
 
   depends_on = [
     module.aws_cloudwatch_observability_eks_pod_identity,
-    module.container_insights_log_group
+    module.container_insights_log_group,
+    kubernetes_manifest.kyverno_privileged_policy
   ]
 }
 
