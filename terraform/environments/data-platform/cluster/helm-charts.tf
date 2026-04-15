@@ -381,23 +381,17 @@ resource "helm_release" "shared_services_gateway" {
   ]
 }
 
-# Temporarily disabled: on EKS 1.35 + Bottlerocket 1.57.0 arm64 nodes,
-# KEDA components crash-loop at startup with:
-# "open /sys/fs/cgroup/cpu.max: permission denied".
-# This leaves external.metrics.k8s.io unavailable and can block namespace
-# deletion. Re-enable once an arm64-compatible KEDA/runtime combination is
-# validated in this environment.
-# resource "helm_release" "keda" {
-#   /* https://artifacthub.io/packages/helm/kedacore/keda */
+resource "helm_release" "keda" {
+  /* https://artifacthub.io/packages/helm/kedacore/keda */
 
-#   name       = "keda"
-#   repository = "https://kedacore.github.io/charts"
-#   chart      = "keda"
-#   version    = local.cluster_configuration.helm_chart_versions.keda
-#   namespace  = module.keda_namespace.name
-#   values = [
-#     templatefile(
-#       "${path.module}/configuration/helm/keda/values.yml.tftpl", {}
-#     )
-#   ]
-# }
+  name       = "keda"
+  repository = "https://kedacore.github.io/charts"
+  chart      = "keda"
+  version    = local.cluster_configuration.helm_chart_versions.keda
+  namespace  = module.keda_namespace.name
+  values = [
+    templatefile(
+      "${path.module}/configuration/helm/keda/values.yml.tftpl", {}
+    )
+  ]
+}
