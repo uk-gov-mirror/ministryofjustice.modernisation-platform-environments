@@ -34,7 +34,7 @@ resource "aws_lb_target_group" "sftp_barclaycard_target_group" {
   }
 
   health_check {
-    path                = "/health"
+    path                = "/"
     healthy_threshold   = "5"
     interval            = "120"
     protocol            = "HTTP"
