@@ -92,7 +92,7 @@ resource "aws_workspaces_workspace" "workspaces_ad" {
 
   root_volume_encryption_enabled = true
   user_volume_encryption_enabled = true
-  volume_encryption_key          = data.aws_kms_key.ebs_shared.arn
+  volume_encryption_key          = aws_kms_key.ebs[0].arn
 
   workspace_properties {
     compute_type_name                         = local.workspace_types[each.value.instance_type].compute_type_name
