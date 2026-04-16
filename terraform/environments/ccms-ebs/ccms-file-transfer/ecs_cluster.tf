@@ -8,13 +8,7 @@ resource "aws_ecs_cluster" "main_cluster" {
   }
 }
 
-# resource "aws_ecs_cluster_capacity_providers" "main" {
-#   cluster_name       = aws_ecs_cluster.main.name
-#   capacity_providers = [aws_ecs_capacity_provider.capacity-provider.name]
-# }
-
 # ECS Task Definition
-
 
 resource "aws_ecs_task_definition" "sftp_barclaycard_task_definition" {
   family             = "${local.application_name}-ftp-barclaycard-task"
@@ -26,7 +20,7 @@ resource "aws_ecs_task_definition" "sftp_barclaycard_task_definition" {
   cpu    = local.application_data.accounts[local.environment].container_cpu
   memory = local.application_data.accounts[local.environment].container_memory
 
-# Forcing ARM64 architecture for Fargate tasks
+  # Forcing ARM64 architecture for Fargate tasks
   runtime_platform {
     cpu_architecture = "ARM64"
   }
@@ -70,10 +64,6 @@ resource "aws_ecs_service" "sftp_barclaycard_ecs_service" {
   #   ignore_changes = [
   #     task_definition
   #   ]
-  # }
-  # ordered_placement_strategy {
-  #   field = "attribute:ecs.availability-zone"
-  #   type  = "spread"
   # }
 
   network_configuration {
