@@ -45,6 +45,21 @@ module "s3-bucket-sftp-barclaycard" {
           module.s3-bucket-sftp-barclaycard.bucket.arn,
           "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
         ]
+      },
+      {
+        "Sid" = "RestrictToTLSRequestsOnly",
+        "Action": "s3:*",
+        "Effect": "Deny",
+        "Resource": [
+          module.s3-bucket-sftp-barclaycard.bucket.arn,
+          "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
+        ],
+        "Condition": {
+            "Bool": {
+                "aws:SecureTransport": "false"
+            }
+        },
+        "Principal": "*"
       }
     ]
   })]
