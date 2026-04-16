@@ -88,3 +88,25 @@ resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_alb_healthyhosts" {
     LoadBalancer = aws_lb.sftp_barclaycard_load_balancer.arn_suffix
   }
 }
+
+resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_ecs_high_memory" {
+  alarm_name          = "${local.application_name}-sftp-barclaycard-${local.environment}-ecs-high-memory"
+  alarm_description   = "ECS Fargate service memory utilization is high"
+  comparison_operator = "GreaterThanThreshold"
+  threshold           = 85
+  evaluation_periods  = 3
+  datapoints_to_alarm = 3
+  treat_missing_data  = "notBreaching"
+  namespace   = "AWS/ECS"
+  metric_name = "MemoryUtilization"
+  statistic   = "Average"
+  period      = 60
+
+  dimensions = {
+    ClusterName = aws_ecs_cluster.main_cluster.name
+    ServiceName = aws_ecs_service.sftp_barclaycard_ecs_service.name
+  }
+
+  alarm_actions       = [data.aws_sns_topic.cw_alerts.arn]
+  ok_actions          = [data.aws_sns_topic.cw_alerts.arn]
+}
