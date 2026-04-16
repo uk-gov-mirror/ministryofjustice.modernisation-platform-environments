@@ -139,19 +139,6 @@ resource "aws_s3_bucket_notification" "sftp_barclaycard_bucket_notification" {
   depends_on = [module.s3-bucket-sftp-barclaycard]
 }
 
-# resource "aws_s3_bucket_notification" "sftp_barclaycard_file_lambda_notification" {
-#   bucket = module.s3-bucket-sftp-barclaycard.bucket.id
-#   # eventbridge = true
-#   # topic {
-#   #   topic_arn     = data.aws_sns_topic.s3_topic.arn
-#   #   events        = ["s3:ObjectCreated:*"]
-#   #   filter_suffix = ".log"
-#   # }
-
-
-#   depends_on = [module.s3-bucket-sftp-barclaycard]
-# }
-
 resource "aws_s3_object" "sftp_barclaycard_folder" {
   bucket = module.s3-bucket-sftp-barclaycard.bucket.id
   for_each = {
