@@ -98,6 +98,24 @@ data "aws_iam_policy_document" "gdpr_structured_job_policy_document" {
       "${module.s3-data-bucket.bucket.arn}/*",
     ]
   }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecr:GetAuthorizationToken"
+    ]
+    resources = ["*"]
+  }
+
+statement {
+  effect = "Allow"
+  actions = [
+    "ecr:BatchCheckLayerAvailability",
+    "ecr:GetDownloadUrlForLayer",
+    "ecr:BatchGetImage"
+  ]
+  resources = ["arn:aws:ecr:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:repository/${local.ecr_repo_name}"]
+  }
 }
 
 data "aws_iam_policy_document" "ecs_task_trust_policy" {
