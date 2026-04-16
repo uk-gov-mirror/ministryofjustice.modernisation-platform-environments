@@ -13,7 +13,7 @@ module "weblogic_eis" {
   account_config    = var.account_config
   account_info      = var.account_info
   capacity_provider = aws_ecs_capacity_provider.weblogic_eis.name
-  
+
   force_new_deployment = true
 
   desired_count = 1
@@ -124,6 +124,12 @@ resource "aws_autoscaling_group" "weblogic_eis" {
   launch_template {
     id      = aws_launch_template.weblogic.id
     version = "$Latest"
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "weblogic-eis-${var.env_name}-ecs-asg"
+    propagate_at_launch = true
   }
 }
 

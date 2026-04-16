@@ -202,6 +202,12 @@ resource "aws_autoscaling_group" "weblogic" {
     id      = aws_launch_template.weblogic.id
     version = "$Latest"
   }
+
+  tag {
+    key                 = "Name"
+    value               = "weblogic-${var.env_name}-ecs-asg"
+    propagate_at_launch = true
+  }
 }
 
 resource "aws_ecs_capacity_provider" "weblogic" {
