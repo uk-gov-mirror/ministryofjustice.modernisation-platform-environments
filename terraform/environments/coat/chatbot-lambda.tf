@@ -35,6 +35,10 @@ resource "aws_security_group" "rag_lambda" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    "application" = "coat"
+  }
 }
 
 resource "aws_lambda_function" "rag_lambda" {
