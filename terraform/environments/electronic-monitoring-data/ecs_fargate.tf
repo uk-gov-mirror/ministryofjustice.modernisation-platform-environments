@@ -1,5 +1,5 @@
 locals {
-  structured_data_image_name = "delete-structured-data"
+  structured_data_image_name = "gdpr-structured-data-dev"
   ecr_repo_name              = "electronic-monitoring-gdpr"
   core_shared_services_id    = local.environment_management.account_ids["core-shared-services-production"]
 }
@@ -34,14 +34,14 @@ data "aws_iam_policy_document" "ecs_execution_policy" {
     resources = ["*"]
   }
 
-statement {
-  effect = "Allow"
-  actions = [
-    "ecr:BatchCheckLayerAvailability",
-    "ecr:GetDownloadUrlForLayer",
-    "ecr:BatchGetImage"
-  ]
-  resources = ["*"]
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage"
+    ]
+    resources = ["*"]
   }
 }
 
