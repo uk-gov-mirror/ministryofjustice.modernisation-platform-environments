@@ -26,7 +26,7 @@
       "deletion_protection": "false",
       "pagerduty_integration_key_name": "laa_oas_nonprod_alarms",
       "s3_vpc_endpoint_prefix": "pl-7ca54015",
-      "ec2_private_ip": "10.26.56.108"
+      "ec2_private_ip": "10.26.56.148"
     },
     "test": {
       "example_var": "test-data"
