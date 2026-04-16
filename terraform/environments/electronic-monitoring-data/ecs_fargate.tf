@@ -25,7 +25,7 @@ data "aws_iam_policy_document" "ecs_execution_policy" {
     ]
     resources = ["*"]
   }
-  
+
   statement {
     effect = "Allow"
     actions = [
@@ -41,7 +41,7 @@ statement {
     "ecr:GetDownloadUrlForLayer",
     "ecr:BatchGetImage"
   ]
-  resources = ["arn:aws:ecr:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:repository/${local.ecr_repo_name}"]
+  resources = ["*"]
   }
 }
 
@@ -72,7 +72,6 @@ resource "aws_iam_role_policy_attachment" "ecs_gdpr_execution_role_policy_attach
   policy_arn = aws_iam_policy.ecs_gdpr_execution_policy.arn
 }
 
-# ECS STRUCTURED JOB IAM
 data "aws_iam_policy_document" "gdpr_structured_job_policy_document" {
   statement {
     sid    = "AthenaQueryActions"
