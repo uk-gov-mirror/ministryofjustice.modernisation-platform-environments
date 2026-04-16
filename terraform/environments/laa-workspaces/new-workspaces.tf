@@ -77,12 +77,7 @@ resource "aws_workspaces_ip_group" "workspaces" {
 }
 
 ##############################################
-### WorkSpaces Creation
-##############################################
-# resource "aws_workspaces_workspace" "workspaces" {
-#   for_each = local.environment == "development" ? local.workspace_users : {}
-#
-#   directory_id = aws_ with Microsoft AD
+### WorkSpaces Creation with Microsoft AD
 ###
 ### Automatically creates WorkSpaces for users
 ### defined in new-workspace-users.tf
@@ -121,3 +116,4 @@ resource "aws_workspaces_workspace" "workspaces_ad" {
     terraform_data.ad_users,
     aws_workspaces_directory.workspaces_ad
   ]
+}
