@@ -16,36 +16,76 @@ locals {
 
   loadbalancer_ingress_rules = {
     "lb_ingress_80" = {
-      description     = "Loadbalancer ingress rule for HTTP (redirects to HTTPS)"
-      from_port       = 80
-      to_port         = 80
-      protocol        = "tcp"
-      cidr_blocks     = local.moj_cidr_blocks
-      security_groups = local.environment == "preproduction" ? [aws_security_group.kali_sg[0].id] : []
+      description = "Loadbalancer ingress rule for HTTP (redirects to HTTPS)"
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = local.moj_cidr_blocks
     }
     "lb_ingress_443" = {
-      description     = "Loadbalancer ingress rule for HTTPS from MOJO devices, LZ Shared-Service Workspaces and OAS EC2 Instance"
-      from_port       = 443
-      to_port         = 443
-      protocol        = "tcp"
-      cidr_blocks     = local.moj_cidr_blocks
-      security_groups = local.environment == "preproduction" ? [aws_security_group.ec2_sg[0].id, aws_security_group.kali_sg[0].id] : []
+      description = "Loadbalancer ingress rule for HTTPS from MOJO devices, LZ Shared-Service Workspaces and OAS EC2 Instance"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = local.moj_cidr_blocks
     }
     "lb_ingress_9500" = {
-      description     = "Loadbalancer ingress rule for HTTP 9500 (Console/EM)"
-      from_port       = 9500
-      to_port         = 9500
-      protocol        = "tcp"
-      cidr_blocks     = local.moj_cidr_blocks
-      security_groups = local.environment == "preproduction" ? [aws_security_group.kali_sg[0].id] : []
+      description = "Loadbalancer ingress rule for HTTP 9500 (Console/EM)"
+      from_port   = 9500
+      to_port     = 9500
+      protocol    = "tcp"
+      cidr_blocks = local.moj_cidr_blocks
     }
     "lb_ingress_9502" = {
-      description     = "Loadbalancer ingress rule for HTTP 9502 (Analytics/DV)"
-      from_port       = 9502
-      to_port         = 9502
-      protocol        = "tcp"
-      cidr_blocks     = local.moj_cidr_blocks
-      security_groups = local.environment == "preproduction" ? [aws_security_group.kali_sg[0].id] : []
+      description = "Loadbalancer ingress rule for HTTP 9502 (Analytics/DV)"
+      from_port   = 9502
+      to_port     = 9502
+      protocol    = "tcp"
+      cidr_blocks = local.moj_cidr_blocks
+    }
+  }
+
+  # Define security group to security group rules with static keys
+  loadbalancer_sg_ingress_rules = {
+    "lb_ingress_80_kali" = {
+      description      = "Loadbalancer ingress rule for HTTP from Kali"
+      from_port        = 80
+      to_port          = 80
+      protocol         = "tcp"
+      source_sg_name   = "kali_sg"
+      enabled_in_envs  = ["preproduction"]
+    }
+    "lb_ingress_443_ec2" = {
+      description      = "Loadbalancer ingress rule for HTTPS from EC2"
+      from_port        = 443
+      to_port          = 443
+      protocol         = "tcp"
+      source_sg_name   = "ec2_sg"
+      enabled_in_envs  = ["preproduction", "development"]
+    }
+    "lb_ingress_443_kali" = {
+      description      = "Loadbalancer ingress rule for HTTPS from Kali"
+      from_port        = 443
+      to_port          = 443
+      protocol         = "tcp"
+      source_sg_name   = "kali_sg"
+      enabled_in_envs  = ["preproduction"]
+    }
+    "lb_ingress_9500_kali" = {
+      description      = "Loadbalancer ingress rule for HTTP 9500 from Kali"
+      from_port        = 9500
+      to_port          = 9500
+      protocol         = "tcp"
+      source_sg_name   = "kali_sg"
+      enabled_in_envs  = ["preproduction"]
+    }
+    "lb_ingress_9502_kali" = {
+      description      = "Loadbalancer ingress rule for HTTP 9502 from Kali"
+      from_port        = 9502
+      to_port          = 9502
+      protocol         = "tcp"
+      source_sg_name   = "kali_sg"
+      enabled_in_envs  = ["preproduction"]
     }
   }
 
@@ -66,7 +106,7 @@ locals {
 ### Security Group for Load Balancer
 ##############################################
 resource "aws_security_group" "lb_security_group" {
-  count       = local.environment == "preproduction" ? 1 : 0
+  count       = contains(["preproduction", "development"], local.environment) ? 1 : 0
   name_prefix = "${local.application_name}-lb-sg"
   description = "Security group for ${local.application_name} load balancer"
   vpc_id      = data.aws_vpc.shared.id
@@ -78,7 +118,7 @@ resource "aws_security_group" "lb_security_group" {
 }
 
 resource "aws_security_group_rule" "lb_ingress_rules" {
-  for_each = local.environment == "preproduction" ? local.loadbalancer_ingress_rules : {}
+  for_each = contains(["preproduction", "development"], local.environment) ? local.loadbalancer_ingress_rules : {}
 
   security_group_id = aws_security_group.lb_security_group[0].id
   type              = "ingress"
@@ -89,19 +129,13 @@ resource "aws_security_group_rule" "lb_ingress_rules" {
   cidr_blocks       = each.value.cidr_blocks
 }
 
-# Additional ingress rules for when a source security group is specified in the local
+# Additional ingress rules for when a source security group is specified
 resource "aws_security_group_rule" "lb_ingress_sg_rules" {
-  for_each = local.environment == "preproduction" ? merge([
-    for rule_name, rule in local.loadbalancer_ingress_rules : {
-      for sg_id in rule.security_groups : "${rule_name}-${sg_id}" => {
-        description = rule.description
-        from_port   = rule.from_port
-        to_port     = rule.to_port
-        protocol    = rule.protocol
-        sg_id       = sg_id
-      }
-    } if length(rule.security_groups) > 0
-  ]...) : {}
+  for_each = contains(["preproduction", "development"], local.environment) ? {
+    for rule_key, rule in local.loadbalancer_sg_ingress_rules :
+    rule_key => rule
+    if contains(rule.enabled_in_envs, local.environment)
+  } : {}
 
   security_group_id        = aws_security_group.lb_security_group[0].id
   type                     = "ingress"
@@ -109,11 +143,11 @@ resource "aws_security_group_rule" "lb_ingress_sg_rules" {
   from_port                = each.value.from_port
   to_port                  = each.value.to_port
   protocol                 = each.value.protocol
-  source_security_group_id = each.value.sg_id
+  source_security_group_id = each.value.source_sg_name == "ec2_sg" ? aws_security_group.ec2_sg[0].id : aws_security_group.kali_sg[0].id
 }
 
 resource "aws_security_group_rule" "lb_egress_rules" {
-  for_each = local.environment == "preproduction" ? local.loadbalancer_egress_rules : {}
+  for_each = contains(["preproduction", "development"], local.environment) ? local.loadbalancer_egress_rules : {}
 
   security_group_id = aws_security_group.lb_security_group[0].id
   type              = "egress"
@@ -128,7 +162,7 @@ resource "aws_security_group_rule" "lb_egress_rules" {
 ### S3 Bucket for Load Balancer Access Logs
 ##############################################
 resource "aws_s3_bucket" "lb_access_logs" {
-  count         = local.environment == "preproduction" ? 1 : 0
+  count         = contains(["preproduction", "development"], local.environment) ? 1 : 0
   bucket_prefix = "${local.application_name}-lb-access-logs-"
   force_destroy = true
 
@@ -139,7 +173,7 @@ resource "aws_s3_bucket" "lb_access_logs" {
 }
 
 resource "aws_s3_bucket_versioning" "lb_access_logs" {
-  count  = local.environment == "preproduction" ? 1 : 0
+  count  = contains(["preproduction", "development"], local.environment) ? 1 : 0
   bucket = aws_s3_bucket.lb_access_logs[0].id
 
   versioning_configuration {
@@ -148,12 +182,14 @@ resource "aws_s3_bucket_versioning" "lb_access_logs" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "lb_access_logs" {
-  count  = local.environment == "preproduction" ? 1 : 0
+  count  = contains(["preproduction", "development"], local.environment) ? 1 : 0
   bucket = aws_s3_bucket.lb_access_logs[0].id
 
   rule {
     id     = "main"
     status = "Enabled"
+
+    filter {}
 
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
@@ -190,7 +226,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "lb_access_logs" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "lb_access_logs" {
-  count  = local.environment == "preproduction" ? 1 : 0
+  count  = contains(["preproduction", "development"], local.environment) ? 1 : 0
   bucket = aws_s3_bucket.lb_access_logs[0].id
 
   rule {
@@ -201,7 +237,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "lb_access_logs" {
 }
 
 resource "aws_s3_bucket_public_access_block" "lb_access_logs" {
-  count  = local.environment == "preproduction" ? 1 : 0
+  count  = contains(["preproduction", "development"], local.environment) ? 1 : 0
   bucket = aws_s3_bucket.lb_access_logs[0].id
 
   block_public_acls       = true
@@ -213,7 +249,7 @@ resource "aws_s3_bucket_public_access_block" "lb_access_logs" {
 data "aws_elb_service_account" "default" {}
 
 resource "aws_s3_bucket_policy" "lb_access_logs" {
-  count  = local.environment == "preproduction" ? 1 : 0
+  count  = contains(["preproduction", "development"], local.environment) ? 1 : 0
   bucket = aws_s3_bucket.lb_access_logs[0].id
 
   policy = jsonencode({
@@ -280,7 +316,7 @@ resource "aws_s3_bucket_policy" "lb_access_logs" {
 ### Application Load Balancer
 ##############################################
 resource "aws_lb" "oas_lb" {
-  count                      = local.environment == "preproduction" ? 1 : 0
+  count                      = contains(["preproduction", "development"], local.environment) ? 1 : 0
   name                       = "${local.application_name}-lb"
   internal                   = true
   load_balancer_type         = "application"
@@ -305,7 +341,7 @@ resource "aws_lb" "oas_lb" {
 }
 
 resource "aws_lb_target_group" "oas_ec2_target_group" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   name_prefix          = "oas-ec"
   port                 = 9500
@@ -341,7 +377,7 @@ resource "aws_lb_target_group" "oas_ec2_target_group" {
 }
 
 resource "aws_lb_target_group_attachment" "oas_ec2_attachment" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   target_group_arn = aws_lb_target_group.oas_ec2_target_group[0].arn
   target_id        = aws_instance.oas_app_instance_new[0].id
@@ -350,7 +386,7 @@ resource "aws_lb_target_group_attachment" "oas_ec2_attachment" {
 
 # Target Group for Analytics (port 9502)
 resource "aws_lb_target_group" "oas_analytics_target_group" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   name_prefix          = "oas-an"
   port                 = 9502
@@ -386,7 +422,7 @@ resource "aws_lb_target_group" "oas_analytics_target_group" {
 }
 
 resource "aws_lb_target_group_attachment" "oas_analytics_attachment" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   target_group_arn = aws_lb_target_group.oas_analytics_target_group[0].arn
   target_id        = aws_instance.oas_app_instance_new[0].id
@@ -394,7 +430,7 @@ resource "aws_lb_target_group_attachment" "oas_analytics_attachment" {
 }
 
 resource "aws_lb_listener" "http_listener" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   load_balancer_arn = aws_lb.oas_lb[0].arn
   port              = 80
@@ -412,7 +448,7 @@ resource "aws_lb_listener" "http_listener" {
 
 resource "aws_lb_listener" "https_listener" {
   #checkov:skip=CKV_AWS_103
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   depends_on        = [aws_acm_certificate_validation.external]
   load_balancer_arn = aws_lb.oas_lb[0].arn
@@ -434,7 +470,7 @@ resource "aws_lb_listener" "https_listener" {
 
 # HTTP Listener on port 9500 for WebLogic Console and Enterprise Manager
 resource "aws_lb_listener" "http_9500_listener" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   load_balancer_arn = aws_lb.oas_lb[0].arn
   port              = 9500
@@ -448,7 +484,7 @@ resource "aws_lb_listener" "http_9500_listener" {
 
 # Listener rule for /console on port 9500
 resource "aws_lb_listener_rule" "console_9500_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.http_9500_listener[0].arn
   priority     = 100
@@ -467,7 +503,7 @@ resource "aws_lb_listener_rule" "console_9500_rule" {
 
 # Listener rule for /em on port 9500
 resource "aws_lb_listener_rule" "em_9500_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.http_9500_listener[0].arn
   priority     = 101
@@ -486,7 +522,7 @@ resource "aws_lb_listener_rule" "em_9500_rule" {
 
 # HTTP Listener on port 9502 for Analytics and Data Visualization
 resource "aws_lb_listener" "http_9502_listener" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   load_balancer_arn = aws_lb.oas_lb[0].arn
   port              = 9502
@@ -500,7 +536,7 @@ resource "aws_lb_listener" "http_9502_listener" {
 
 # Listener rule for /analytics on port 9502
 resource "aws_lb_listener_rule" "analytics_9502_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.http_9502_listener[0].arn
   priority     = 200
@@ -519,7 +555,7 @@ resource "aws_lb_listener_rule" "analytics_9502_rule" {
 
 # Listener rule for /analytics-ws on port 9502
 resource "aws_lb_listener_rule" "analytics_ws_9502_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.http_9502_listener[0].arn
   priority     = 205
@@ -538,7 +574,7 @@ resource "aws_lb_listener_rule" "analytics_ws_9502_rule" {
 
 # Listener rule for /dv on port 9502
 resource "aws_lb_listener_rule" "dv_9502_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.http_9502_listener[0].arn
   priority     = 210
@@ -557,7 +593,7 @@ resource "aws_lb_listener_rule" "dv_9502_rule" {
 
 # Listener rule for /bi-security-login on port 9502
 resource "aws_lb_listener_rule" "bi_security_login_9502_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.http_9502_listener[0].arn
   priority     = 220
@@ -576,7 +612,7 @@ resource "aws_lb_listener_rule" "bi_security_login_9502_rule" {
 
 # Listener rule for /static on port 9502
 resource "aws_lb_listener_rule" "static_9502_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.http_9502_listener[0].arn
   priority     = 230
@@ -596,7 +632,7 @@ resource "aws_lb_listener_rule" "static_9502_rule" {
 # HTTPS Listener rules (keeping for SSL access)
 # Listener rule for /console on HTTPS
 resource "aws_lb_listener_rule" "console_https_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.https_listener[0].arn
   priority     = 100
@@ -611,12 +647,11 @@ resource "aws_lb_listener_rule" "console_https_rule" {
       values = ["/console*"]
     }
   }
-
 }
 
 # Listener rule for /em on HTTPS
 resource "aws_lb_listener_rule" "em_https_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.https_listener[0].arn
   priority     = 110
@@ -635,7 +670,7 @@ resource "aws_lb_listener_rule" "em_https_rule" {
 
 # Listener rule for /analytics on HTTPS
 resource "aws_lb_listener_rule" "analytics_https_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.https_listener[0].arn
   priority     = 200
@@ -654,7 +689,7 @@ resource "aws_lb_listener_rule" "analytics_https_rule" {
 
 # Listener rule for /analytics-ws on HTTPS
 resource "aws_lb_listener_rule" "analytics_ws_https_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.https_listener[0].arn
   priority     = 205
@@ -673,7 +708,7 @@ resource "aws_lb_listener_rule" "analytics_ws_https_rule" {
 
 # Listener rule for /dv on HTTPS
 resource "aws_lb_listener_rule" "dv_https_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.https_listener[0].arn
   priority     = 210
@@ -692,7 +727,7 @@ resource "aws_lb_listener_rule" "dv_https_rule" {
 
 # Listener rule for /bi-security-login on HTTPS
 resource "aws_lb_listener_rule" "bi_security_login_https_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.https_listener[0].arn
   priority     = 220
@@ -711,7 +746,7 @@ resource "aws_lb_listener_rule" "bi_security_login_https_rule" {
 
 # Listener rule for /biinfer on HTTPS
 resource "aws_lb_listener_rule" "biinfer_login_https_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.https_listener[0].arn
   priority     = 250
@@ -730,7 +765,7 @@ resource "aws_lb_listener_rule" "biinfer_login_https_rule" {
 
 # Listener rule for /static on HTTPS
 resource "aws_lb_listener_rule" "static_https_rule" {
-  count = local.environment == "preproduction" ? 1 : 0
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
 
   listener_arn = aws_lb_listener.https_listener[0].arn
   priority     = 240
