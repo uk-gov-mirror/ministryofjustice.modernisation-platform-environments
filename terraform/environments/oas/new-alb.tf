@@ -16,36 +16,76 @@ locals {
 
   loadbalancer_ingress_rules = {
     "lb_ingress_80" = {
-      description     = "Loadbalancer ingress rule for HTTP (redirects to HTTPS)"
-      from_port       = 80
-      to_port         = 80
-      protocol        = "tcp"
-      cidr_blocks     = local.moj_cidr_blocks
-      security_groups = local.environment == "preproduction" ? [aws_security_group.kali_sg[0].id] : []
+      description = "Loadbalancer ingress rule for HTTP (redirects to HTTPS)"
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = local.moj_cidr_blocks
     }
     "lb_ingress_443" = {
-      description     = "Loadbalancer ingress rule for HTTPS from MOJO devices, LZ Shared-Service Workspaces and OAS EC2 Instance"
-      from_port       = 443
-      to_port         = 443
-      protocol        = "tcp"
-      cidr_blocks     = local.moj_cidr_blocks
-      security_groups = local.environment == "preproduction" ? [aws_security_group.ec2_sg[0].id, aws_security_group.kali_sg[0].id] : local.environment == "development" ? [aws_security_group.ec2_sg[0].id] : []
+      description = "Loadbalancer ingress rule for HTTPS from MOJO devices, LZ Shared-Service Workspaces and OAS EC2 Instance"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = local.moj_cidr_blocks
     }
     "lb_ingress_9500" = {
-      description     = "Loadbalancer ingress rule for HTTP 9500 (Console/EM)"
-      from_port       = 9500
-      to_port         = 9500
-      protocol        = "tcp"
-      cidr_blocks     = local.moj_cidr_blocks
-      security_groups = local.environment == "preproduction" ? [aws_security_group.kali_sg[0].id] : []
+      description = "Loadbalancer ingress rule for HTTP 9500 (Console/EM)"
+      from_port   = 9500
+      to_port     = 9500
+      protocol    = "tcp"
+      cidr_blocks = local.moj_cidr_blocks
     }
     "lb_ingress_9502" = {
-      description     = "Loadbalancer ingress rule for HTTP 9502 (Analytics/DV)"
-      from_port       = 9502
-      to_port         = 9502
-      protocol        = "tcp"
-      cidr_blocks     = local.moj_cidr_blocks
-      security_groups = local.environment == "preproduction" ? [aws_security_group.kali_sg[0].id] : []
+      description = "Loadbalancer ingress rule for HTTP 9502 (Analytics/DV)"
+      from_port   = 9502
+      to_port     = 9502
+      protocol    = "tcp"
+      cidr_blocks = local.moj_cidr_blocks
+    }
+  }
+
+  # Define security group to security group rules with static keys
+  loadbalancer_sg_ingress_rules = {
+    "lb_ingress_80_kali" = {
+      description      = "Loadbalancer ingress rule for HTTP from Kali"
+      from_port        = 80
+      to_port          = 80
+      protocol         = "tcp"
+      source_sg_name   = "kali_sg"
+      enabled_in_envs  = ["preproduction"]
+    }
+    "lb_ingress_443_ec2" = {
+      description      = "Loadbalancer ingress rule for HTTPS from EC2"
+      from_port        = 443
+      to_port          = 443
+      protocol         = "tcp"
+      source_sg_name   = "ec2_sg"
+      enabled_in_envs  = ["preproduction", "development"]
+    }
+    "lb_ingress_443_kali" = {
+      description      = "Loadbalancer ingress rule for HTTPS from Kali"
+      from_port        = 443
+      to_port          = 443
+      protocol         = "tcp"
+      source_sg_name   = "kali_sg"
+      enabled_in_envs  = ["preproduction"]
+    }
+    "lb_ingress_9500_kali" = {
+      description      = "Loadbalancer ingress rule for HTTP 9500 from Kali"
+      from_port        = 9500
+      to_port          = 9500
+      protocol         = "tcp"
+      source_sg_name   = "kali_sg"
+      enabled_in_envs  = ["preproduction"]
+    }
+    "lb_ingress_9502_kali" = {
+      description      = "Loadbalancer ingress rule for HTTP 9502 from Kali"
+      from_port        = 9502
+      to_port          = 9502
+      protocol         = "tcp"
+      source_sg_name   = "kali_sg"
+      enabled_in_envs  = ["preproduction"]
     }
   }
 
@@ -89,19 +129,13 @@ resource "aws_security_group_rule" "lb_ingress_rules" {
   cidr_blocks       = each.value.cidr_blocks
 }
 
-# Additional ingress rules for when a source security group is specified in the local
+# Additional ingress rules for when a source security group is specified
 resource "aws_security_group_rule" "lb_ingress_sg_rules" {
-  for_each = contains(["preproduction", "development"], local.environment) ? merge([
-    for rule_name, rule in local.loadbalancer_ingress_rules : {
-      for sg_id in rule.security_groups : "${rule_name}-${sg_id}" => {
-        description = rule.description
-        from_port   = rule.from_port
-        to_port     = rule.to_port
-        protocol    = rule.protocol
-        sg_id       = sg_id
-      }
-    } if length(rule.security_groups) > 0
-  ]...) : {}
+  for_each = contains(["preproduction", "development"], local.environment) ? {
+    for rule_key, rule in local.loadbalancer_sg_ingress_rules :
+    rule_key => rule
+    if contains(rule.enabled_in_envs, local.environment)
+  } : {}
 
   security_group_id        = aws_security_group.lb_security_group[0].id
   type                     = "ingress"
@@ -109,7 +143,7 @@ resource "aws_security_group_rule" "lb_ingress_sg_rules" {
   from_port                = each.value.from_port
   to_port                  = each.value.to_port
   protocol                 = each.value.protocol
-  source_security_group_id = each.value.sg_id
+  source_security_group_id = each.value.source_sg_name == "ec2_sg" ? aws_security_group.ec2_sg[0].id : aws_security_group.kali_sg[0].id
 }
 
 resource "aws_security_group_rule" "lb_egress_rules" {
