@@ -97,16 +97,16 @@ resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_ecs_high_memory" {
   evaluation_periods  = 3
   datapoints_to_alarm = 3
   treat_missing_data  = "notBreaching"
-  namespace   = "AWS/ECS"
-  metric_name = "MemoryUtilization"
-  statistic   = "Average"
-  period      = 60
+  namespace           = "AWS/ECS"
+  metric_name         = "MemoryUtilization"
+  statistic           = "Average"
+  period              = 60
 
   dimensions = {
     ClusterName = aws_ecs_cluster.main_cluster.name
     ServiceName = aws_ecs_service.sftp_barclaycard_ecs_service.name
   }
 
-  alarm_actions       = [data.aws_sns_topic.cw_alerts.arn]
-  ok_actions          = [data.aws_sns_topic.cw_alerts.arn]
+  alarm_actions = [data.aws_sns_topic.cw_alerts.arn]
+  ok_actions    = [data.aws_sns_topic.cw_alerts.arn]
 }
