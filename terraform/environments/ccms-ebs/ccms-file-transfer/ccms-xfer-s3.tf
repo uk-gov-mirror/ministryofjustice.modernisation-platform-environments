@@ -57,6 +57,9 @@ module "s3-bucket-sftp-barclaycard" {
         "Condition": {
             "Bool": {
                 "aws:SecureTransport": "false"
+            },
+            "NumericLessThan": {
+                "aws:TLSVersion": "1.2"
             }
         },
         "Principal": "*"
