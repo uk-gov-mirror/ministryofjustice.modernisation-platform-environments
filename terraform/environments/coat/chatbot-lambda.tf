@@ -38,6 +38,10 @@ resource "aws_security_group" "rag_lambda" {
 
   tags = {
     "application" = "coat"
+    "owner" = "coat"
+    "is-production" = local.is-production
+    "service-area" = "Hosting"
+    "business-unit" = "Platforms"
   }
 }
 
