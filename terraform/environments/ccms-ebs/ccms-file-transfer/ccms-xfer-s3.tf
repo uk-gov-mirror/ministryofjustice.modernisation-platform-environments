@@ -48,29 +48,29 @@ module "s3-bucket-sftp-barclaycard" {
       },
       {
         "Sid" = "RestrictToTLSRequestsOnly",
-        "Action": "s3:*",
-        "Effect": "Deny",
-        "Resource": [
+        "Action" : "s3:*",
+        "Effect" : "Deny",
+        "Resource" : [
           module.s3-bucket-sftp-barclaycard.bucket.arn,
           "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
         ],
-        "Condition": {
-            "Bool": {
-                "aws:SecureTransport": "false"
-            },
-            "NumericLessThan": {
-                "aws:TLSVersion": "1.2"
-            }
+        "Condition" : {
+          "Bool" : {
+            "aws:SecureTransport" : "false"
+          },
+          "NumericLessThan" : {
+            "aws:TLSVersion" : "1.2"
+          }
         },
-        "Principal": "*"
+        "Principal" : "*"
       }
     ]
   })]
 
-  log_bucket    = local.logging_bucket_name
-  log_prefix    = "s3access/${local.sftp_barclaycard_bucket_name}"
+  log_bucket     = local.logging_bucket_name
+  log_prefix     = "s3access/${local.sftp_barclaycard_bucket_name}"
   custom_kms_key = aws_kms_key.s3_sftp_barclaycard_kms_key.arn
-  sse_algorithm = "aws:kms"
+  sse_algorithm  = "aws:kms"
 
   # Refer to the below section "Replication" before enabling replication
   replication_enabled = false

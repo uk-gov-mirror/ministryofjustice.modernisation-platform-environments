@@ -30,20 +30,20 @@ data "aws_iam_policy_document" "s3_sftp_barclaycard_kms_policy" {
     }
   }
   statement {
-      sid = "AllowAnalyticalPlatformIngestionService"
-      effect = "Allow"
-      principals {
-        type        = "AWS"
-        identifiers = [
-            "arn:aws:iam::${local.environment_management.account_ids["analytical-platform-ingestion-development"]}:role/transfer",
-            "arn:aws:iam::${local.environment_management.account_ids["analytical-platform-ingestion-production"]}:role/transfer"
-        ]
-      }
-      actions = [
-        "kms:GenerateDataKey",
-        "kms:Encrypt"
+    sid    = "AllowAnalyticalPlatformIngestionService"
+    effect = "Allow"
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::${local.environment_management.account_ids["analytical-platform-ingestion-development"]}:role/transfer",
+        "arn:aws:iam::${local.environment_management.account_ids["analytical-platform-ingestion-production"]}:role/transfer"
       ]
-      resources = ["*"]
+    }
+    actions = [
+      "kms:GenerateDataKey",
+      "kms:Encrypt"
+    ]
+    resources = ["*"]
   }
 }
 
