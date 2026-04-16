@@ -105,7 +105,7 @@ data "aws_iam_policy_document" "gdpr_delete_policy_document" {
     resources = [
       aws_iam_role.ecs_execution_role.arn,
       aws_iam_role.ecs_gdpr_execution_role.arn,
-      aws_iam_role.gdpr_structured_job_role.arn
+      aws_iam_role.gdpr_structured_job_role[0].arn
     ]
     condition {
       test     = "StringLike"
