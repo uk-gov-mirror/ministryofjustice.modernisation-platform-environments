@@ -1,19 +1,15 @@
 resource "kubernetes_manifest" "kyverno_privileged_policy" {
   for_each = { for policy in local.kyverno_privileged_policies : policy.name => policy }
-
   manifest = {
     apiVersion = "kyverno.io/v1"
     kind       = "ClusterPolicy"
-
     metadata = {
       name = "enforce-${each.value.name}-privileged"
     }
-
     spec = {
       rules = [
         {
-          name = "set-privileged-true"
-
+          name = "set-capabilities"
           match = {
             resources = {
               kinds      = ["Pod"]
@@ -23,17 +19,25 @@ resource "kubernetes_manifest" "kyverno_privileged_policy" {
               }
             }
           }
-
           mutate = {
             patchStrategicMerge = {
               spec = {
                 containers = [
                   {
-                    # (name) is a Kyverno anchor – matches all containers
-                    # without filtering by name.
                     "(name)" = "*"
                     securityContext = {
-                      privileged = true
+                      privileged             = false
+                      readOnlyRootFilesystem = false
+                      seLinuxOptions = {
+                        level = "s0"
+                        role  = "system_r"
+                        type  = "super_t"
+                        user  = "system_u"
+                      }
+                      capabilities = {
+                        drop = ["ALL"]
+                        add  = each.value.capabilities_add
+                      }
                     }
                   }
                 ]
@@ -41,7 +45,18 @@ resource "kubernetes_manifest" "kyverno_privileged_policy" {
                   {
                     "(name)" = "*"
                     securityContext = {
-                      privileged = true
+                      privileged             = false
+                      readOnlyRootFilesystem = false
+                      seLinuxOptions = {
+                        level = "s0"
+                        role  = "system_r"
+                        type  = "super_t"
+                        user  = "system_u"
+                      }
+                      capabilities = {
+                        drop = ["ALL"]
+                        add  = each.value.capabilities_add
+                      }
                     }
                   }
                 ]
@@ -52,6 +67,5 @@ resource "kubernetes_manifest" "kyverno_privileged_policy" {
       ]
     }
   }
-
   depends_on = [helm_release.kyverno]
 }
