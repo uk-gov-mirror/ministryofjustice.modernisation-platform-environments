@@ -1525,6 +1525,10 @@ module "s3-ears-sars-bucket" {
   tags = local.tags
 }
 
+# -----------------------------
+# GDPR Audit Bucket
+# -----------------------------
+
 module "s3-gdpr-audit-bucket" {
   source = "github.com/ministryofjustice/modernisation-platform-terraform-s3-bucket?ref=9facf9f"
 
