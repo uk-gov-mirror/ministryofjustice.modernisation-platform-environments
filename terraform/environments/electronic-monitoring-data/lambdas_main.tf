@@ -763,8 +763,8 @@ module "create_p1_export" {
   is_image                       = true
   image_name                     = "export_em_data_p1"
   function_name                  = "create_p1_export"
-  role_name                      = aws_iam_role.create_p1_export.name
-  role_arn                       = aws_iam_role.create_p1_export.arn
+  role_name                      = module.create_p1_export_iam_role.name
+  role_arn                       = module.create_p1_export_iam_role.arn
   memory_size                    = 512
   timeout                        = 300
   reserved_concurrent_executions = 1
