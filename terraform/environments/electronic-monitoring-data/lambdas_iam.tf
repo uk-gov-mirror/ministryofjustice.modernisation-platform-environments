@@ -1968,7 +1968,7 @@ module "create_p1_export_iam_role" {
   }
 
   policies = {
-    main_policy = module.create_p1_export_iam_policy.policy
+    main_policy = module.create_p1_export_iam_policy.arn
   }
 
   tags = local.tags
