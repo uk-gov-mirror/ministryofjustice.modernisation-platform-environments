@@ -1990,7 +1990,7 @@ resource "aws_lakeformation_permissions" "lambda_p1_database_access" {
 }
 
 resource "aws_lakeformation_permissions" "lambda_p1_table_access" {
-  principal   = module.create_p1_export_iam_rolee.arn
+  principal   = module.create_p1_export_iam_role.arn
   permissions = ["SELECT"]
   table {
     database_name = "allied_mdss${local.db_suffix}"
