@@ -47,13 +47,6 @@ module "karpenter_namespace" {
   workload = "system"
 }
 
-module "keda_namespace" {
-  source = "./modules/kubernetes/namespace"
-
-  name     = "keda"
-  workload = "system"
-}
-
 module "external_dns_namespace" {
   source = "./modules/kubernetes/namespace"
 
@@ -75,10 +68,9 @@ module "shared_services_namespace" {
   workload = "system"
 }
 
-# Commenting out KEDA namespace for now as we are not using it yet. We can add it back in when we need it.
-# module "keda_namespace" {
-#   source = "./modules/kubernetes/namespace"
+module "keda_namespace" {
+  source = "./modules/kubernetes/namespace"
 
-#   name     = "keda"
-#   workload = "system"
-# }
+  name     = "keda"
+  workload = "system"
+}
