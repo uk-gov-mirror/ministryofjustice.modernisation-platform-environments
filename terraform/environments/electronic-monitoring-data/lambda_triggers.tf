@@ -308,7 +308,7 @@ resource "aws_cloudwatch_event_rule" "schedule_p1_creation" {
   name = "create-p1-export"
   description = "Trigger the creation of P1 data export."
 
-  schedule_expression = "cron(0 7 * * *)"
+  schedule_expression = "cron(0 7 * * ? *)"
 }
 
 resource "aws_cloudwatch_event_target" "schedule_p1_creation_target" {
