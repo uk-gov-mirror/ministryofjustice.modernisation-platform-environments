@@ -1757,7 +1757,8 @@ data "aws_iam_policy_document" "cloudwatch_alarm_threader_policy_document" {
       "s3:DeleteObject",
     ]
     resources = [
-      "arn:aws:s3:::${local.alarm_thread_state_bucket}/${local.alarm_thread_state_prefix}/${local.environment_shorthand}/*"
+      "arn:aws:s3:::${local.alarm_thread_state_bucket}/" \
+      "${local.alarm_thread_state_prefix}/${local.environment_shorthand}/*"
     ]
   }
 
@@ -1770,7 +1771,6 @@ data "aws_iam_policy_document" "cloudwatch_alarm_threader_policy_document" {
     resources = [aws_sns_topic.emds_alerts.arn]
   }
 
-  # Topic is KMS-encrypted; to match the pattern used by mdss_daily_failure_digest
   statement {
     sid    = "AllowUseOfAlertsKmsKey"
     effect = "Allow"
@@ -1780,6 +1780,15 @@ data "aws_iam_policy_document" "cloudwatch_alarm_threader_policy_document" {
       "kms:Decrypt",
     ]
     resources = [aws_kms_key.emds_alerts.arn]
+  }
+
+  statement {
+    sid    = "AllowInvokeStagingDbJanitor"
+    effect = "Allow"
+    actions = [
+      "lambda:InvokeFunction",
+    ]
+    resources = [module.staging_db_janitor.lambda_function_arn]
   }
 }
 
@@ -1929,4 +1938,100 @@ resource "aws_iam_policy" "mdss_reconciler_lambda_role_policy" {
 resource "aws_iam_role_policy_attachment" "mdss_reconciler_lambda_policy_attachment" {
   role       = aws_iam_role.mdss_reconciler.name
   policy_arn = aws_iam_policy.mdss_reconciler_lambda_role_policy.arn
+}
+
+#-----------------------------------------------------------------------------------
+# Staging DB janitor IAM Role
+#-----------------------------------------------------------------------------------
+
+resource "aws_iam_role" "staging_db_janitor" {
+  name               = "staging_db_janitor_lambda_role"
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+}
+
+data "aws_iam_policy_document" "staging_db_janitor_policy_document" {
+  statement {
+    sid    = "GluePermissionsForJanitor"
+    effect = "Allow"
+    actions = [
+      "glue:GetDatabases",
+      "glue:GetTables",
+      "glue:DeleteTable",
+      "glue:DeleteDatabase",
+    ]
+    resources = [
+      "arn:aws:glue:${data.aws_region.current.region}:" \
+      "${data.aws_caller_identity.current.account_id}:catalog",
+      "arn:aws:glue:${data.aws_region.current.region}:" \
+      "${data.aws_caller_identity.current.account_id}:database/*",
+      "arn:aws:glue:${data.aws_region.current.region}:" \
+      "${data.aws_caller_identity.current.account_id}:table/*/*",
+    ]
+  }
+
+  statement {
+    sid    = "S3ListForJanitor"
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket",
+      "s3:GetBucketLocation",
+    ]
+    resources = [
+      module.s3-create-a-derived-table-bucket.bucket.arn,
+    ]
+  }
+
+  statement {
+    sid    = "S3DeleteForJanitor"
+    effect = "Allow"
+    actions = [
+      "s3:DeleteObject",
+      "s3:DeleteObjectVersion",
+    ]
+    resources = [
+      "${module.s3-create-a-derived-table-bucket.bucket.arn}/*",
+    ]
+  }
+
+  statement {
+    sid    = "LakeFormationGrantRevokeForJanitor"
+    effect = "Allow"
+    actions = [
+      "lakeformation:GrantPermissions",
+      "lakeformation:RevokePermissions",
+      "lakeformation:ListPermissions",
+      "lakeformation:GetDataAccess",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "AllowPublishToAlertsTopic"
+    effect = "Allow"
+    actions = [
+      "sns:Publish",
+    ]
+    resources = [aws_sns_topic.emds_alerts.arn]
+  }
+
+  statement {
+    sid    = "AllowUseOfAlertsKmsKey"
+    effect = "Allow"
+    actions = [
+      "kms:GenerateDataKey",
+      "kms:GenerateDataKey*",
+      "kms:Decrypt",
+    ]
+    resources = [aws_kms_key.emds_alerts.arn]
+  }
+}
+
+resource "aws_iam_policy" "staging_db_janitor" {
+  name   = "staging_db_janitor_lambda_policy"
+  policy = data.aws_iam_policy_document.staging_db_janitor_policy_document.json
+}
+
+resource "aws_iam_role_policy_attachment" "staging_db_janitor_attach" {
+  role       = aws_iam_role.staging_db_janitor.name
+  policy_arn = aws_iam_policy.staging_db_janitor.arn
 }
