@@ -81,6 +81,7 @@ resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_alb_healthyhosts" {
   threshold           = local.application_data.accounts[local.environment].app_count
   alarm_description   = "Number of healthy nodes in Target Group"
   actions_enabled     = true
+  treat_missing_data  = "breaching"
   alarm_actions       = [data.aws_sns_topic.cw_alerts.arn]
   ok_actions          = [data.aws_sns_topic.cw_alerts.arn]
   dimensions = {

@@ -29,36 +29,37 @@
       "lz_aws_workspace_nonprod_prod": "10.200.0.0/19",
       "lz_aws_appstream_subnet_a_b": "10.200.32.0/23",
       "sftp_barclaycard_bucket": "ccms-ebs-test-barclaycard-inbound-mp"
-    },
-    "preproduction": {
-      "short_env": "prep",
-      "dns": "laa-preproduction",
-      "app_name": "ccms-sftp-barclaycard",
-      "app_count": "1",
-      "api_server_port": "8443",
-      "aws_region": "eu-west-2",
-      "app_image": "374269020027.dkr.ecr.eu-west-2.amazonaws.com/ccms-financial-transfers",
-      "container_version": "0.0.29-preprod",
-      "container_cpu": "2048",
-      "container_memory": "7168",
-      "lz_aws_workspace_nonprod_prod": "10.200.0.0/19",
-      "lz_aws_appstream_subnet_a_b": "10.200.32.0/23",
-      "sftp_barclaycard_bucket": "ccms-ebs-preproduction-barclaycard-inbound-mp"
-    },
-    "production": {
-      "short_env": "prod",
-      "dns": "laa",
-      "app_name": "ccms-sftp-barclaycard",
-      "app_count": "2",
-      "api_server_port": "8443",
-      "aws_region": "eu-west-2",
-      "app_image": "374269020027.dkr.ecr.eu-west-2.amazonaws.com/ccms-financial-transfers",
-      "container_version": "0.0.29-test",
-      "container_cpu": "2048",
-      "container_memory": "7168",
-      "lz_aws_workspace_nonprod_prod": "10.200.0.0/19",
-      "lz_aws_appstream_subnet_a_b": "10.200.32.0/23",
-      "sftp_barclaycard_bucket": "ccms-ebs-production-barclaycard-inbound-mp"
     }
+    // },
+    // "preproduction": {
+    //   "short_env": "prep",
+    //   "dns": "laa-preproduction",
+    //   "app_name": "ccms-sftp-barclaycard",
+    //   "app_count": "1",
+    //   "api_server_port": "8443",
+    //   "aws_region": "eu-west-2",
+    //   "app_image": "374269020027.dkr.ecr.eu-west-2.amazonaws.com/ccms-financial-transfers",
+    //   "container_version": "0.0.29-preprod",
+    //   "container_cpu": "2048",
+    //   "container_memory": "7168",
+    //   "lz_aws_workspace_nonprod_prod": "10.200.0.0/19",
+    //   "lz_aws_appstream_subnet_a_b": "10.200.32.0/23",
+    //   "sftp_barclaycard_bucket": "ccms-ebs-preproduction-barclaycard-inbound-mp"
+    // },
+    // "production": {
+    //   "short_env": "prod",
+    //   "dns": "laa",
+    //   "app_name": "ccms-sftp-barclaycard",
+    //   "app_count": "2",
+    //   "api_server_port": "8443",
+    //   "aws_region": "eu-west-2",
+    //   "app_image": "374269020027.dkr.ecr.eu-west-2.amazonaws.com/ccms-financial-transfers",
+    //   "container_version": "0.0.29-test",
+    //   "container_cpu": "2048",
+    //   "container_memory": "7168",
+    //   "lz_aws_workspace_nonprod_prod": "10.200.0.0/19",
+    //   "lz_aws_appstream_subnet_a_b": "10.200.32.0/23",
+    //   "sftp_barclaycard_bucket": "ccms-ebs-production-barclaycard-inbound-mp"
+    // }
   }
 }
