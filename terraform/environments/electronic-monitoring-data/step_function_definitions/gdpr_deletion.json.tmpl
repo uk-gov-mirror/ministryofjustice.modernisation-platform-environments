@@ -17,17 +17,18 @@
             },
             "Overrides": {  
                "ContainerOverrides": [  
-                  {  
-                     "Name": "${container_name}",
-                     "Environment": [  
-                        {  
-                           "Name": "DEPLOY_VERSION",
-                           "Value": "latest"
-                        },
-                        {
-                          "ATHENA_OUTPUT_BICKET": "${athena_output_bucket}"
-                        }
-                     ]
+                  {
+                    "Name": "${container_name}",
+                    "Environment": [
+                      {
+                        "Name": "DEPLOY_VERSION",
+                        "Value": "latest"
+                      },
+                      {
+                        "Name": "ATHENA_OUTPUT_BUCKET",
+                        "Value": "${athena_output_bucket}"
+                      }
+                    ]
                   }
                ]
             }
