@@ -113,6 +113,8 @@ data "aws_iam_policy_document" "gdpr_structured_job_policy_document" {
     resources = [
       module.s3-data-bucket.bucket.arn,
       "${module.s3-data-bucket.bucket.arn}/*",
+      module.s3-athena-bucket.bucket.arn,
+      "${module.s3-athena-bucket.bucket.arn}/*"
     ]
   }
 }
