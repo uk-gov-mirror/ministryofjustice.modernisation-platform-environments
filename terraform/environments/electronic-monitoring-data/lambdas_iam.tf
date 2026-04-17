@@ -1944,57 +1944,43 @@ resource "aws_iam_role_policy_attachment" "mdss_reconciler_lambda_policy_attachm
 # Staging DB janitor IAM Role
 #-----------------------------------------------------------------------------------
 
-resource "aws_iam_role" "staging_db_janitor" {
-  name               = "staging_db_janitor_lambda_role"
-  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
-}
-
 data "aws_iam_policy_document" "staging_db_janitor_policy_document" {
   statement {
-    sid    = "GluePermissionsForJanitor"
+    sid    = "GluePermissionsForCleanup"
     effect = "Allow"
     actions = [
       "glue:GetDatabases",
+      "glue:GetDatabase",
       "glue:GetTables",
+      "glue:GetTable",
       "glue:DeleteTable",
       "glue:DeleteDatabase",
     ]
     resources = [
-      "arn:aws:glue:${data.aws_region.current.region}:" \
-      "${data.aws_caller_identity.current.account_id}:catalog",
-      "arn:aws:glue:${data.aws_region.current.region}:" \
-      "${data.aws_caller_identity.current.account_id}:database/*",
-      "arn:aws:glue:${data.aws_region.current.region}:" \
-      "${data.aws_caller_identity.current.account_id}:table/*/*",
+      "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:catalog",
+      "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:database/*",
+      "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:table/*/*",
+      "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:userDefinedFunction/*/*",
     ]
   }
 
   statement {
-    sid    = "S3ListForJanitor"
+    sid    = "S3PermissionsForCleanup"
     effect = "Allow"
     actions = [
       "s3:ListBucket",
+      "s3:DeleteObject",
+      "s3:DeleteObjectVersion",
       "s3:GetBucketLocation",
     ]
     resources = [
       module.s3-create-a-derived-table-bucket.bucket.arn,
-    ]
-  }
-
-  statement {
-    sid    = "S3DeleteForJanitor"
-    effect = "Allow"
-    actions = [
-      "s3:DeleteObject",
-      "s3:DeleteObjectVersion",
-    ]
-    resources = [
       "${module.s3-create-a-derived-table-bucket.bucket.arn}/*",
     ]
   }
 
   statement {
-    sid    = "LakeFormationGrantRevokeForJanitor"
+    sid    = "LakeFormationGrantRevoke"
     effect = "Allow"
     actions = [
       "lakeformation:GrantPermissions",
@@ -2024,6 +2010,11 @@ data "aws_iam_policy_document" "staging_db_janitor_policy_document" {
     ]
     resources = [aws_kms_key.emds_alerts.arn]
   }
+}
+
+resource "aws_iam_role" "staging_db_janitor" {
+  name               = "staging_db_janitor_lambda_role"
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
 resource "aws_iam_policy" "staging_db_janitor" {
