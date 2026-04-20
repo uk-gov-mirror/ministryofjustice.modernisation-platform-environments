@@ -57,7 +57,6 @@ resource "aws_lambda_function" "process_file_from_bucket_lambda_function" {
   publish       = true
 
   vpc_config {
-    vpc_id                  = data.aws_vpc.shared.id
     security_group_ids      = [aws_security_group.process_file_from_bucket_lambda_sg.id]
     subnet_ids              = data.aws_subnets.shared-private.ids
   }

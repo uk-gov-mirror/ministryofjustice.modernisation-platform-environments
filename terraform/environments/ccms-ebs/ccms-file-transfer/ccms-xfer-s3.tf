@@ -102,7 +102,7 @@ module "s3-bucket-sftp-barclaycard" {
       enabled = "Enabled"
 
       filter = {
-        prefix = "archive/"
+        # prefix = "archive/"
       }
 
       expiration = {
