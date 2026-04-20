@@ -10,7 +10,7 @@ data "aws_iam_policy_document" "s3_sftp_barclaycard_kms_policy" {
     resources = ["*"]
   }
   statement {
-    sid = "AllowUseForS3UseOfKeyInThisAccount"
+    sid = "AllowUseForS3UseOfKeyUseOfSecretManagerInThisAccount"
     principals {
       type        = "Service"
       identifiers = ["s3.amazonaws.com"]
@@ -27,6 +27,11 @@ data "aws_iam_policy_document" "s3_sftp_barclaycard_kms_policy" {
       test     = "StringEquals"
       variable = "kms:CallerAccount"
       values   = [data.aws_caller_identity.current.account_id]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "kms:ViaService"
+      values   = ["secretsmanager.${data.aws_region.current.name}.amazonaws.com"]
     }
   }
   statement {
@@ -46,8 +51,11 @@ data "aws_iam_policy_document" "s3_sftp_barclaycard_kms_policy" {
     resources = ["*"]
   }
 }
-
-resource "aws_kms_alias" "s3_sftop_barclaycard_kms_alias" {
+moved {
+  from = "aws_kms_alias.s3_sftop_barclaycard_kms_alias"
+  to  = "aws_kms_alias.s3_sftp_barclaycard_kms_alias"
+}
+resource "aws_kms_alias" "s3_sftp_barclaycard_kms_alias" {
   name          = "alias/s3-sftp-barclaycard-alias"
   target_key_id = aws_kms_key.s3_sftp_barclaycard_kms_key.key_id
 }
@@ -56,5 +64,5 @@ resource "aws_kms_key" "s3_sftp_barclaycard_kms_key" {
   description         = "KMS for S3 Bucket used by SFTP Barclaycard application in ${local.environment} environment"
   enable_key_rotation = true
   policy              = data.aws_iam_policy_document.s3_sftp_barclaycard_kms_policy.json
-  tags                = { Environment = local.environment }
+  tags                = merge(local.tags, { Environment = local.environment })
 }
