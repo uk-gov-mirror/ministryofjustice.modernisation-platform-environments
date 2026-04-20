@@ -422,7 +422,7 @@ locals {
           }
         ])
       }
-      Ec2Qa112GWeblogicPolicy = {
+      Ec2Qa11G2WeblogicPolicy = {
         description = "Permissions required for QA11G2 Weblogic EC2s"
         statements = concat(local.iam_policy_statements_ec2.web, [
           {
