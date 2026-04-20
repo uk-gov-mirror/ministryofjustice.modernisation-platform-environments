@@ -1246,7 +1246,7 @@ resource "aws_lakeformation_permissions" "historic_csv_add_create_db" {
 }
 
 #-----------------------------------------------------------------------------------
-# Clean after MDSS load IAM Role
+# Clean after dlt load IAM Role
 #-----------------------------------------------------------------------------------
 
 data "aws_iam_policy_document" "clean_after_dlt_load_lambda_role_policy_document" {
@@ -1961,6 +1961,7 @@ data "aws_iam_policy_document" "staging_db_janitor_policy_document" {
       "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:catalog",
       "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:database/*",
       "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:table/*/*",
+      "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:userDefinedFunction/*/*",
     ]
   }
 
