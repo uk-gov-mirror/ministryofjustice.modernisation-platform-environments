@@ -1757,9 +1757,7 @@ data "aws_iam_policy_document" "cloudwatch_alarm_threader_policy_document" {
       "s3:DeleteObject",
     ]
     resources = [
-      "arn:aws:s3:::${local.alarm_thread_state_bucket}/"
-      "${local.alarm_thread_state_prefix}/"
-      "${local.environment_shorthand}/*"
+      "arn:aws:s3:::${local.alarm_thread_state_bucket}/${local.alarm_thread_state_prefix}/${local.environment_shorthand}/*"
     ]
   }
 
@@ -1781,21 +1779,6 @@ data "aws_iam_policy_document" "cloudwatch_alarm_threader_policy_document" {
       "kms:Decrypt",
     ]
     resources = [aws_kms_key.emds_alerts.arn]
-  }
-
-  statement {
-    sid    = "AllowInvokeStagingDbJanitor"
-    effect = "Allow"
-    actions = [
-      "lambda:InvokeFunction",
-    ]
-    resources = [
-      format(
-        "arn:aws:lambda:%s:%s:function:staging_db_janitor",
-        data.aws_region.current.name,
-        data.aws_caller_identity.current.account_id,
-      )
-    ]
   }
 }
 
@@ -1964,12 +1947,9 @@ data "aws_iam_policy_document" "staging_db_janitor_policy_document" {
       "glue:DeleteDatabase",
     ]
     resources = [
-      "arn:aws:glue:${data.aws_region.current.region}:"
-      "${data.aws_caller_identity.current.account_id}:catalog",
-      "arn:aws:glue:${data.aws_region.current.region}:"
-      "${data.aws_caller_identity.current.account_id}:database/*",
-      "arn:aws:glue:${data.aws_region.current.region}:"
-      "${data.aws_caller_identity.current.account_id}:table/*/*",
+      "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:catalog",
+      "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:database/*",
+      "arn:aws:glue:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:table/*/*",
     ]
   }
 
@@ -2018,21 +1998,6 @@ data "aws_iam_policy_document" "staging_db_janitor_policy_document" {
       "kms:Decrypt",
     ]
     resources = [aws_kms_key.emds_alerts.arn]
-  }
-
-  statement {
-    sid    = "AllowSelfInvokeForContinuation"
-    effect = "Allow"
-    actions = [
-      "lambda:InvokeFunction",
-    ]
-    resources = [
-      format(
-        "arn:aws:lambda:%s:%s:function:staging_db_janitor",
-        data.aws_region.current.name,
-        data.aws_caller_identity.current.account_id,
-      )
-    ]
   }
 }
 
