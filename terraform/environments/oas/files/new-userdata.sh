@@ -6,6 +6,49 @@ exec 2>&1
 # Create marker file to prove userdata started
 echo "Userdata started at $(date)" > /tmp/userdata_started
 
+# Replace SSH keys with new Terraform-generated keys
+echo "Replacing SSH keys with new Terraform-generated keys..."
+
+# Fetch the public key from EC2 instance metadata
+TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" 2>/dev/null)
+NEW_PUBLIC_KEY=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-keys/0/openssh-key 2>/dev/null)
+
+if [ -n "$NEW_PUBLIC_KEY" ]; then
+    echo "New public key retrieved from metadata service"
+    
+    # Update authorized_keys for ec2-user
+    if id "ec2-user" &>/dev/null; then
+        echo "Updating authorized_keys for ec2-user"
+        mkdir -p /home/ec2-user/.ssh
+        echo "$NEW_PUBLIC_KEY" > /home/ec2-user/.ssh/authorized_keys
+        chmod 700 /home/ec2-user/.ssh
+        chmod 600 /home/ec2-user/.ssh/authorized_keys
+        chown -R ec2-user:ec2-user /home/ec2-user/.ssh
+        echo "ec2-user SSH keys updated successfully"
+    fi
+    
+    # Update authorized_keys for root
+    echo "Updating authorized_keys for root"
+    mkdir -p /root/.ssh
+    echo "$NEW_PUBLIC_KEY" > /root/.ssh/authorized_keys
+    chmod 700 /root/.ssh
+    chmod 600 /root/.ssh/authorized_keys
+    echo "root SSH keys updated successfully"
+    
+    # Update authorized_keys for oracle user if it exists
+    if id "oracle" &>/dev/null; then
+        echo "Updating authorized_keys for oracle"
+        mkdir -p /home/oracle/.ssh
+        echo "$NEW_PUBLIC_KEY" > /home/oracle/.ssh/authorized_keys
+        chmod 700 /home/oracle/.ssh
+        chmod 600 /home/oracle/.ssh/authorized_keys
+        chown -R oracle:dba /home/oracle/.ssh
+        echo "oracle SSH keys updated successfully"
+    fi
+else
+    echo "WARNING: Could not retrieve public key from metadata service"
+fi
+
 # Set hostname
 hostnamectl set-hostname oas
 
