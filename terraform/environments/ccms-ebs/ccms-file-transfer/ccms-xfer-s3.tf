@@ -125,14 +125,13 @@ resource "aws_s3_bucket_notification" "sftp_barclaycard_bucket_notification" {
   topic {
     topic_arn     = data.aws_sns_topic.s3_topic.arn
     events        = ["s3:ObjectCreated:*"]
-    filter_suffix = ".log"
   }
 
   lambda_function {
     lambda_function_arn = aws_lambda_function.process_file_from_bucket_lambda_function.arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = "inbound/"
-    filter_suffix       = ".csv" #asked a question
+    filter_suffix       = ".csv"
 
   }
 

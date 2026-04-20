@@ -3,7 +3,8 @@
 # PUI Application Secrets
 resource "aws_secretsmanager_secret" "sftp_barclaycard_secrets" {
   name        = "${local.application_name}-sftp-barclaycard-secrets"
-  description = "PUI Application Secrets"
+  description = "SFTP Barclaycard Ingress Application Secrets"
+  kms_key_id = aws_kms_key.s3_sftp_barclaycard_kms_key.arn
 }
 
 resource "aws_secretsmanager_secret_version" "sftp_barclaycard_secrets" {
@@ -17,11 +18,11 @@ resource "aws_secretsmanager_secret_version" "sftp_barclaycard_secrets" {
     tls_key                     = ""
   })
 
-  #   lifecycle {
-  #     ignore_changes = [
-  #       secret_string
-  #     ]
-  #   }
+    lifecycle {
+      ignore_changes = [
+        secret_string
+      ]
+    }
 }
 
 data "aws_secretsmanager_secret_version" "sftp_barclaycard_secrets" {
