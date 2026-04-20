@@ -796,6 +796,6 @@ module "staging_db_janitor" {
     CATALOG_ID            = data.aws_caller_identity.current.account_id
     LAMBDA_ROLE_ARN       = aws_iam_role.staging_db_janitor.arn
     STALE_MINUTES         = "30"
-    MAX_DATABASES_PER_RUN = "1000"
+    MAX_DATABASES_PER_RUN = "2000"
   }
 }
