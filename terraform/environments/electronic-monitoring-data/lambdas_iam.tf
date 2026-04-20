@@ -1780,6 +1780,17 @@ data "aws_iam_policy_document" "cloudwatch_alarm_threader_policy_document" {
     ]
     resources = [aws_kms_key.emds_alerts.arn]
   }
+
+  statement {
+    sid    = "AllowInvokeStagingDbJanitor"
+    effect = "Allow"
+    actions = [
+      "lambda:InvokeFunction",
+    ]
+    resources = [
+      module.staging_db_janitor.lambda_function_arn,
+    ]
+  }
 }
 
 resource "aws_iam_policy" "cloudwatch_alarm_threader" {

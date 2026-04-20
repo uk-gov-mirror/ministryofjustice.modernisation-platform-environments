@@ -661,12 +661,12 @@ module "cloudwatch_alarm_threader" {
   subnet_ids         = data.aws_subnets.shared-private.ids
 
   environment_variables = {
-    SNS_TOPIC_ARN                = aws_sns_topic.emds_alerts.arn
-    STATE_BUCKET                 = local.alarm_thread_state_bucket
-    STATE_PREFIX                 = local.alarm_thread_state_prefix
-    ENVIRONMENT                  = local.environment_shorthand
-    INCLUDE_REASON               = "true"
-    ENABLE_CUSTOM_ACTIONS        = "false"
+    SNS_TOPIC_ARN                 = aws_sns_topic.emds_alerts.arn
+    STATE_BUCKET                  = local.alarm_thread_state_bucket
+    STATE_PREFIX                  = local.alarm_thread_state_prefix
+    ENVIRONMENT                   = local.environment_shorthand
+    INCLUDE_REASON                = "true"
+    ENABLE_CUSTOM_ACTIONS         = "false"
     GLUE_DB_JANITOR_FUNCTION_NAME = (
       module.staging_db_janitor.lambda_function_name
     )
