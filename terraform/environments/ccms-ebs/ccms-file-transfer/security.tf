@@ -20,7 +20,7 @@ resource "aws_vpc_security_group_ingress_rule" "sftp_barclaycard_lb_ingress_443"
   to_port     = 443
 }
 
-resource "aws_vpc_security_group_ingress_rule" "sftp_barclaycard_lb_ingress_443" {
+resource "aws_vpc_security_group_ingress_rule" "sftp_barclaycard_lb_ingress_from_lambda_443" {
   security_group_id = aws_security_group.sftp_barclaycard_load_balancer.id
 
   description = "HTTPS from Anywhere - WAF in front of ALB"
