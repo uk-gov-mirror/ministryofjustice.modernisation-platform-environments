@@ -51,10 +51,7 @@ data "aws_iam_policy_document" "s3_sftp_barclaycard_kms_policy" {
     resources = ["*"]
   }
 }
-moved {
-  from = "aws_kms_alias.s3_sftop_barclaycard_kms_alias"
-  to  = "aws_kms_alias.s3_sftp_barclaycard_kms_alias"
-}
+
 resource "aws_kms_alias" "s3_sftp_barclaycard_kms_alias" {
   name          = "alias/s3-sftp-barclaycard-alias"
   target_key_id = aws_kms_key.s3_sftp_barclaycard_kms_key.key_id
