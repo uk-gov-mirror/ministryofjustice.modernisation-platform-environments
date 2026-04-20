@@ -177,7 +177,7 @@ resource "aws_cloudwatch_log_metric_filter" "soa_custom_check_hogging_threads" {
 
 resource "aws_cloudwatch_log_metric_filter" "soa_custom_check_jdbc_ebs_state" {
   name           = "SOACustomCheckJDBCebsState"
-  pattern        = "\"<Local Script Error>\" \"JDBC datasource state\" \"EBS\" -\"EBSSMS\""
+  pattern        = "\"<Local Script Error>\" \"Managed server EBS JDBC datasource state\""
   log_group_name = aws_cloudwatch_log_group.log_group_managed.name
 
   metric_transformation {
@@ -189,7 +189,7 @@ resource "aws_cloudwatch_log_metric_filter" "soa_custom_check_jdbc_ebs_state" {
 
 resource "aws_cloudwatch_log_metric_filter" "soa_custom_check_jdbc_ebssms_state" {
   name           = "SOACustomCheckJDBCebssmsState"
-  pattern        = "\"<Local Script Error>\" \"JDBC datasource state\" \"EBSSMS\""
+  pattern        = "\"<Local Script Error>\" \"Managed server EBSSMS JDBC datasource state\""
   log_group_name = aws_cloudwatch_log_group.log_group_managed.name
 
   metric_transformation {
