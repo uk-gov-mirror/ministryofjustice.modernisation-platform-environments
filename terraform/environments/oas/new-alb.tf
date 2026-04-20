@@ -48,12 +48,12 @@ locals {
   # Define security group to security group rules with static keys
   loadbalancer_sg_ingress_rules = {
     "lb_ingress_443_ec2" = {
-      description      = "Loadbalancer ingress rule for HTTPS from EC2"
-      from_port        = 443
-      to_port          = 443
-      protocol         = "tcp"
-      source_sg_name   = "ec2_sg"
-      enabled_in_envs  = ["preproduction", "development"]
+      description     = "Loadbalancer ingress rule for HTTPS from EC2"
+      from_port       = 443
+      to_port         = 443
+      protocol        = "tcp"
+      source_sg_name  = "ec2_sg"
+      enabled_in_envs = ["preproduction", "development"]
     }
   }
 
