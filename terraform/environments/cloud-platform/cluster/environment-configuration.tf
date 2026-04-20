@@ -137,9 +137,9 @@ locals {
         }
 
         labels = {
-          Terraform                                     = "true"
-          "cloud-platform.justice.gov.uk/system-ng"     = "true"
-          Cluster                                       = local.environment
+          Terraform                                 = "true"
+          "cloud-platform.justice.gov.uk/system-ng" = "true"
+          Cluster                                   = local.environment
         }
       }
     }
@@ -251,9 +251,9 @@ locals {
         }
 
         labels = {
-          Terraform                                     = "true"
-          "cloud-platform.justice.gov.uk/system-ng"     = "true"
-          Cluster                                       = local.environment
+          Terraform                                 = "true"
+          "cloud-platform.justice.gov.uk/system-ng" = "true"
+          Cluster                                   = local.environment
         }
       }
     }
@@ -365,9 +365,9 @@ locals {
         }
 
         labels = {
-          Terraform                                     = "true"
-          "cloud-platform.justice.gov.uk/system-ng"     = "true"
-          Cluster                                       = local.environment
+          Terraform                                 = "true"
+          "cloud-platform.justice.gov.uk/system-ng" = "true"
+          Cluster                                   = local.environment
         }
       }
     }
@@ -479,9 +479,9 @@ locals {
         }
 
         labels = {
-          Terraform                                     = "true"
-          "cloud-platform.justice.gov.uk/system-ng"     = "true"
-          Cluster                                       = local.environment
+          Terraform                                 = "true"
+          "cloud-platform.justice.gov.uk/system-ng" = "true"
+          Cluster                                   = local.environment
         }
       }
     }
@@ -593,9 +593,9 @@ locals {
         }
 
         labels = {
-          Terraform                                     = "true"
-          "cloud-platform.justice.gov.uk/system-ng"     = "true"
-          Cluster                                       = local.environment
+          Terraform                                 = "true"
+          "cloud-platform.justice.gov.uk/system-ng" = "true"
+          Cluster                                   = local.environment
         }
       }
     }
