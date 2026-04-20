@@ -797,5 +797,7 @@ module "staging_db_janitor" {
     LAMBDA_ROLE_ARN       = aws_iam_role.staging_db_janitor.arn
     STALE_MINUTES         = "30"
     MAX_DATABASES_PER_RUN = "2000"
+    STATE_BUCKET          = local.alarm_thread_state_bucket
+    STATE_PREFIX          = local.alarm_thread_state_prefix
   }
 }
