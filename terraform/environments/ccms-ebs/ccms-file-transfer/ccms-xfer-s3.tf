@@ -125,19 +125,43 @@ resource "aws_s3_bucket_notification" "sftp_barclaycard_bucket_notification" {
   topic {
     topic_arn     = data.aws_sns_topic.s3_topic.arn
     events        = ["s3:ObjectCreated:*"]
-    filter_prefix = "inbound/"
-    filter_suffix = ".csv"
   }
 
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.process_file_from_bucket_lambda_function.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "inbound/"
-    filter_suffix       = ".csv"
+  # lambda_function {
+  #   lambda_function_arn = aws_lambda_function.process_file_from_bucket_lambda_function.arn
+  #   events              = ["s3:ObjectCreated:*"]
+  #   filter_prefix       = "inbound/"
+  #   filter_suffix       = ".csv"
 
-  }
+  # }
 
   depends_on = [module.s3-bucket-sftp-barclaycard]
+}
+
+resource "aws_cloudwatch_event_rule" "sftp_barclaycard_bucket_event_rule" {
+  name        = "sftp-barclaycard-bucket-event-rule"
+  description = "Event rule to trigger on S3 Object Created events for the sftp-barclaycard bucket"
+  event_pattern = jsonencode({
+    source = ["aws.s3"],
+    detail = {
+      eventName = ["ObjectCreated"]
+      requestParameters = {
+        bucketName = [module.s3-bucket-sftp-barclaycard.bucket.id]
+      },
+      object = {
+        key = [{
+          prefix = "inbound/"
+          suffix = ".csv"
+        }]
+      }
+    }
+  })
+}
+
+resource "aws_cloudwatch_event_target" "sftp_barclaycard_bucket_event_target" {
+  rule      = aws_cloudwatch_event_rule.sftp_barclaycard_bucket_event_rule.name
+  target_id = "s3-event-target"
+  arn       = aws_lambda_function.process_file_from_bucket_lambda_function.arn
 }
 
 resource "aws_s3_object" "sftp_barclaycard_folder" {
