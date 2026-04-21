@@ -81,45 +81,9 @@ resource "aws_sns_topic" "tds_maintenance_topic" {
 resource "aws_sns_topic_subscription" "rds_to_slack_lambda" {
   topic_arn = aws_sns_topic.tds_maintenance_topic.arn
   protocol  = "lambda"
-  endpoint  = aws_lambda_function.dbmaintenance_sns_to_slack.arn
+  endpoint  = aws_lambda_function.cloudwatch_sns.arn
 
   depends_on = [
     aws_lambda_permission.allow_rds_sns_invoke
   ]
-}
-
-data "archive_file" "lambda_zip" {
-  type        = "zip"
-  source_file = "${path.module}/lambda/rds_maintenance_notify.py"
-  output_path = "${path.module}/lambda/rds_maintenance_notify.zip"
-}
-
-resource "aws_lambda_function" "dbmaintenance_sns_to_slack" {
-  filename         = data.archive_file.lambda_zip.output_path
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-  function_name    = "${local.application_name}-${local.environment}-rds_maintenance_notify"
-  role             = aws_iam_role.lambda_dbmaintenance_sns_role.arn
-  handler          = "rds_maintenance_notify.lambda_handler"
-  runtime          = "python3.13"
-  timeout          = 30
-  publish          = true
-
-  environment {
-    variables = {
-      SECRET_NAME = aws_secretsmanager_secret.slack_channel_id.name
-    }
-  }
-
-  tags = merge(local.tags, {
-    Name = "${local.application_name}-${local.environment}-rds-maintenance-notify"
-  })
-}
-
-resource "aws_lambda_permission" "allow_rds_sns_invoke" {
-  statement_id  = "AllowExecutionFromrdsSNSTopic"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.dbmaintenance_sns_to_slack.function_name
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.tds
-  _maintenance_topic.arn
 }
