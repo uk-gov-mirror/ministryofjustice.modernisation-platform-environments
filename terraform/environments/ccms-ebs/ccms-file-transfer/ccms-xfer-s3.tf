@@ -149,10 +149,10 @@ resource "aws_cloudwatch_event_rule" "sftp_barclaycard_bucket_event_rule" {
         bucketName = [module.s3-bucket-sftp-barclaycard.bucket.id]
       },
       object = {
-        key = [{
-          prefix = "inbound/"
-          suffix = ".csv"
-        }]
+        key = [
+          { prefix = "inbound/" },
+          { suffix = ".csv" }
+        ]
       }
     }
   })
