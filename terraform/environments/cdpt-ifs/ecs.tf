@@ -376,14 +376,13 @@ resource "aws_ecs_service" "ecs_service" {
     aws_ecs_task_definition.ifs_task_definition
   ]
 
-  ordered_placement_strategy {
-    field = "attribute:ecs.availability-zone"
-    type  = "spread"
+  placement_constraints {
+    type  = "distinctInstance"
   }
 
   ordered_placement_strategy {
-    field = "cpu"
-    type  = "binpack"
+    field = "instanceId"
+    type  = "spread"
   }
 
   load_balancer {
