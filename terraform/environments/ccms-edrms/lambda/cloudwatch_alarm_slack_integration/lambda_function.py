@@ -575,7 +575,7 @@ def lambda_handler(event, context):
             type = "S3 Event"
             is_error = False   # S3 put is informational
         # ---------------- RDS Maintenance Event ----------------
-        elif source == "aws.rds":
+        elif "EventCategories" in alarm_details:
             logger.info("RDS maintenance event detected in SNS message")
             logger.info("Starting Notification to Slack for RDS Maintenance Event via SNS Topic")
 
