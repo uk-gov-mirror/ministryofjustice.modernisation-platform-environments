@@ -26,7 +26,7 @@ resource "aws_security_group" "vpce_sg" {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-    security_groups = [aws_security_group.ec2_sg.id]
+    security_groups = [aws_security_group.ec2_sg[0].id]
   }
 
 }
