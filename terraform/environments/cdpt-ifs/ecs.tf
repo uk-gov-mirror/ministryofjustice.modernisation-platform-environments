@@ -376,8 +376,9 @@ resource "aws_ecs_service" "ecs_service" {
     aws_ecs_task_definition.ifs_task_definition
   ]
 
-  placement_constraints {
+  dynamic "placement_constraints" {
     for_each = local.application_data.accounts[local.environment].ec2_desired_capacity > 1 ? [1] : []
+    
     content {
       type  = "distinctInstance"
     }
