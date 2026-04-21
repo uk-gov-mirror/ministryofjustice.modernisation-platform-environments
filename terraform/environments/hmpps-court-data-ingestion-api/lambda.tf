@@ -31,6 +31,11 @@ module "authorizer_lambda" {
       actions   = ["secretsmanager:GetSecretValue"]
       resources = [module.secret_ingestion_api_auth_token.secret_arn]
     }
+    secrets = {
+      effect    = "Allow"
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = [local.environment_configuration[local.environment].cloud_platform_secret_id]
+    }
     kms = {
       effect    = "Allow"
       actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
