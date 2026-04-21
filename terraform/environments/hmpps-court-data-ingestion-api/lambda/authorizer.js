@@ -36,16 +36,6 @@ exports.handler = async (event) => {
   }
 
   try {
-
-    //TODO WIP Check can access CP secret
-    const cpSecret = "arn:aws:secretsmanager:eu-west-2:754256621582:secret:hmpps-court-data-ingestion-dev-hmac-token-IS6U3E"
-    console.log("[auth] fetching CP secret from Secrets Manager", "SECRET_ID=", cpSecret);
-    const command = new GetSecretValueCommand({ SecretId: cpSecret });
-    const response = await secretsClient.send(command);
-    const cpSecretValue = response.SecretString;
-    console.log(cpSecretValue)
-
-
     if (!cachedSecret) {
       console.log("[auth] fetching secret from Secrets Manager", "SECRET_ID=", process.env.SECRET_ID);
       const command = new GetSecretValueCommand({ SecretId: process.env.SECRET_ID });

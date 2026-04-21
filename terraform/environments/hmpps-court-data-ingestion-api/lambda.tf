@@ -20,17 +20,12 @@ module "authorizer_lambda" {
   publish = true
 
   environment_variables = {
-    SECRET_ID = module.secret_ingestion_api_auth_token.secret_arn
+    SECRET_ID = local.environment_configuration[local.environment].cloud_platform_secret_id
     SQS_URL   = "https://sqs.eu-west-2.amazonaws.com/${data.aws_secretsmanager_secret_version.cloud_platform_account_id.secret_string}/${local.environment_configuration[local.environment].cloud_platform_sqs_queue_name}"
   }
 
   attach_policy_statements = true
   policy_statements = {
-    secrets = {
-      effect    = "Allow"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = [module.secret_ingestion_api_auth_token.secret_arn]
-    }
     secrets = {
       effect    = "Allow"
       actions   = ["secretsmanager:GetSecretValue"]
