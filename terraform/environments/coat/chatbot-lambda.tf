@@ -206,6 +206,11 @@ data "aws_iam_policy_document" "rag_lambda_function_role" {
   }
 }
 
+resource "aws_iam_role_policy_attachment" "rag_lambda_vpc_access" {
+  role       = aws_iam_role.rag_lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
 # Secrets
 
 resource "aws_secretsmanager_secret" "llm_gateway_key" {
