@@ -42,15 +42,6 @@ resource "aws_iam_role_policy" "lambda_process_file_from_bucket_policy" {
           "logs:PutLogEvents"
         ]
         Resource = "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${aws_lambda_function.process_file_from_bucket_lambda_function.function_name}:*"
-      },
-      {
-        Effect = "Allow",
-        Action = [
-          "ec2:CreateNetworkInterface",
-          "ec2:DescribeNetworkInterfaces",
-          "ec2:DeleteNetworkInterface"
-        ],
-        Resource = "*"
       }
     ]
   })
@@ -81,4 +72,9 @@ resource "aws_lambda_permission" "allow_s3_invoke" {
   function_name = aws_lambda_function.process_file_from_bucket_lambda_function.function_name
   principal     = "s3.amazonaws.com"
   source_arn    = module.s3-bucket-sftp-barclaycard.bucket.arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_vpc" {
+  role       = aws_iam_role.lambda_process_file_from_bucket_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
