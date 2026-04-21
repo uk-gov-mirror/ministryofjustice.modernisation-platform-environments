@@ -288,3 +288,149 @@ data "aws_iam_policy_document" "cloudwatch_sns_encryption" {
   }
 
 }
+
+# RDS → SNS publish policy
+data "aws_iam_policy_document" "rds_publish_to_sns" {
+  statement {
+    sid    = "AllowRDSPublish"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["events.rds.amazonaws.com"]
+    }
+
+    actions   = ["sns:Publish"]
+    resources = [aws_sns_topic.tds_maintenance_topic.arn]
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values = [
+        "arn:aws:rds:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:db:${aws_db_instance.tds_db.id}"
+      ]
+    }
+  }
+}
+
+# SNS topic policy 
+
+resource "aws_sns_topic_policy" "rds_publish_policy" {
+  arn    = aws_sns_topic.tds_maintenance_topic.arn
+  policy = data.aws_iam_policy_document.rds_publish_to_sns.json
+}
+
+# KMS key for SNS + RDS events
+
+resource "aws_kms_key" "sns_rds_events" {
+  description         = "KMS key for encrypting RDS maintenance events in SNS"
+  enable_key_rotation = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowAccountAdmins"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowSNSToUseKey"
+        Effect = "Allow"
+        Principal = {
+          Service = "sns.amazonaws.com"
+        }
+        Action = [
+          "kms:GenerateDataKey*",
+          "kms:Decrypt"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowRDSEventsToUseKey"
+        Effect = "Allow"
+        Principal = {
+          Service = "events.rds.amazonaws.com"
+        }
+        Action = [
+          "kms:GenerateDataKey*",
+          "kms:Decrypt"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = merge(local.tags, {
+    Name = "${local.application_name}-${local.environment}-sns-rds-events-kms"
+  })
+}
+
+# KMS alias
+
+resource "aws_kms_alias" "sns_rds_events" {
+  name          = "alias/${local.application_name}-${local.environment}-sns-rds-events"
+  target_key_id = aws_kms_key.sns_rds_events.key_id
+}
+
+# RDS notification lambda role
+resource "aws_iam_role" "lambda_dbmaintenance_sns_role" {
+  name = "${local.application_name}-${local.environment}-lambda_dbmaintenance_sns_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+
+  tags = merge(local.tags, {
+    Name = "${local.application_name}-${local.environment}-lambda_dbmaintenance_sns_role"
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_dbmaintenance_sns_policy" {
+  name = "${local.application_name}-${local.environment}-lambda-dbmaintenance-sns-policy"
+  role = aws_iam_role.lambda_dbmaintenance_sns_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowReadSlackSecret"
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:ListSecretVersionIds"
+        ]
+        Resource = [
+          aws_secretsmanager_secret.slack_channel_id.arn
+        ]
+      },
+      {
+        Sid    = "AllowCloudWatchLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${aws_lambda_function.dbmaintenance_sns_to_slack.function_name}:*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+  role       = aws_iam_role.lambda_dbmaintenance_sns_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
