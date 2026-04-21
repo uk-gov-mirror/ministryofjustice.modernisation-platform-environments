@@ -377,7 +377,10 @@ resource "aws_ecs_service" "ecs_service" {
   ]
 
   placement_constraints {
-    type  = "distinctInstance"
+    for_each = local.application_data.accounts[local.environment].ec2_desired_capacity > 1 ? [1] : []
+    content {
+      type  = "distinctInstance"
+    }
   }
 
   ordered_placement_strategy {
