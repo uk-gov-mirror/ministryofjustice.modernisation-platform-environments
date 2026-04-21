@@ -101,10 +101,8 @@ module "s3-bucket-sftp-barclaycard" {
       id      = "delete-archive-folder-file-after-5-days"
       enabled = "Enabled"
 
-      filter = {
+      filter = {}
         # prefix = "archive/"
-      }
-
       expiration = {
         days = 7 # delete objects 5 days after creation
       }
