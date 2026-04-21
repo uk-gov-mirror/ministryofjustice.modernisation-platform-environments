@@ -96,19 +96,19 @@ module "s3-bucket-sftp-barclaycard" {
         days = 7
       }
 
+    },
+    {
+      id      = "delete-archive-folder-file-after-5-days"
+      enabled = "Enabled"
+
+      filter = {
+        prefix = "archive/"
+      }
+
+      expiration = {
+        days = 7 # delete objects 5 days after creation
+      }
     }
-    # {
-    #   id      = "delete-archive-folder-file-after-5-days"
-    #   enabled = "Enabled"
-
-    #   filter = {}
-    #   #   prefix = "archive/"
-
-
-    #   expiration = {
-    #     days = 7 # delete objects 5 days after creation
-    #   }
-    # }
 
   ]
 
