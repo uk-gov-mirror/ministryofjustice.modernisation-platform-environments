@@ -7,26 +7,27 @@ locals {
   ]
 }
 
-resource "aws_vpc_endpoint" "ssm_endpoints" {
-  for_each = toset(local.ssm_endpoints)
-
-  vpc_id              = data.aws_vpc.shared.id
-  service_name        = each.value
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = data.aws_subnet.private_subnets_a.id
-  security_group_ids  = [aws_security_group.vpce_sg.id]
-  private_dns_enabled = true
-}
-
 resource "aws_security_group" "vpce_sg" {
+  count = contains(["preproduction", "development"], local.environment) ? 1 : 0
+
   name   = "ssm-vpce-sg"
-  vpc_id  = data.aws_vpc.shared.id
+  vpc_id = data.aws_vpc.shared.id
 
   ingress {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-   security_groups = aws_security_group.ec2_sg[*].id 
+    security_groups = [aws_security_group.ec2_sg[0].id]
   }
+}
 
+resource "aws_vpc_endpoint" "ssm_endpoints" {
+  for_each = contains(["preproduction", "development"], local.environment) ? toset(local.ssm_endpoints) : toset([])
+
+  vpc_id              = data.aws_vpc.shared.id
+  service_name        = each.value
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = [data.aws_subnet.private_subnets_a.id]
+  security_group_ids  = [aws_security_group.vpce_sg[0].id]
+  private_dns_enabled = true
 }
