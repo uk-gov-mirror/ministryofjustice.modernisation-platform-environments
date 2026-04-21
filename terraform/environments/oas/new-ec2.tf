@@ -38,7 +38,6 @@ resource "aws_secretsmanager_secret_version" "ec2_ssh_private_key_version" {
 }
 
 
-
 ######################################
 ### EC2 INSTANCE Userdata File
 ######################################
