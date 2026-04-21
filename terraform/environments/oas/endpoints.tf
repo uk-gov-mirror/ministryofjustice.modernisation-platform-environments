@@ -28,6 +28,6 @@ resource "aws_vpc_endpoint" "ssm_endpoints" {
   service_name        = each.value
   vpc_endpoint_type   = "Interface"
   subnet_ids          = [data.aws_subnet.private_subnets_a.id]
-  security_group_ids  = [aws_security_group.vpce_sg[*].id]
+  security_group_ids  = [aws_security_group.vpce_sg[0].id]
   private_dns_enabled = true
 }
