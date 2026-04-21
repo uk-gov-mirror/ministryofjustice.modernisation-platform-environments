@@ -95,6 +95,7 @@ resource "aws_instance" "oas_app_instance_new" {
     )
   }
 
+
   tags = merge(
     local.tags,
     { "Name" = "${local.application_name} Apps Server" },
