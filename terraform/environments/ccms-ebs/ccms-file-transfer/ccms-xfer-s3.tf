@@ -86,18 +86,6 @@ module "s3-bucket-sftp-barclaycard" {
 
   lifecycle_rule = [
     {
-      id      = "delete-noncurrent-versions-after-5-days"
-      enabled = "Enabled"
-
-      # No filter → applies to whole bucket
-      filter = {}
-
-      noncurrent_version_expiration = {
-        days = 7
-      }
-
-    },
-    {
       id      = "delete-archive-folder-file-after-5-days"
       enabled = "Enabled"
 
@@ -108,8 +96,19 @@ module "s3-bucket-sftp-barclaycard" {
       expiration = {
         days = 7 # delete objects 5 days after creation
       }
-    }
+    },
+    {
+      id      = "delete-noncurrent-versions-after-5-days"
+      enabled = "Enabled"
 
+      # No filter → applies to whole bucket
+      filter = {}
+
+      noncurrent_version_expiration = {
+        days = 7
+      }
+
+    }
   ]
 
   tags = merge(local.tags,
