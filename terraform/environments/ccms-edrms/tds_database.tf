@@ -72,7 +72,7 @@ resource "aws_db_event_subscription" "tds_rds_maintenance_notifications" {
   sns_topic = aws_sns_topic.tds_maintenance_topic.arn
 
   source_type = "db-instance"
-  source_ids  = [aws_db_instance.tds_db.id]
+  source_ids  = [aws_db_instance.tds_db.identifier]
 
   event_categories = ["maintenance"]
   enabled          = true
