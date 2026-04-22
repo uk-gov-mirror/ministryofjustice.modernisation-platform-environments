@@ -39,7 +39,7 @@ resource "aws_ecs_task_definition" "sftp_bc_task_definition" {
       memory                      = local.application_data.accounts[local.environment].container_memory
       aws_region                  = local.application_data.accounts[local.environment].aws_region
       container_version           = local.application_data.accounts[local.environment].container_version
-      ccms_s3_bucket              = local.application_data.accounts[local.environment].sftp_bc_bucket
+      ccms_s3_bucket              = local.sftp_bc_bucket_name
       ebs_db_username             = "${aws_secretsmanager_secret.sftp_bc_secrets.arn}:ebs_db_username::"
       ebs_db_password             = "${aws_secretsmanager_secret.sftp_bc_secrets.arn}:ebs_db_password::"
       ebs_db_endpoint             = "${aws_secretsmanager_secret.sftp_bc_secrets.arn}:ebs_db_endpoint::"
