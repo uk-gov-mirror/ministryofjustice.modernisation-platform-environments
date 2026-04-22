@@ -3,7 +3,7 @@
     "development": {
       "short_env": "dev",
       "dns": "laa-development",
-      "app_name": "ccms-ebs-sftp-bc",
+      "app_name": "ccms-ebs-sftp-barclaycard",
       "app_count": "1",
       "api_server_port": "8080",
       "aws_region": "eu-west-2",
@@ -12,13 +12,12 @@
       "container_cpu": "512",
       "container_memory": "1024",
       "lz_aws_workspace_nonprod_prod": "10.200.0.0/19",
-      "lz_aws_appstream_subnet_a_b": "10.200.32.0/23",
-      "sftp_bc_bucket": "ccms-ebs-development-bc-inbound-mp"
+      "lz_aws_appstream_subnet_a_b": "10.200.32.0/23"
     },
     "test": {
       "short_env": "tst",
       "dns": "laa-test",
-      "app_name": "ccms-ebs-sftp-bc",
+      "app_name": "ccms-ebs-sftp-barclaycard",
       "app_count": "1",
       "api_server_port": "8443",
       "aws_region": "eu-west-2",
@@ -27,8 +26,7 @@
       "container_cpu": "2048",
       "container_memory": "7168",
       "lz_aws_workspace_nonprod_prod": "10.200.0.0/19",
-      "lz_aws_appstream_subnet_a_b": "10.200.32.0/23",
-      "sftp_bc_bucket": "ccms-ebs-test-bc-inbound-mp"
+      "lz_aws_appstream_subnet_a_b": "10.200.32.0/23"
     }
   }
 }
