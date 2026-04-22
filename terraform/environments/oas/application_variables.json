@@ -1,7 +1,7 @@
 {
   "accounts": {
     "development": {
-      "ec2amiid": "ami-02e43e2fc8a2cf14a",
+      "ec2amiid": "ami-02637525ccfc684ac",
       "ec2instancetype": "r5a.large",
       "orahomesize": "300",
       "orahome_snapshot": "snap-0ce71d391351de5c5",
