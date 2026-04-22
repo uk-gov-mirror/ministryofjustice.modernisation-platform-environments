@@ -228,6 +228,18 @@ variable "launch_type" {
   default     = "FARGATE"
 }
 
+variable "capacity_provider" {
+  type        = string
+  description = "Capacity provider to host the task"
+  default     = null
+}
+
+variable "force_new_deployment" {
+  type        = bool
+  description = "Force a new service deployment"
+  default     = false
+}
+
 variable "container_port_config" {
   description = "The port configuration for the container. First in list is used for Load Balancer Configuration"
   type = list(object({
@@ -476,12 +488,6 @@ variable "ignore_changes_service_task_definition" {
   description = "Ignore changes to the task definition"
   type        = bool
   default     = true
-}
-
-variable "force_new_deployment" {
-  description = "Force new deployment of ECS service on apply"
-  type        = bool
-  default     = false
 }
 
 variable "redeploy_on_apply" {

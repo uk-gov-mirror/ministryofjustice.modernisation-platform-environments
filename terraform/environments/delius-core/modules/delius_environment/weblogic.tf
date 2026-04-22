@@ -15,6 +15,8 @@ module "weblogic" {
 
   desired_count = var.delius_microservice_configs.weblogic.task_count
 
+  force_new_deployment = true
+
   pin_task_definition_revision           = try(var.delius_microservice_configs.weblogic.task_definition_revision, 0)
   ignore_changes_service_task_definition = false
 
@@ -200,6 +202,12 @@ resource "aws_autoscaling_group" "weblogic" {
     id      = aws_launch_template.weblogic.id
     version = "$Latest"
   }
+
+  tag {
+    key                 = "Name"
+    value               = "weblogic-${var.env_name}-ecs-asg"
+    propagate_at_launch = true
+  }
 }
 
 resource "aws_ecs_capacity_provider" "weblogic" {
@@ -214,20 +222,5 @@ resource "aws_ecs_capacity_provider" "weblogic" {
     }
 
     managed_termination_protection = "ENABLED"
-  }
-}
-
-resource "aws_ecs_cluster_capacity_providers" "main" {
-  cluster_name = module.ecs.ecs_cluster_name
-
-  capacity_providers = [
-    "FARGATE",
-    "FARGATE_SPOT",
-    aws_ecs_capacity_provider.weblogic.name
-  ]
-
-  default_capacity_provider_strategy {
-    capacity_provider = "FARGATE"
-    weight            = 1
   }
 }
