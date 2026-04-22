@@ -28,8 +28,8 @@ resource "aws_cloudwatch_metric_alarm" "alb_sftp_bc_5xx" {
 }
 
 moved {
-  from = "aws_cloudwatch_metric_alarm.container_sftp_barclaycard_count"
-  to   = "aws_cloudwatch_metric_alarm.container_sftp_bc_count"
+  from = aws_cloudwatch_metric_alarm.container_sftp_barclaycard_count
+  to   = aws_cloudwatch_metric_alarm.container_sftp_bc_count
 }
 # Alarm for ECS Container Count for sftp_bc Service
 resource "aws_cloudwatch_metric_alarm" "container_sftp_bc_count" {
@@ -55,8 +55,8 @@ resource "aws_cloudwatch_metric_alarm" "container_sftp_bc_count" {
 }
 
 moved {
-  from = "aws_cloudwatch_metric_alarm.sftp_barclaycard_waf_high_blocked_requests"
-  to   = "aws_cloudwatch_metric_alarm.sftp_bc_waf_high_blocked_requests"
+  from = aws_cloudwatch_metric_alarm.sftp_barclaycard_waf_high_blocked_requests
+  to   = aws_cloudwatch_metric_alarm.sftp_bc_waf_high_blocked_requests
 }
 
 # Underlying waf Instance Status Check Failure
@@ -85,8 +85,8 @@ resource "aws_cloudwatch_metric_alarm" "sftp_bc_waf_high_blocked_requests" {
 }
 
 moved {
-  from = "aws_cloudwatch_metric_alarm.sftp_barclaycard_alb_healthyhosts"
-  to   = "aws_cloudwatch_metric_alarm.sftp_bc_alb_healthyhosts"
+  from = aws_cloudwatch_metric_alarm.sftp_barclaycard_alb_healthyhosts
+  to   = aws_cloudwatch_metric_alarm.sftp_bc_alb_healthyhosts
 }
 
 resource "aws_cloudwatch_metric_alarm" "sftp_bc_alb_healthyhosts" {
@@ -110,8 +110,8 @@ resource "aws_cloudwatch_metric_alarm" "sftp_bc_alb_healthyhosts" {
 }
 
 moved {
-  from = "aws_cloudwatch_metric_alarm.sftp_barclaycard_ecs_high_memory"
-  to   = "aws_cloudwatch_metric_alarm.sftp_bc_ecs_high_memory"
+  from = aws_cloudwatch_metric_alarm.sftp_barclaycard_ecs_high_memory
+  to   = aws_cloudwatch_metric_alarm.sftp_bc_ecs_high_memory
 }
 
 resource "aws_cloudwatch_metric_alarm" "sftp_bc_ecs_high_memory" {
