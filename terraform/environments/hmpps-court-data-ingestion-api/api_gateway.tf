@@ -75,26 +75,28 @@ resource "aws_api_gateway_deployment" "main" {
   }
 }
 
-# Account-level Logging Role
-module "apigw_cloudwatch_role" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
-  version = "5.58.0"
+resource "aws_iam_role" "apigw_cloudwatch_role" {
+  name = "apigw-cloudwatch-logs-role-${local.environment}"
 
-  create_role = true
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "apigateway.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
 
-  role_name = "apigateway-cloudwatch-logs-role-${local.environment}"
-
-  trusted_role_services = [
-    "apigateway.amazonaws.com"
-  ]
-
-  custom_role_policy_arns = [
-    "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
-  ]
+resource "aws_iam_role_policy_attachment" "apigw_logs_attach" {
+  role       = aws_iam_role.apigw_cloudwatch_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
 }
 
 resource "aws_api_gateway_account" "main" {
-  cloudwatch_role_arn = module.apigw_cloudwatch_role.iam_role_arn
+  cloudwatch_role_arn = aws_iam_role.apigw_cloudwatch_role.arn
 }
 
 resource "aws_api_gateway_stage" "main" {
