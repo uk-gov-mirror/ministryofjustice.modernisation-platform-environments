@@ -84,7 +84,7 @@ locals {
       container_memory         = 4096
       container_cpu            = 2048
       task_definition_revision = 18
-      ec2_instance_type        = "r8g.large"
+      ec2_instance_type        = "r7i.large"
       task_count               = 1
       # max_size                 = 2
       # min_size                 = 1
