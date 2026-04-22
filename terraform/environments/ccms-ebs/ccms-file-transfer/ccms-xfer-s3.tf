@@ -1,10 +1,14 @@
 # ---------------------------------------------
-# S3 Bucket - Barclaycard
+# S3 Bucket - bc
 # ---------------------------------------------
+moved {
+  from = module.s3-bucket-sftp-barclaycard
+  to   = module.s3-bucket-sftp-bc
+}
 
-module "s3-bucket-sftp-barclaycard" {
+module "s3-bucket-sftp-bc" {
   source             = "github.com/ministryofjustice/modernisation-platform-terraform-s3-bucket?ref=9facf9fc8f8b8e3f93ffbda822028534b9a75399"
-  bucket_name        = local.sftp_barclaycard_bucket_name
+  bucket_name        = local.sftp_bc_bucket_name
   versioning_enabled = true
   bucket_policy = [jsonencode({
     Version = "2012-10-17",
@@ -15,8 +19,8 @@ module "s3-bucket-sftp-barclaycard" {
         "Principal" : "*",
         "Action" : "s3:*",
         "Resource" : [
-          module.s3-bucket-sftp-barclaycard.bucket.arn,
-          "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
+          module.s3-bucket-sftp-bc.bucket.arn,
+          "${module.s3-bucket-sftp-bc.bucket.arn}/*"
         ],
         "Condition" : {
           "Bool" : {
@@ -42,8 +46,8 @@ module "s3-bucket-sftp-barclaycard" {
           "s3:PutObjectTagging"
         ],
         Resource = [
-          module.s3-bucket-sftp-barclaycard.bucket.arn,
-          "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
+          module.s3-bucket-sftp-bc.bucket.arn,
+          "${module.s3-bucket-sftp-bc.bucket.arn}/*"
         ]
       },
       {
@@ -51,8 +55,8 @@ module "s3-bucket-sftp-barclaycard" {
         "Action" : "s3:*",
         "Effect" : "Deny",
         "Resource" : [
-          module.s3-bucket-sftp-barclaycard.bucket.arn,
-          "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
+          module.s3-bucket-sftp-bc.bucket.arn,
+          "${module.s3-bucket-sftp-bc.bucket.arn}/*"
         ],
         "Condition" : {
           "Bool" : {
@@ -68,8 +72,8 @@ module "s3-bucket-sftp-barclaycard" {
   })]
 
   log_bucket     = local.logging_bucket_name
-  log_prefix     = "s3access/${local.sftp_barclaycard_bucket_name}"
-  custom_kms_key = aws_kms_key.s3_sftp_barclaycard_kms_key.arn
+  log_prefix     = "s3access/${local.sftp_bc_bucket_name}"
+  custom_kms_key = aws_kms_key.s3_sftp_bc_kms_key.arn
   sse_algorithm  = "aws:kms"
 
   # Refer to the below section "Replication" before enabling replication
@@ -112,13 +116,17 @@ module "s3-bucket-sftp-barclaycard" {
   ]
 
   tags = merge(local.tags,
-    { Name = lower(format("s3-%s-%s-barclaycard-inbound-mp", local.application_name, local.environment)) }
+    { Name = lower(format("s3-%s-%s-bc-inbound-mp", local.application_name, local.environment)) }
   )
 }
 
+moved {
+  from = aws_s3_bucket_notification.sftp_barclaycard_bucket_notification
+  to   = aws_s3_bucket_notification.sftp_bc_bucket_notification
+}
 
-resource "aws_s3_bucket_notification" "sftp_barclaycard_bucket_notification" {
-  bucket      = module.s3-bucket-sftp-barclaycard.bucket.id
+resource "aws_s3_bucket_notification" "sftp_bc_bucket_notification" {
+  bucket      = module.s3-bucket-sftp-bc.bucket.id
   eventbridge = true
 
   topic {
@@ -134,18 +142,22 @@ resource "aws_s3_bucket_notification" "sftp_barclaycard_bucket_notification" {
 
   # }
 
-  depends_on = [module.s3-bucket-sftp-barclaycard]
+  depends_on = [module.s3-bucket-sftp-bc]
 }
 
-resource "aws_cloudwatch_event_rule" "sftp_barclaycard_bucket_event_rule" {
-  name        = "sftp-barclaycard-bucket-event-rule"
-  description = "Event rule to trigger on S3 Object Created events for the sftp-barclaycard bucket"
+moved {
+  from = aws_cloudwatch_event_rule.sftp_barclaycard_bucket_event_rule
+  to   = aws_cloudwatch_event_rule.sftp_bc_bucket_event_rule
+}
+resource "aws_cloudwatch_event_rule" "sftp_bc_bucket_event_rule" {
+  name        = "sftp-bc-bucket-event-rule"
+  description = "Event rule to trigger on S3 Object Created events for the sftp-bc bucket"
   event_pattern = jsonencode({
     source = ["aws.s3"],
     detail = {
       eventName = ["ObjectCreated"]
       requestParameters = {
-        bucketName = [module.s3-bucket-sftp-barclaycard.bucket.id]
+        bucketName = [module.s3-bucket-sftp-bc.bucket.id]
       },
       object = {
         key = [
@@ -157,16 +169,26 @@ resource "aws_cloudwatch_event_rule" "sftp_barclaycard_bucket_event_rule" {
   })
 }
 
-resource "aws_cloudwatch_event_target" "sftp_barclaycard_bucket_event_target" {
-  rule      = aws_cloudwatch_event_rule.sftp_barclaycard_bucket_event_rule.name
+moved {
+  from = aws_cloudwatch_event_target.sftp_barclaycard_bucket_event_target
+  to   = aws_cloudwatch_event_target.sftp_bc_bucket_event_target
+}
+
+resource "aws_cloudwatch_event_target" "sftp_bc_bucket_event_target" {
+  rule      = aws_cloudwatch_event_rule.sftp_bc_bucket_event_rule.name
   target_id = "s3-event-target"
   arn       = aws_lambda_function.process_file_from_bucket_lambda_function.arn
 }
 
-resource "aws_s3_object" "sftp_barclaycard_folder" {
-  bucket = module.s3-bucket-sftp-barclaycard.bucket.id
+moved {
+  from = aws_s3_object.sftp_barclaycard_folder
+  to   = aws_s3_object.sftp_bc_folder
+}
+
+resource "aws_s3_object" "sftp_bc_folder" {
+  bucket = module.s3-bucket-sftp-bc.bucket.id
   for_each = {
-    for name in local.sftp_barclaycard_folder_name :
+    for name in local.sftp_bc_folder_name :
     name => "${name}/"
   }
 

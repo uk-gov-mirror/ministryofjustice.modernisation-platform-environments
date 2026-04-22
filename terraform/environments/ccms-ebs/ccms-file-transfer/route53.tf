@@ -1,7 +1,10 @@
 # DNS Configuration
-
-# Creates Route53 DNS records for the SFTP Barclaycard LB in Non-Prod
-resource "aws_route53_record" "route53_record_sftp_barclaycard_nonprod" {
+moved {
+  from = aws_route53_record.route53_record_sftp_barclaycard_nonprod
+  to   = aws_route53_record.route53_record_sftp_bc_nonprod
+}
+# Creates Route53 DNS records for the SFTP bc LB in Non-Prod
+resource "aws_route53_record" "route53_record_sftp_bc_nonprod" {
   count    = local.is-production ? 0 : 1
   provider = aws.core-vpc
   zone_id  = data.aws_route53_zone.external.zone_id
@@ -9,23 +12,27 @@ resource "aws_route53_record" "route53_record_sftp_barclaycard_nonprod" {
   type     = "A"
 
   alias {
-    name                   = aws_lb.sftp_barclaycard_load_balancer.dns_name
-    zone_id                = aws_lb.sftp_barclaycard_load_balancer.zone_id
+    name                   = aws_lb.sftp_bc_load_balancer.dns_name
+    zone_id                = aws_lb.sftp_bc_load_balancer.zone_id
     evaluate_target_health = false
   }
 }
 
+moved {
+  from = aws_route53_record.route53_record_sftp_barclaycard_prod
+  to   = aws_route53_record.route53_record_sftp_bc_prod
+}
 
-# Creates Route53 DNS records for the SFTP Barclaycard LB in PROD
-resource "aws_route53_record" "route53_record_sftp_barclaycard_prod" {
+# Creates Route53 DNS records for the SFTP bc LB in PROD
+resource "aws_route53_record" "route53_record_sftp_bc_prod" {
   count    = local.is-production ? 1 : 0
   provider = aws.core-network-services
   zone_id  = data.aws_route53_zone.laa.zone_id
   name     = local.application_data.accounts[local.environment].app_name
   type     = "A"
   alias {
-    name                   = aws_lb.sftp_barclaycard_load_balancer.dns_name
-    zone_id                = aws_lb.sftp_barclaycard_load_balancer.zone_id
+    name                   = aws_lb.sftp_bc_load_balancer.dns_name
+    zone_id                = aws_lb.sftp_bc_load_balancer.zone_id
     evaluate_target_health = false
   }
 }

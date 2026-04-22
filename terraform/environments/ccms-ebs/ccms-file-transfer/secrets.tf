@@ -1,14 +1,21 @@
 #### This file can be used to store secrets specific to the sftp client account ####
-
-# PUI Application Secrets
-resource "aws_secretsmanager_secret" "sftp_barclaycard_secrets" {
-  name        = "${local.application_name}-sftp-barclaycard-secrets"
-  description = "SFTP Barclaycard Ingress Application Secrets"
-  kms_key_id = aws_kms_key.s3_sftp_barclaycard_kms_key.arn
+moved {
+  from = aws_secretsmanager_secret.sftp_barclaycard_secrets
+  to   = aws_secretsmanager_secret.sftp_bc_secrets
+}
+# SFTP BC Application Secrets
+resource "aws_secretsmanager_secret" "sftp_bc_secrets" {
+  name        = "${local.application_name}-sftp-bc-secrets"
+  description = "SFTP bc Ingress Application Secrets"
+  kms_key_id = aws_kms_key.s3_sftp_bc_kms_key.arn
 }
 
-resource "aws_secretsmanager_secret_version" "sftp_barclaycard_secrets" {
-  secret_id = aws_secretsmanager_secret.sftp_barclaycard_secrets.id
+moved {
+  from = aws_secretsmanager_secret_version.sftp_barclaycard_secrets
+  to   = aws_secretsmanager_secret_version.sftp_bc_secrets
+}
+resource "aws_secretsmanager_secret_version" "sftp_bc_secrets" {
+  secret_id = aws_secretsmanager_secret.sftp_bc_secrets.id
   secret_string = jsonencode({
     ebs_db_username             = "",
     ebs_db_password             = "",
@@ -25,6 +32,6 @@ resource "aws_secretsmanager_secret_version" "sftp_barclaycard_secrets" {
     }
 }
 
-data "aws_secretsmanager_secret_version" "sftp_barclaycard_secrets" {
-  secret_id = aws_secretsmanager_secret.sftp_barclaycard_secrets.id
+data "aws_secretsmanager_secret_version" "sftp_bc_secrets" {
+  secret_id = aws_secretsmanager_secret.sftp_bc_secrets.id
 }
