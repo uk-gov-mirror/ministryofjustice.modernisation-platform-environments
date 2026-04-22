@@ -9,10 +9,14 @@ resource "aws_ecs_cluster" "main_cluster" {
 }
 
 # ECS Task Definition
+moved {
+  from = aws_ecs_task_definition.sftp_barclaycard_task_definition
+  to   = aws_ecs_task_definition.sftp_bc_task_definition
+}
 
-resource "aws_ecs_task_definition" "sftp_barclaycard_task_definition" {
-  family             = "${local.application_name}-ftp-barclaycard-task"
-  execution_role_arn = aws_iam_role.barclaycard_ecs_task_execution_role.arn
+resource "aws_ecs_task_definition" "sftp_bc_task_definition" {
+  family             = "${local.application_name}-ftp-bc-task"
+  execution_role_arn = aws_iam_role.bc_ecs_task_execution_role.arn
   network_mode       = "awsvpc"
   requires_compatibilities = [
     "FARGATE",
@@ -35,27 +39,31 @@ resource "aws_ecs_task_definition" "sftp_barclaycard_task_definition" {
       memory                      = local.application_data.accounts[local.environment].container_memory
       aws_region                  = local.application_data.accounts[local.environment].aws_region
       container_version           = local.application_data.accounts[local.environment].container_version
-      ccms_s3_bucket              = local.application_data.accounts[local.environment].sftp_barclaycard_bucket
-      ebs_db_username             = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_username::"
-      ebs_db_password             = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_password::"
-      ebs_db_endpoint             = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:ebs_db_endpoint::"
-      file_transfer_slack_webhook = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:file_transfer_slack_webhook::"
-      TLS_CERT                    = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:tls_cert::"
-      TLS_KEY                     = "${aws_secretsmanager_secret.sftp_barclaycard_secrets.arn}:tls_key::"
+      ccms_s3_bucket              = local.application_data.accounts[local.environment].sftp_bc_bucket
+      ebs_db_username             = "${aws_secretsmanager_secret.sftp_bc_secrets.arn}:ebs_db_username::"
+      ebs_db_password             = "${aws_secretsmanager_secret.sftp_bc_secrets.arn}:ebs_db_password::"
+      ebs_db_endpoint             = "${aws_secretsmanager_secret.sftp_bc_secrets.arn}:ebs_db_endpoint::"
+      file_transfer_slack_webhook = "${aws_secretsmanager_secret.sftp_bc_secrets.arn}:file_transfer_slack_webhook::"
+      TLS_CERT                    = "${aws_secretsmanager_secret.sftp_bc_secrets.arn}:tls_cert::"
+      TLS_KEY                     = "${aws_secretsmanager_secret.sftp_bc_secrets.arn}:tls_key::"
     }
   )
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-sftp-barclaycard-%s-task", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-bc-%s-task", local.application_name, local.environment)) }
   )
 }
 
 # ECS Service
+moved {
+  from = aws_ecs_service.sftp_barclaycard_ecs_service
+  to   = aws_ecs_service.sftp_bc_ecs_service
+}
 
-resource "aws_ecs_service" "sftp_barclaycard_ecs_service" {
+resource "aws_ecs_service" "sftp_bc_ecs_service" {
   name            = local.application_data.accounts[local.environment].app_name
   cluster         = aws_ecs_cluster.main_cluster.id
-  task_definition = aws_ecs_task_definition.sftp_barclaycard_task_definition.arn
+  task_definition = aws_ecs_task_definition.sftp_bc_task_definition.arn
   desired_count   = local.application_data.accounts[local.environment].app_count
   launch_type     = "FARGATE"
 
@@ -72,13 +80,13 @@ resource "aws_ecs_service" "sftp_barclaycard_ecs_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.sftp_barclaycard_target_group.arn
+    target_group_arn = aws_lb_target_group.sftp_bc_target_group.arn
     container_name   = local.application_data.accounts[local.environment].app_name
     container_port   = local.application_data.accounts[local.environment].api_server_port
   }
 
   depends_on = [
-    aws_lb_listener.sftp_barclaycard_listener,
-    aws_iam_role_policy_attachment.barclaycard_ecs_task_execution_role
+    aws_lb_listener.sftp_bc_listener,
+    aws_iam_role_policy_attachment.bc_ecs_task_execution_role
   ]
 }

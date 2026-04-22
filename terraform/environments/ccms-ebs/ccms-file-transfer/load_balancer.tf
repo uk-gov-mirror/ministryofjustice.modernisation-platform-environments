@@ -1,26 +1,34 @@
 # API Load Balancer Configuration
-
-resource "aws_lb" "sftp_barclaycard_load_balancer" {
-  name               = "${local.application_name}-sftp-barclaycard-lb"
+moved {
+  from = aws_lb.sftp_barclaycard_load_balancer
+  to   = aws_lb.sftp_bc_load_balancer
+}
+resource "aws_lb" "sftp_bc_load_balancer" {
+  name               = "${local.application_name}-sftp-bc-lb"
   internal           = true
   load_balancer_type = "application"
   subnets            = data.aws_subnets.shared-private.ids
 
-  security_groups = [aws_security_group.sftp_barclaycard_load_balancer.id]
+  security_groups = [aws_security_group.sftp_bc_load_balancer.id]
 
   access_logs {
     bucket  = data.aws_s3_bucket.logging_bucket.id
-    prefix  = "${local.application_name}-sftp-barclaycard-lb"
+    prefix  = "${local.application_name}-sftp-bc-lb"
     enabled = true
   }
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-sftp-barclaycard-%s-lb", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-bc-%s-lb", local.application_name, local.environment)) }
   )
 }
 
-resource "aws_lb_target_group" "sftp_barclaycard_target_group" {
-  name                 = "${local.application_name}-sftp-barclaycard-tg"
+moved {
+  from = aws_lb_target_group.sftp_barclaycard_target_group
+  to   = aws_lb_target_group.sftp_bc_target_group
+}
+
+resource "aws_lb_target_group" "sftp_bc_target_group" {
+  name                 = "${local.application_name}-sftp-bc-tg"
   port                 = local.application_data.accounts[local.environment].api_server_port
   protocol             = "HTTP"
   vpc_id               = data.aws_vpc.shared.id
@@ -44,7 +52,7 @@ resource "aws_lb_target_group" "sftp_barclaycard_target_group" {
   }
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-sftp-barclaycard-%s-tg", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-bc-%s-tg", local.application_name, local.environment)) }
   )
 
   lifecycle {
@@ -52,17 +60,22 @@ resource "aws_lb_target_group" "sftp_barclaycard_target_group" {
   }
 }
 
+moved {
+  from = aws_lb_listener.sftp_barclaycard_listener
+  to   = aws_lb_listener.sftp_bc_listener
+}
+
 # Redirect all traffic from the lb to the target group
-resource "aws_lb_listener" "sftp_barclaycard_listener" {
-  load_balancer_arn = aws_lb.sftp_barclaycard_load_balancer.arn
+resource "aws_lb_listener" "sftp_bc_listener" {
+  load_balancer_arn = aws_lb.sftp_bc_load_balancer.arn
   port              = 443
   protocol          = "HTTPS"
 
   ssl_policy      = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  certificate_arn = aws_acm_certificate.external_sftp_barclaycard.arn
+  certificate_arn = aws_acm_certificate.external_sftp_bc.arn
 
   default_action {
-    target_group_arn = aws_lb_target_group.sftp_barclaycard_target_group.id
+    target_group_arn = aws_lb_target_group.sftp_bc_target_group.id
     type             = "forward"
   }
 }
