@@ -478,6 +478,12 @@ variable "ignore_changes_service_task_definition" {
   default     = true
 }
 
+variable "force_new_deployment" {
+  description = "Force new deployment of ECS service on apply"
+  type        = bool
+  default     = false
+}
+
 variable "redeploy_on_apply" {
   description = "Redeploy the ecs service on apply"
   type        = bool

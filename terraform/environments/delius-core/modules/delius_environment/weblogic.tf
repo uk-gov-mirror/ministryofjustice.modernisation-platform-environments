@@ -6,12 +6,12 @@ module "weblogic" {
     aws.core-network-services = aws.core-network-services
   }
 
-  name            = "weblogic"
-  launch_type     = "EC2"
-  container_image = "${var.platform_vars.environment_management.account_ids["core-shared-services-production"]}.dkr.ecr.eu-west-2.amazonaws.com/delius-core-weblogic:${var.delius_microservice_configs.weblogic.image_tag}"
-  env_name        = var.env_name
-  account_config  = var.account_config
-  account_info    = var.account_info
+  name              = "weblogic"
+  container_image   = "${var.platform_vars.environment_management.account_ids["core-shared-services-production"]}.dkr.ecr.eu-west-2.amazonaws.com/delius-core-weblogic:${var.delius_microservice_configs.weblogic.image_tag}"
+  env_name          = var.env_name
+  account_config    = var.account_config
+  account_info      = var.account_info
+  capacity_provider = aws_ecs_capacity_provider.weblogic.name
 
   desired_count = var.delius_microservice_configs.weblogic.task_count
 
