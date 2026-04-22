@@ -24,10 +24,7 @@ locals {
 resource "aws_cloudwatch_event_rule" "alarm_state_change_threader" {
   name = "emds-alarm-state-change-threader-${local.environment_shorthand}"
 
-  description = (
-    "Routes CloudWatch ALARM/OK state changes to "
-    "cloudwatch_alarm_threader for incident-threaded Slack notifications"
-  )
+  description = "Routes CloudWatch ALARM/OK state changes to cloudwatch_alarm_threader for incident-threaded Slack notifications"
 
   event_pattern = jsonencode(
     {
