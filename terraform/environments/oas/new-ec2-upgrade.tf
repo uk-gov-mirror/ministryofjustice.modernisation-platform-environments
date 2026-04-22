@@ -24,7 +24,7 @@ resource "aws_network_interface" "oas_eni_upgrade_test" {
 resource "aws_instance" "oas_app_instance_upgrade_test" {
   count = contains(["development"], local.environment) ? 1 : 0
 
-  ami                         = local.application_data.accounts[local.environment].ec2amiid
+  ami                         = "ami-02637525ccfc684ac"
   availability_zone           = "eu-west-2a"
   ebs_optimized               = true
   instance_type               = local.application_data.accounts[local.environment].ec2instancetype
