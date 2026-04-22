@@ -651,6 +651,7 @@ module "cloudwatch_alarm_threader" {
   core_shared_services_id = local.environment_management.account_ids[
     "core-shared-services-production"
   ]
+
   production_dev = local.is-production ? "prod" : (
     local.is-preproduction ? "preprod" : (
       local.is-test ? "test" : "dev"
@@ -661,15 +662,17 @@ module "cloudwatch_alarm_threader" {
   subnet_ids         = data.aws_subnets.shared-private.ids
 
   environment_variables = {
-    SNS_TOPIC_ARN                 = aws_sns_topic.emds_alerts.arn
-    STATE_BUCKET                  = local.alarm_thread_state_bucket
-    STATE_PREFIX                  = local.alarm_thread_state_prefix
-    ENVIRONMENT                   = local.environment_shorthand
-    INCLUDE_REASON                = "true"
-    ENABLE_CUSTOM_ACTIONS         = "false"
-    GLUE_DB_JANITOR_FUNCTION_NAME = (
-      module.staging_db_janitor.lambda_function_name
+    SNS_TOPIC_ARN                    = aws_sns_topic.emds_alerts.arn
+    STATE_BUCKET                     = local.alarm_thread_state_bucket
+    STATE_PREFIX                     = local.alarm_thread_state_prefix
+    ENVIRONMENT                      = local.environment_shorthand
+    INCLUDE_REASON                   = "true"
+    ENABLE_CUSTOM_ACTIONS            = "false"
+    GLUE_DB_JANITOR_STATE_MACHINE_ARN = (
+      aws_sfn_state_machine.staging_db_janitor.arn
     )
+    GLUE_DB_JANITOR_STALE_MINUTES    = "120"
+    GLUE_DB_JANITOR_BATCH_SIZE       = "250"
   }
 }
 
@@ -780,6 +783,7 @@ module "staging_db_janitor" {
   core_shared_services_id = local.environment_management.account_ids[
     "core-shared-services-production"
   ]
+
   production_dev = local.is-production ? "prod" : (
     local.is-preproduction ? "preprod" : (
       local.is-test ? "test" : "dev"
@@ -795,7 +799,7 @@ module "staging_db_janitor" {
     STAGING_BUCKET        = module.s3-create-a-derived-table-bucket.bucket.id
     CATALOG_ID            = data.aws_caller_identity.current.account_id
     LAMBDA_ROLE_ARN       = aws_iam_role.staging_db_janitor.arn
-    STALE_MINUTES         = "30"
+    STALE_MINUTES         = "60"
     MAX_DATABASES_PER_RUN = "2000"
     STATE_BUCKET          = local.alarm_thread_state_bucket
     STATE_PREFIX          = local.alarm_thread_state_prefix

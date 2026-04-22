@@ -1782,14 +1782,12 @@ data "aws_iam_policy_document" "cloudwatch_alarm_threader_policy_document" {
   }
 
   statement {
-    sid    = "AllowInvokeStagingDbJanitor"
+    sid    = "AllowStartStagingDbJanitorWorkflow"
     effect = "Allow"
     actions = [
-      "lambda:InvokeFunction",
+      "states:StartExecution",
     ]
-    resources = [
-      module.staging_db_janitor.lambda_function_arn,
-    ]
+    resources = [aws_sfn_state_machine.staging_db_janitor.arn]
   }
 }
 
@@ -1977,6 +1975,19 @@ data "aws_iam_policy_document" "staging_db_janitor_policy_document" {
     resources = [
       module.s3-create-a-derived-table-bucket.bucket.arn,
       "${module.s3-create-a-derived-table-bucket.bucket.arn}/*",
+    ]
+  }
+
+  statement {
+    sid    = "S3StateAccess"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+    ]
+    resources = [
+      "arn:aws:s3:::${local.alarm_thread_state_bucket}/${local.alarm_thread_state_prefix}/${local.environment_shorthand}/*"
     ]
   }
 
