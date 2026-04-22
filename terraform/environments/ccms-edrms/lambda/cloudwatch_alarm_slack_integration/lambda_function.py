@@ -577,21 +577,21 @@ def lambda_handler(event, context):
             is_error = False   # S3 put is informational
         # ---------------- RDS Maintenance Event ----------------
         elif isinstance(alarm_details, dict) and "EventCategories" in alarm_details:
-                logger.info("RDS maintenance event detected in SNS message")
-                logger.info("Starting Notification to Slack for RDS Maintenance Event via SNS Topic")
+            logger.info("RDS maintenance event detected in SNS message")
+            logger.info("Starting Notification to Slack for RDS Maintenance Event via SNS Topic")
 
-                timestamp_str = sns_message.get('Timestamp')
-                if timestamp_str:
-                    try:
+            timestamp_str = sns_message.get('Timestamp')
+            if timestamp_str:
+                try:
                     dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ")
-                    except ValueError:
+                except ValueError:
                     dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%SZ")
-                    formatted = dt.strftime("%a, %d %b %Y %H:%M:%S UTC")
+                formatted = dt.strftime("%a, %d %b %Y %H:%M:%S UTC")
 
-                channelconfig = config.slack_channel_webhook    
-                alarmnotifiction = "RDS Maintenance Event Notification"
-                type = "RDS Maintenance"
-                is_error = False
+            channelconfig = config.slack_channel_webhook    
+            alarmnotifiction = "RDS Maintenance Event Notification"
+            type = "RDS Maintenance"
+            is_error = False
         # ---------------- CloudWatch Alarm (default) ----------------
         else:
             logger.info("CloudWatch Alarm detected in SNS message")
