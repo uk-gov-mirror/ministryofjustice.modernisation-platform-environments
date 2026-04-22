@@ -234,10 +234,32 @@ systemctl enable amazon-ssm-agent
 systemctl stop firewalld
 systemctl disable firewalld
 
+# Ensure SSH host keys exist (may be missing from AMI)
+echo "Checking SSH host keys..."
+if [ ! -f /etc/ssh/ssh_host_rsa_key ] || [ ! -f /etc/ssh/ssh_host_ecdsa_key ] || [ ! -f /etc/ssh/ssh_host_ed25519_key ]; then
+    echo "SSH host keys missing, regenerating..."
+    ssh-keygen -A
+    echo "SSH host keys regenerated successfully"
+else
+    echo "SSH host keys already exist"
+fi
+
 # Configure SSH keepalive to prevent session timeouts
-echo "ClientAliveInterval 60" >> /etc/ssh/sshd_config
-echo "ClientAliveCountMax 120" >> /etc/ssh/sshd_config
-systemctl restart sshd
-echo "SSH keepalive configured: 60s interval, 120 retries = 2 hours max idle"
+if ! grep -q "^ClientAliveInterval" /etc/ssh/sshd_config; then
+    echo "ClientAliveInterval 60" >> /etc/ssh/sshd_config
+    echo "ClientAliveCountMax 120" >> /etc/ssh/sshd_config
+    echo "SSH keepalive settings added to sshd_config"
+else
+    echo "SSH keepalive settings already configured"
+fi
+
+# Test sshd configuration before restart
+if sshd -t 2>/dev/null; then
+    systemctl restart sshd
+    echo "SSH keepalive configured: 60s interval, 120 retries = 2 hours max idle"
+else
+    echo "WARNING: sshd configuration test failed, skipping restart"
+    sshd -t
+fi
 
 echo "Userdata script completed at $(date)"
