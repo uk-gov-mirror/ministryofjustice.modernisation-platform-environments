@@ -2,8 +2,13 @@
 # CloudWatch Alarms for PUI
 #######################################
 # Alarm for ALB 5xx Errors
-resource "aws_cloudwatch_metric_alarm" "alb_sftp_barclaycard_5xx" {
-  alarm_name          = "${local.application_name}-${local.environment}-sftp-barclaycard-5xx-errors"
+moved {
+  from = "aws_cloudwatch_metric_alarm.alb_sftp_barclaycard_5xx"
+  to   = "aws_cloudwatch_metric_alarm.alb_sftp_bc_5xx"
+}
+
+resource "aws_cloudwatch_metric_alarm" "alb_sftp_bc_5xx" {
+  alarm_name          = "${local.application_name}-${local.environment}-sftp-bc-5xx-errors"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 3
   metric_name         = "HTTPCode_ELB_5XX_Count"
@@ -11,9 +16,9 @@ resource "aws_cloudwatch_metric_alarm" "alb_sftp_barclaycard_5xx" {
   period              = 60
   statistic           = "Sum"
   threshold           = 10
-  alarm_description   = "Alarm when the number of 5xx errors from the sftp_barclaycard ALB exceeds 10 in a 3 minute period"
+  alarm_description   = "Alarm when the number of 5xx errors from the sftp_bc ALB exceeds 10 in a 3 minute period"
   dimensions = {
-    LoadBalancer = aws_lb.sftp_barclaycard_load_balancer.arn_suffix
+    LoadBalancer = aws_lb.sftp_bc_load_balancer.arn_suffix
   }
   treat_missing_data = "notBreaching"
   alarm_actions      = [data.aws_sns_topic.cw_alerts.arn]
@@ -22,9 +27,13 @@ resource "aws_cloudwatch_metric_alarm" "alb_sftp_barclaycard_5xx" {
   tags = local.tags
 }
 
-# Alarm for ECS Container Count for sftp_barclaycard Service
-resource "aws_cloudwatch_metric_alarm" "container_sftp_barclaycard_count" {
-  alarm_name          = "${local.application_name}-${local.environment}-sftp-barclaycard-container-count-low"
+moved {
+  from = "aws_cloudwatch_metric_alarm.container_sftp_barclaycard_count"
+  to   = "aws_cloudwatch_metric_alarm.container_sftp_bc_count"
+}
+# Alarm for ECS Container Count for sftp_bc Service
+resource "aws_cloudwatch_metric_alarm" "container_sftp_bc_count" {
+  alarm_name          = "${local.application_name}-${local.environment}-sftp-bc-container-count-low"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = 1
   metric_name         = "RunningTaskCount"
@@ -34,9 +43,9 @@ resource "aws_cloudwatch_metric_alarm" "container_sftp_barclaycard_count" {
   threshold           = local.application_data.accounts[local.environment].app_count
   dimensions = {
     ClusterName = aws_ecs_cluster.main_cluster.name
-    ServiceName = aws_ecs_service.sftp_barclaycard_ecs_service.name
+    ServiceName = aws_ecs_service.sftp_bc_ecs_service.name
   }
-  alarm_description         = "The number of sftp_barclaycard ECS tasks is less than ${local.application_data.accounts[local.environment].app_count}. Runbook: https://dsdmoj.atlassian.net/wiki/spaces/CCMS/pages/1408598133/Monitoring+and+Alerts"
+  alarm_description         = "The number of sftp_bc ECS tasks is less than ${local.application_data.accounts[local.environment].app_count}. Runbook: https://dsdmoj.atlassian.net/wiki/spaces/CCMS/pages/1408598133/Monitoring+and+Alerts"
   treat_missing_data        = "breaching"
   alarm_actions             = [data.aws_sns_topic.cw_alerts.arn]
   ok_actions                = [data.aws_sns_topic.cw_alerts.arn]
@@ -45,9 +54,14 @@ resource "aws_cloudwatch_metric_alarm" "container_sftp_barclaycard_count" {
   tags = local.tags
 }
 
+moved {
+  from = "aws_cloudwatch_metric_alarm.sftp_barclaycard_waf_high_blocked_requests"
+  to   = "aws_cloudwatch_metric_alarm.sftp_bc_waf_high_blocked_requests"
+}
+
 # Underlying waf Instance Status Check Failure
-resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_waf_high_blocked_requests" {
-  alarm_name        = "${local.application_name}-sftp-barclaycard-${local.environment}-waf-high-blocked-requests"
+resource "aws_cloudwatch_metric_alarm" "sftp_bc_waf_high_blocked_requests" {
+  alarm_name        = "${local.application_name}-sftp-bc-${local.environment}-waf-high-blocked-requests"
   alarm_description = "High number of requests blocked by WAF. Potential attack."
 
   comparison_operator = "GreaterThanThreshold"
@@ -60,7 +74,7 @@ resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_waf_high_blocked_reques
   treat_missing_data  = "notBreaching"
 
   dimensions = {
-    WebACL = aws_wafv2_web_acl.sftp_barclaycard_web_acl.name
+    WebACL = aws_wafv2_web_acl.sftp_bc_web_acl.name
     Scope  = "REGIONAL"
   }
 
@@ -70,8 +84,13 @@ resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_waf_high_blocked_reques
   tags = local.tags
 }
 
-resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_alb_healthyhosts" {
-  alarm_name          = "${local.application_name}-sftp-barclaycard-${local.environment}-alb-targets-group"
+moved {
+  from = "aws_cloudwatch_metric_alarm.sftp_barclaycard_alb_healthyhosts"
+  to   = "aws_cloudwatch_metric_alarm.sftp_bc_alb_healthyhosts"
+}
+
+resource "aws_cloudwatch_metric_alarm" "sftp_bc_alb_healthyhosts" {
+  alarm_name          = "${local.application_name}-sftp-bc-${local.environment}-alb-targets-group"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = 1
   metric_name         = "HealthyHostCount"
@@ -85,13 +104,18 @@ resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_alb_healthyhosts" {
   alarm_actions       = [data.aws_sns_topic.cw_alerts.arn]
   ok_actions          = [data.aws_sns_topic.cw_alerts.arn]
   dimensions = {
-    TargetGroup  = aws_lb_target_group.sftp_barclaycard_target_group.arn_suffix
-    LoadBalancer = aws_lb.sftp_barclaycard_load_balancer.arn_suffix
+    TargetGroup  = aws_lb_target_group.sftp_bc_target_group.arn_suffix
+    LoadBalancer = aws_lb.sftp_bc_load_balancer.arn_suffix
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_ecs_high_memory" {
-  alarm_name          = "${local.application_name}-sftp-barclaycard-${local.environment}-ecs-high-memory"
+moved {
+  from = "aws_cloudwatch_metric_alarm.sftp_barclaycard_ecs_high_memory"
+  to   = "aws_cloudwatch_metric_alarm.sftp_bc_ecs_high_memory"
+}
+
+resource "aws_cloudwatch_metric_alarm" "sftp_bc_ecs_high_memory" {
+  alarm_name          = "${local.application_name}-sftp-bc-${local.environment}-ecs-high-memory"
   alarm_description   = "ECS Fargate service memory utilization is high"
   comparison_operator = "GreaterThanThreshold"
   threshold           = 85
@@ -105,7 +129,7 @@ resource "aws_cloudwatch_metric_alarm" "sftp_barclaycard_ecs_high_memory" {
 
   dimensions = {
     ClusterName = aws_ecs_cluster.main_cluster.name
-    ServiceName = aws_ecs_service.sftp_barclaycard_ecs_service.name
+    ServiceName = aws_ecs_service.sftp_bc_ecs_service.name
   }
 
   alarm_actions = [data.aws_sns_topic.cw_alerts.arn]

@@ -1,17 +1,25 @@
 ### Load Balancer Security Group
-
-resource "aws_security_group" "sftp_barclaycard_load_balancer" {
-  name_prefix = "${local.application_name}-sftp-barclaycard-load-balancer-sg"
-  description = "Controls access to ${local.application_name}-sftp-barclaycard lb"
+moved {
+  from = aws_security_group.sftp_barclaycard_load_balancer
+  to   = aws_security_group.sftp_bc_load_balancer
+}
+resource "aws_security_group" "sftp_bc_load_balancer" {
+  name_prefix = "${local.application_name}-sftp-bc-load-balancer-sg"
+  description = "Controls access to ${local.application_name}-sftp-bc lb"
   vpc_id      = data.aws_vpc.shared.id
 
   tags = merge(local.tags,
-    { Name = lower(format("%s-sftp-barclaycard-%s-lb-sg", local.application_name, local.environment)) }
+    { Name = lower(format("%s-sftp-bc-%s-lb-sg", local.application_name, local.environment)) }
   )
 }
 
-resource "aws_vpc_security_group_ingress_rule" "sftp_barclaycard_lb_ingress_443" {
-  security_group_id = aws_security_group.sftp_barclaycard_load_balancer.id
+moved {
+  from = aws_vpc_security_group_ingress_rule.sftp_barclaycard_lb_ingress_443
+  to   = aws_vpc_security_group_ingress_rule.sftp_bc_lb_ingress_443
+}
+
+resource "aws_vpc_security_group_ingress_rule" "sftp_bc_lb_ingress_443" {
+  security_group_id = aws_security_group.sftp_bc_load_balancer.id
 
   cidr_ipv4   = "0.0.0.0/0"
   description = "HTTPS from Anywhere - WAF in front of ALB"
@@ -20,8 +28,12 @@ resource "aws_vpc_security_group_ingress_rule" "sftp_barclaycard_lb_ingress_443"
   to_port     = 443
 }
 
-resource "aws_vpc_security_group_ingress_rule" "sftp_barclaycard_lb_ingress_from_lambda_443" {
-  security_group_id = aws_security_group.sftp_barclaycard_load_balancer.id
+moved {
+  from = aws_vpc_security_group_ingress_rule.sftp_barclaycard_lb_ingress_from_lambda_443
+  to   = aws_vpc_security_group_ingress_rule.sftp_bc_lb_ingress_from_lambda_443
+}
+resource "aws_vpc_security_group_ingress_rule" "sftp_bc_lb_ingress_from_lambda_443" {
+  security_group_id = aws_security_group.sftp_bc_load_balancer.id
 
   description = "HTTPS from Anywhere - WAF in front of ALB"
   ip_protocol = "tcp"
@@ -30,8 +42,13 @@ resource "aws_vpc_security_group_ingress_rule" "sftp_barclaycard_lb_ingress_from
   referenced_security_group_id = aws_security_group.process_file_from_bucket_lambda_sg.id
 }
 
-resource "aws_vpc_security_group_egress_rule" "sftp_barclaycard_lb_egress_api" {
-  security_group_id = aws_security_group.sftp_barclaycard_load_balancer.id
+moved {
+  from = aws_vpc_security_group_egress_rule.sftp_barclaycard_lb_egress_api
+  to   = aws_vpc_security_group_egress_rule.sftp_bc_lb_egress_api
+}
+
+resource "aws_vpc_security_group_egress_rule" "sftp_bc_lb_egress_api" {
+  security_group_id = aws_security_group.sftp_bc_load_balancer.id
 
   ip_protocol                  = "tcp"
   from_port                    = local.application_data.accounts[local.environment].api_server_port
@@ -56,7 +73,7 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_fargate_sg_ingress_all" 
   ip_protocol                  = "tcp"
   from_port                    = local.application_data.accounts[local.environment].api_server_port
   to_port                      = local.application_data.accounts[local.environment].api_server_port
-  referenced_security_group_id = aws_security_group.sftp_barclaycard_load_balancer.id
+  referenced_security_group_id = aws_security_group.sftp_bc_load_balancer.id
 }
 
 resource "aws_vpc_security_group_egress_rule" "cluster_fargate_sg_egress_all" {
@@ -85,5 +102,5 @@ resource "aws_vpc_security_group_egress_rule" "process_file_from_bucket_lambda_s
   ip_protocol = "tcp"
   from_port   = 443
   to_port     = 443
-  referenced_security_group_id = aws_security_group.sftp_barclaycard_load_balancer.id
+  referenced_security_group_id = aws_security_group.sftp_bc_load_balancer.id
 }

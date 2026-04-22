@@ -30,8 +30,8 @@ resource "aws_iam_role_policy" "lambda_process_file_from_bucket_policy" {
           "s3:GetObjectTagging"
         ]
         Resource = [
-          module.s3-bucket-sftp-barclaycard.bucket.arn,
-          "${module.s3-bucket-sftp-barclaycard.bucket.arn}/*"
+          module.s3-bucket-sftp-bc.bucket.arn,
+          "${module.s3-bucket-sftp-bc.bucket.arn}/*"
         ]
       },
       {
@@ -71,7 +71,7 @@ resource "aws_lambda_permission" "allow_s3_invoke" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.process_file_from_bucket_lambda_function.function_name
   principal     = "s3.amazonaws.com"
-  source_arn    = module.s3-bucket-sftp-barclaycard.bucket.arn
+  source_arn    = module.s3-bucket-sftp-bc.bucket.arn
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_vpc" {
