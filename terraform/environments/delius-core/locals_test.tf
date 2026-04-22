@@ -80,11 +80,12 @@ locals {
 
   delius_microservices_configs_test = {
     weblogic = {
-      image_tag         = "6.2.0.3"
+      image_tag         = "6.7.4"
       container_port    = 8080
       container_memory  = 4096
       container_cpu     = 2048
-      ec2_instance_type = "r5.2xlarge"
+      ec2_instance_type = "r8g.2xlarge"
+      task_count        = 8
     }
 
     weblogic_params = {
@@ -101,7 +102,7 @@ locals {
       DMS_PROTOCOL                      = "https"
       EIS_USER_CONTEXT                  = "cn=EISUsers,ou=Users,dc=moj,dc=com"
       ELASTICSEARCH_URL                 = "https://probation-search-test.hmpps.service.justice.gov.uk/delius"
-      GDPR_URL                          = "/gdpr/ui/homepage" # GDPR not deployed to CP yet, <URL>/gdpr/ui/homepage
+      GDPR_URL                          = "https://ndelius.test.probation.service.justice.gov.uk/gdpr/ui/homepage" # GDPR not deployed to CP yet, <URL>/gdpr/ui/homepage
       JDBC_CONNECTION_POOL_MAX_CAPACITY = "100"
       JDBC_CONNECTION_POOL_MIN_CAPACITY = "50"
       JDBC_URL                          = ""
@@ -134,10 +135,12 @@ locals {
     }
 
     weblogic_eis = {
-      image_tag        = "6.2.0.3"
+      image_tag        = "6.7.4-eis"
       container_port   = 8080
       container_memory = 2048
       container_cpu    = 1024
+      ec2_instance_type = "r8g.large"
+      task_count        = 1
     }
 
     pwm = {

@@ -89,7 +89,8 @@ locals {
       container_port    = 8080
       container_memory  = 4096
       container_cpu     = 2048
-      ec2_instance_type = "r5.2xlarge"
+      ec2_instance_type = "r8g.2xlarge"
+      task_count        = 8
     }
 
     weblogic_params = {
@@ -143,6 +144,8 @@ locals {
       container_port   = 8080
       container_memory = 2048
       container_cpu    = 1024
+      ec2_instance_type = "r8g.large"
+      task_count        = 1
     }
 
     pwm = {

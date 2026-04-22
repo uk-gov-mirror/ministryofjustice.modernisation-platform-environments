@@ -13,7 +13,7 @@ module "weblogic" {
   account_config  = var.account_config
   account_info    = var.account_info
 
-  desired_count = 1
+  desired_count = var.delius_microservice_configs.weblogic.task_count
 
   pin_task_definition_revision           = try(var.delius_microservice_configs.weblogic.task_definition_revision, 0)
   ignore_changes_service_task_definition = false
