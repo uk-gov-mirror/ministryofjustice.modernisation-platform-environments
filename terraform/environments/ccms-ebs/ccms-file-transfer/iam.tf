@@ -60,8 +60,27 @@ resource "aws_iam_policy" "bc_ecs_secrets_policy" {
     {
       "Effect": "Allow",
       "Action": ["secretsmanager:GetSecretValue"],
-      "Resource": ["arn:aws:secretsmanager:eu-west-2:*:secret:*"]
+      "Resource": ["arn:aws:secretsmanager:eu-west-2:${data.aws_region.current.id}:secret:${aws_secretsmanager_secret.sftp_bc_secrets.id}"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["kms:GenerateDataKey*","kms:Decrypt"],
+      "Resource": [aws_kms_key.s3_sftp_bc_kms_key.arn}"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+          "s3:GetObject",
+          "s3:GetObjectTagging",
+          "s3:ListObjects*",
+          "s3:DeleteObject"
+        ],
+      "Resource": [
+          module.s3-bucket-sftp-bc.bucket.arn,
+          "${module.s3-bucket-sftp-bc.bucket.arn}/*"
+        ]
     }
+
   ]
 }
 EOF
