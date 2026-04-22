@@ -65,7 +65,7 @@ resource "aws_iam_policy" "bc_ecs_secrets_policy" {
     {
       "Effect": "Allow",
       "Action": ["kms:GenerateDataKey*","kms:Decrypt"],
-      "Resource": [aws_kms_key.s3_sftp_bc_kms_key.arn]
+      "Resource": ["${aws_kms_key.s3_sftp_bc_kms_key.arn}"]
     },
     {
       "Effect": "Allow",
@@ -76,7 +76,7 @@ resource "aws_iam_policy" "bc_ecs_secrets_policy" {
           "s3:DeleteObject"
         ],
       "Resource": [
-          module.s3-bucket-sftp-bc.bucket.arn,
+          "${module.s3-bucket-sftp-bc.bucket.arn}",
           "${module.s3-bucket-sftp-bc.bucket.arn}/*"
         ]
     }
