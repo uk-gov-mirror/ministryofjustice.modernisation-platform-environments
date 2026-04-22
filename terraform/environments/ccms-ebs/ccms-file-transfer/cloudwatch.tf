@@ -3,8 +3,8 @@
 #######################################
 # Alarm for ALB 5xx Errors
 moved {
-  from = "aws_cloudwatch_metric_alarm.alb_sftp_barclaycard_5xx"
-  to   = "aws_cloudwatch_metric_alarm.alb_sftp_bc_5xx"
+  from = aws_cloudwatch_metric_alarm.alb_sftp_barclaycard_5xx
+  to   = aws_cloudwatch_metric_alarm.alb_sftp_bc_5xx
 }
 
 resource "aws_cloudwatch_metric_alarm" "alb_sftp_bc_5xx" {
