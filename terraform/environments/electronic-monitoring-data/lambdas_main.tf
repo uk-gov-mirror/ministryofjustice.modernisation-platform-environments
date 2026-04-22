@@ -776,7 +776,8 @@ module "create_p1_export" {
   subnet_ids         = data.aws_subnets.shared-private.ids
 
   environment_variables = {
-    MOD_PLAT_ACCOUNT_ALIAS = terraform.workspace
+    MOD_PLAT_ACCOUNT_ALIAS  = terraform.workspace
+    MOD_PLAT_ACCOUNT_NUMBER = local.env_account_id
   }
 
 }
