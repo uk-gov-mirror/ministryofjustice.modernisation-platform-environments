@@ -45,7 +45,8 @@ module "ecs_service" {
 
   pin_task_definition_revision = var.pin_task_definition_revision
 
-  launch_type                        = var.launch_type
+  force_new_deployment               = var.force_new_deployment
+  capacity_provider                  = var.capacity_provider
   desired_count                      = var.desired_count
   deployment_maximum_percent         = var.deployment_maximum_percent
   deployment_minimum_healthy_percent = var.deployment_minimum_healthy_percent
