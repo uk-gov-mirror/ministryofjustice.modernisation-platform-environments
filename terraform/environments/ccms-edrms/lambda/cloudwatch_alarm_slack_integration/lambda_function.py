@@ -421,6 +421,7 @@ class NotificationService:
                     }
                 }
             ]
+            payload = {"blocks": blocks}
         # ---------------- Fallback ----------------
         else:
             payload = {
