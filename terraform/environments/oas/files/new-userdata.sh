@@ -6,6 +6,49 @@ exec 2>&1
 # Create marker file to prove userdata started
 echo "Userdata started at $(date)" > /tmp/userdata_started
 
+# Replace SSH keys with new Terraform-generated keys
+echo "Replacing SSH keys with new Terraform-generated keys..."
+
+# Fetch the public key from EC2 instance metadata
+TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" 2>/dev/null)
+NEW_PUBLIC_KEY=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-keys/0/openssh-key 2>/dev/null)
+
+if [ -n "$NEW_PUBLIC_KEY" ]; then
+    echo "New public key retrieved from metadata service"
+    
+    # Update authorized_keys for ec2-user
+    if id "ec2-user" &>/dev/null; then
+        echo "Updating authorized_keys for ec2-user"
+        mkdir -p /home/ec2-user/.ssh
+        echo "$NEW_PUBLIC_KEY" > /home/ec2-user/.ssh/authorized_keys
+        chmod 700 /home/ec2-user/.ssh
+        chmod 600 /home/ec2-user/.ssh/authorized_keys
+        chown -R ec2-user:ec2-user /home/ec2-user/.ssh
+        echo "ec2-user SSH keys updated successfully"
+    fi
+    
+    # Update authorized_keys for root
+    echo "Updating authorized_keys for root"
+    mkdir -p /root/.ssh
+    echo "$NEW_PUBLIC_KEY" > /root/.ssh/authorized_keys
+    chmod 700 /root/.ssh
+    chmod 600 /root/.ssh/authorized_keys
+    echo "root SSH keys updated successfully"
+    
+    # Update authorized_keys for oracle user if it exists
+    if id "oracle" &>/dev/null; then
+        echo "Updating authorized_keys for oracle"
+        mkdir -p /home/oracle/.ssh
+        echo "$NEW_PUBLIC_KEY" > /home/oracle/.ssh/authorized_keys
+        chmod 700 /home/oracle/.ssh
+        chmod 600 /home/oracle/.ssh/authorized_keys
+        chown -R oracle:dba /home/oracle/.ssh
+        echo "oracle SSH keys updated successfully"
+    fi
+else
+    echo "WARNING: Could not retrieve public key from metadata service"
+fi
+
 # Set hostname
 hostnamectl set-hostname oas
 
@@ -187,9 +230,25 @@ echo "Installing required packages..."
 cd /tmp
 
 # Disable deltarpm and prestodelta to avoid 404 errors and timeouts
-sed -i 's/^deltarpm=.*/deltarpm=0/' /etc/yum.conf
-if ! grep -q "^deltarpm=" /etc/yum.conf; then
-    echo "deltarpm=0" >> /etc/yum.conf
+# Detect OS version to use correct configuration file
+RHEL_VERSION=$(rpm -E %{rhel} 2>/dev/null || cat /etc/redhat-release | grep -oE '[0-9]+' | head -1)
+
+if [ "$RHEL_VERSION" = "8" ]; then
+    # Oracle Linux 8 uses DNF configuration
+    echo "Configuring deltarpm for Oracle Linux 8 (DNF)..."
+    if [ -f /etc/dnf/dnf.conf ]; then
+        sed -i 's/^deltarpm=.*/deltarpm=0/' /etc/dnf/dnf.conf
+        if ! grep -q "^deltarpm=" /etc/dnf/dnf.conf; then
+            echo "deltarpm=0" >> /etc/dnf/dnf.conf
+        fi
+    fi
+else
+    # Oracle Linux 7 and earlier use YUM configuration
+    echo "Configuring deltarpm for Oracle Linux 7 (YUM)..."
+    sed -i 's/^deltarpm=.*/deltarpm=0/' /etc/yum.conf
+    if ! grep -q "^deltarpm=" /etc/yum.conf; then
+        echo "deltarpm=0" >> /etc/yum.conf
+    fi
 fi
 
 # Disable prestodelta in EPEL repo
@@ -204,16 +263,46 @@ yum -y install xorg-x11-xauth
 yum -y install xclock xterm
 
 # Install and configure SSM agent and firewall
-yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+# Check if SSM agent is already installed (may exist on OL8 AMI)
+if ! rpm -q amazon-ssm-agent >/dev/null 2>&1; then
+    echo "SSM agent not found, installing..."
+    yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+else
+    echo "SSM agent already installed, skipping installation"
+fi
+
+# Ensure SSM agent is started and enabled
 systemctl start amazon-ssm-agent
 systemctl enable amazon-ssm-agent
 systemctl stop firewalld
 systemctl disable firewalld
 
+# Ensure SSH host keys exist (may be missing from AMI)
+echo "Checking SSH host keys..."
+if [ ! -f /etc/ssh/ssh_host_rsa_key ] || [ ! -f /etc/ssh/ssh_host_ecdsa_key ] || [ ! -f /etc/ssh/ssh_host_ed25519_key ]; then
+    echo "SSH host keys missing, regenerating..."
+    ssh-keygen -A
+    echo "SSH host keys regenerated successfully"
+else
+    echo "SSH host keys already exist"
+fi
+
 # Configure SSH keepalive to prevent session timeouts
-echo "ClientAliveInterval 60" >> /etc/ssh/sshd_config
-echo "ClientAliveCountMax 120" >> /etc/ssh/sshd_config
-systemctl restart sshd
-echo "SSH keepalive configured: 60s interval, 120 retries = 2 hours max idle"
+if ! grep -q "^ClientAliveInterval" /etc/ssh/sshd_config; then
+    echo "ClientAliveInterval 60" >> /etc/ssh/sshd_config
+    echo "ClientAliveCountMax 120" >> /etc/ssh/sshd_config
+    echo "SSH keepalive settings added to sshd_config"
+else
+    echo "SSH keepalive settings already configured"
+fi
+
+# Test sshd configuration before restart
+if sshd -t 2>/dev/null; then
+    systemctl restart sshd
+    echo "SSH keepalive configured: 60s interval, 120 retries = 2 hours max idle"
+else
+    echo "WARNING: sshd configuration test failed, skipping restart"
+    sshd -t
+fi
 
 echo "Userdata script completed at $(date)"
