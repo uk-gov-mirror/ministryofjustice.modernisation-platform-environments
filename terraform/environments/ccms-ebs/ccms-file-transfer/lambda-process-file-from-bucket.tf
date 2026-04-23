@@ -57,23 +57,30 @@ resource "aws_lambda_function" "process_file_from_bucket_lambda_function" {
   publish       = true
 
   vpc_config {
-    security_group_ids = [aws_security_group.process_file_from_bucket_lambda_sg.id]
-    subnet_ids         = data.aws_subnets.shared-private.ids
+    security_group_ids      = [aws_security_group.process_file_from_bucket_lambda_sg.id]
+    subnet_ids              = data.aws_subnets.shared-private.ids
   }
-
+  
   tags = merge(local.tags, {
     Name = "${local.application_name}-${local.environment}-process-file-from-bucket"
   })
 }
 
-resource "aws_lambda_permission" "allow_s3_invoke" {
-  statement_id  = "AllowExecutionFromS3"
+resource "aws_lambda_permission" "allow_eventbridge_invoke" {
+  statement_id  = "AllowExecutionFromEventBridge"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.process_file_from_bucket_lambda_function.function_name
-  principal     = "s3.amazonaws.com"
-  source_arn    = module.s3-bucket-sftp-bc.bucket.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.sftp_bc_bucket_event_rule.arn
 }
 
+# resource "aws_lambda_permission" "allow_s3_invoke" {
+#   statement_id  = "AllowExecutionFromS3"
+#   action        = "lambda:InvokeFunction"
+#   function_name = aws_lambda_function.process_file_from_bucket_lambda_function.function_name
+#   principal     = "s3.amazonaws.com"
+#   source_arn    = module.s3-bucket-sftp-bc.bucket.arn
+# }
 resource "aws_iam_role_policy_attachment" "lambda_vpc" {
   role       = aws_iam_role.lambda_process_file_from_bucket_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
