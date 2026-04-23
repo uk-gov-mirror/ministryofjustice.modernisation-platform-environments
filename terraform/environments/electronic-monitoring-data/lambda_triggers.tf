@@ -363,9 +363,9 @@ resource "aws_lambda_event_source_mapping" "p1_creation_trigger" {
   event_source_arn = aws_sqs_queue.p1_creation_queue.arn
   function_name    = module.create_p1_export.lambda_function_name
 
-  batch_size = 10
+  batch_size = 1
 
   scaling_config {
-    maximum_concurrency = 100
+    maximum_concurrency = 1
   }
 }
