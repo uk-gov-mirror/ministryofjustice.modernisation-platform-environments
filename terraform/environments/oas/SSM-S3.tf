@@ -6,6 +6,8 @@
 resource "aws_s3_bucket" "files_bucket" {
   count         = contains(["preproduction", "development"], local.environment) ? 1 : 0
   bucket_prefix = "${local.application_name}-bucket-to-upload-ec2-files-"
+  force_destroy = true
+
 
   tags = {
     Name        = "${local.application_name}-bucket-to-upload-ec2-files"
