@@ -758,7 +758,6 @@ module "mdss_reconciler" {
 #-----------------------------------------------------------------------------------
 
 module "create_p1_export" {
-  count                          = 1
   source                         = "./modules/lambdas"
   is_image                       = true
   image_name                     = "export_em_data_p1"
