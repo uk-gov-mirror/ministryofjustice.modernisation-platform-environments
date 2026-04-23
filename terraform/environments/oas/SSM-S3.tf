@@ -103,7 +103,7 @@ resource "aws_iam_policy" "ec2_s3_reader" {
 //adding poloicy to role 
 resource "aws_iam_role_policy_attachment" "ec2_s3_reader" {
   count      = contains(["preproduction", "development"], local.environment) ? 1 : 0
-  role       = aws_iam_role.ec2_instance_role_new.name
+  role       = aws_iam_role.ec2_instance_role_new[0].name
   policy_arn = aws_iam_policy.ec2_s3_reader[0].arn
 }
 
