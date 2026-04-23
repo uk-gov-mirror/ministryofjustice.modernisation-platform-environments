@@ -11,7 +11,7 @@ module "weblogic" {
   env_name          = var.env_name
   account_config    = var.account_config
   account_info      = var.account_info
-  capacity_provider = aws_ecs_capacity_provider.weblogic.name
+  capacity_provider = aws_ecs_capacity_provider.weblogic_eis.name
 
   # desired_count = var.delius_microservice_configs.weblogic.task_count
   desired_count = 0
@@ -189,39 +189,39 @@ resource "aws_security_group" "ecs_host_sg" {
   tags = merge(var.tags, { Name = "weblogic-${var.env_name}-ecscluster-private-sg" })
 }
 
-resource "aws_autoscaling_group" "weblogic" {
-  name = "weblogic-${var.env_name}-ecs-asg"
+# resource "aws_autoscaling_group" "weblogic" {
+#   name = "weblogic-${var.env_name}-ecs-asg"
 
-  max_size              = 2
-  min_size              = 1
-  desired_capacity      = 1
-  protect_from_scale_in = false
+#   max_size              = 2
+#   min_size              = 1
+#   desired_capacity      = 1
+#   protect_from_scale_in = false
 
-  vpc_zone_identifier = var.account_config.private_subnet_ids
+#   vpc_zone_identifier = var.account_config.private_subnet_ids
 
-  launch_template {
-    id      = aws_launch_template.weblogic.id
-    version = "$Latest"
-  }
+#   launch_template {
+#     id      = aws_launch_template.weblogic.id
+#     version = "$Latest"
+#   }
 
-  tag {
-    key                 = "Name"
-    value               = "weblogic-${var.env_name}-ecs-asg"
-    propagate_at_launch = true
-  }
-}
+#   tag {
+#     key                 = "Name"
+#     value               = "weblogic-${var.env_name}-ecs-asg"
+#     propagate_at_launch = true
+#   }
+# }
 
-resource "aws_ecs_capacity_provider" "weblogic" {
-  name = "weblogic-${var.env_name}-ec2-cp"
+# resource "aws_ecs_capacity_provider" "weblogic" {
+#   name = "weblogic-${var.env_name}-ec2-cp"
 
-  auto_scaling_group_provider {
-    auto_scaling_group_arn = aws_autoscaling_group.weblogic.arn
+#   auto_scaling_group_provider {
+#     auto_scaling_group_arn = aws_autoscaling_group.weblogic.arn
 
-    managed_scaling {
-      status          = "ENABLED"
-      target_capacity = 100
-    }
+#     managed_scaling {
+#       status          = "ENABLED"
+#       target_capacity = 100
+#     }
 
-    managed_termination_protection = "ENABLED"
-  }
-}
+#     managed_termination_protection = "ENABLED"
+#   }
+# }
