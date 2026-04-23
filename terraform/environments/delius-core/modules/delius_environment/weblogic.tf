@@ -192,9 +192,9 @@ resource "aws_autoscaling_group" "weblogic" {
   name = "weblogic-${var.env_name}-ecs-asg"
 
   max_size              = 2
-  min_size              = 1
-  desired_capacity      = 1
-  protect_from_scale_in = true
+  min_size              = 0
+  desired_capacity      = 0
+  protect_from_scale_in = false
 
   vpc_zone_identifier = var.account_config.private_subnet_ids
 
