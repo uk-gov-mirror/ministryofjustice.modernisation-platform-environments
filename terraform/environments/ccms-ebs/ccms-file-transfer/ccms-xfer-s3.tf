@@ -146,21 +146,24 @@ moved {
 resource "aws_cloudwatch_event_rule" "sftp_bc_bucket_event_rule" {
   name        = "sftp-bc-bucket-event-rule"
   description = "Event rule to trigger on S3 Object Created events for the sftp-bc bucket"
-  event_pattern = jsonencode({
-    source = ["aws.s3"],
-    detail = {
-      eventName = ["ObjectCreated"]
-      requestParameters = {
-        bucketName = [module.s3-bucket-sftp-bc.bucket.id]
-      },
-      object = {
-        key = [
-          { prefix = "inbound/" },
-          { suffix = ".csv" }
-        ]
-      }
+event_pattern = jsonencode({
+  source = ["aws.s3"]
+  detail-type = ["Object Created"]
+  detail = {
+    eventName = [
+      { prefix = "ObjectCreated" }
+    ]
+    bucket = {
+      name = ["${module.s3-bucket-sftp-bc.bucket.id}"]
     }
-  })
+    object = {
+      key = [
+        { prefix = "input/" },
+        { suffix = ".csv" }
+      ]
+    }
+  }
+})
 }
 
 moved {
