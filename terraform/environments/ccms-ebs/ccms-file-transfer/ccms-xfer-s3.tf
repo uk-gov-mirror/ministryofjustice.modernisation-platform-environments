@@ -158,7 +158,7 @@ event_pattern = jsonencode({
     }
     object = {
       key = [
-        { prefix = "input/" },
+        { prefix = "inbound/" },
         { suffix = ".csv" }
       ]
     }
