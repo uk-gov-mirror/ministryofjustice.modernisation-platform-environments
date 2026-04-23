@@ -7,7 +7,7 @@ moved {
 resource "aws_secretsmanager_secret" "sftp_bc_secrets" {
   name        = "${local.application_name}-sftp-bc-secrets"
   description = "SFTP bc Ingress Application Secrets"
-  kms_key_id = aws_kms_key.s3_sftp_bc_kms_key.arn
+  kms_key_id  = aws_kms_key.s3_sftp_bc_kms_key.arn
 }
 
 moved {
@@ -25,11 +25,11 @@ resource "aws_secretsmanager_secret_version" "sftp_bc_secrets" {
     tls_key                     = ""
   })
 
-    lifecycle {
-      ignore_changes = [
-        secret_string
-      ]
-    }
+  lifecycle {
+    ignore_changes = [
+      secret_string
+    ]
+  }
 }
 
 data "aws_secretsmanager_secret_version" "sftp_bc_secrets" {

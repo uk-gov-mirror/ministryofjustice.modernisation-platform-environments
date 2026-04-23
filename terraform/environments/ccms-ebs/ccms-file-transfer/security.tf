@@ -35,10 +35,10 @@ moved {
 resource "aws_vpc_security_group_ingress_rule" "sftp_bc_lb_ingress_from_lambda_443" {
   security_group_id = aws_security_group.sftp_bc_load_balancer.id
 
-  description = "HTTPS from Anywhere - WAF in front of ALB"
-  ip_protocol = "tcp"
-  from_port   = 443
-  to_port     = 443
+  description                  = "HTTPS from Anywhere - WAF in front of ALB"
+  ip_protocol                  = "tcp"
+  from_port                    = 443
+  to_port                      = 443
   referenced_security_group_id = aws_security_group.process_file_from_bucket_lambda_sg.id
 }
 
@@ -99,8 +99,8 @@ resource "aws_security_group" "process_file_from_bucket_lambda_sg" {
 resource "aws_vpc_security_group_egress_rule" "process_file_from_bucket_lambda_sg_egress_all" {
   security_group_id = aws_security_group.process_file_from_bucket_lambda_sg.id
 
-  ip_protocol = "tcp"
-  from_port   = 443
-  to_port     = 443
+  ip_protocol                  = "tcp"
+  from_port                    = 443
+  to_port                      = 443
   referenced_security_group_id = aws_security_group.sftp_bc_load_balancer.id
 }
