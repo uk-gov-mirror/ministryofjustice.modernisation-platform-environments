@@ -376,9 +376,12 @@ resource "aws_ecs_service" "ecs_service" {
     aws_ecs_task_definition.ifs_task_definition
   ]
 
+  deployment_minimum_healthy_percent = local.application_data.accounts[local.environment].ec2_desired_capacity > 1 ? 50 : 0
+  deployment_maximum_percent         = 100
+
   dynamic "placement_constraints" {
     for_each = local.application_data.accounts[local.environment].ec2_desired_capacity > 1 ? [1] : []
-    
+
     content {
       type  = "distinctInstance"
     }
