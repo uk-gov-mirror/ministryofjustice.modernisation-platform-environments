@@ -5,7 +5,7 @@ moved {
 
 # Set up CloudWatch group and log stream and retain logs for 90 days
 resource "aws_cloudwatch_log_group" "log_group_sftp_bc" {
-  name              = "${local.application_name}-sftp-bc-ecs"
+  name              = "${local.application_name}-sftp-barclaycard-ecs"
   retention_in_days = 90
 
   tags = merge(local.tags,
