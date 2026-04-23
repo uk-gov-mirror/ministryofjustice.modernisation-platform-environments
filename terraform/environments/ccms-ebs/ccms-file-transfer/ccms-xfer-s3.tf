@@ -123,17 +123,17 @@ resource "aws_s3_bucket_notification" "sftp_bc_bucket_notification" {
   bucket      = module.s3-bucket-sftp-bc.bucket.id
   eventbridge = true
 
-  topic {
-    topic_arn = data.aws_sns_topic.s3_topic.arn
-    events    = ["s3:ObjectCreated:*"]
-  }
-
-  # lambda_function {
-  #   lambda_function_arn = aws_lambda_function.process_file_from_bucket_lambda_function.arn
-  #   events              = ["s3:ObjectCreated:*"]
-  #   filter_prefix       = "inbound/"
-  #   filter_suffix       = ".csv"
+  # topic {
+  #   topic_arn = data.aws_sns_topic.s3_topic.arn
+  #   events    = ["s3:ObjectCreated:*"]
   # }
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.process_file_from_bucket_lambda_function.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "inbound/"
+    filter_suffix       = ".csv"
+  }
 
   depends_on = [module.s3-bucket-sftp-bc]
 }
@@ -146,24 +146,16 @@ moved {
 resource "aws_cloudwatch_event_rule" "sftp_bc_bucket_event_rule" {
   name        = "sftp-bc-bucket-event-rule"
   description = "Event rule to trigger on S3 Object Created events for the sftp-bc bucket"
-event_pattern = jsonencode({
-  source = ["aws.s3"]
-  detail-type = ["Object Created"]
-  detail = {
-    eventName = [
-      { prefix = "ObjectCreated" }
-    ]
-    bucket = {
-      name = ["${module.s3-bucket-sftp-bc.bucket.id}"]
+  event_pattern = jsonencode({
+    source = ["aws.s3"]
+    detail-type = ["Object Created"]
+    detail = {
+      bucket = {
+        name = ["${module.s3-bucket-sftp-bc.bucket.id}"]
+      }
     }
-    object = {
-      key = [
-        { prefix = "inbound/" },
-        { suffix = ".csv" }
-      ]
-    }
-  }
-})
+  })
+  tags = merge(local.tags, { name = "sftp-bc-bucket-event-rule" })
 }
 
 moved {
@@ -174,7 +166,7 @@ moved {
 resource "aws_cloudwatch_event_target" "sftp_bc_bucket_event_target" {
   rule      = aws_cloudwatch_event_rule.sftp_bc_bucket_event_rule.name
   target_id = "s3-event-target"
-  arn       = aws_lambda_function.process_file_from_bucket_lambda_function.arn
+  arn       = data.aws_sns_topic.s3_topic.arn
 }
 
 moved {
