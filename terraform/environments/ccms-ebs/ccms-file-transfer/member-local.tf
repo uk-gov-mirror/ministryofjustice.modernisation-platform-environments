@@ -1,7 +1,7 @@
 locals {
   sftp_bc_folder_name = ["inbound", "archive", "error"]
   sftp_bc_bucket_name = "${local.application_name}-${local.environment}-bc-inbound-mp"
-  logging_bucket_name          = "${local.application_name}-${local.environment}-logging"
+  logging_bucket_name = "${local.application_name}-${local.environment}-logging"
 
   # Certificate configuration based on environment
   nonprod_domain = format("%s-%s.modernisation-platform.service.justice.gov.uk", var.networking[0].business-unit, local.environment)

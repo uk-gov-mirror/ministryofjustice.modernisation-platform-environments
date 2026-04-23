@@ -147,7 +147,7 @@ resource "aws_cloudwatch_event_rule" "sftp_bc_bucket_event_rule" {
   name        = "sftp-bc-bucket-event-rule"
   description = "Event rule to trigger on S3 Object Created events for the sftp-bc bucket"
   event_pattern = jsonencode({
-    source = ["aws.s3"]
+    source      = ["aws.s3"]
     detail-type = ["Object Created"]
     detail = {
       bucket = {
