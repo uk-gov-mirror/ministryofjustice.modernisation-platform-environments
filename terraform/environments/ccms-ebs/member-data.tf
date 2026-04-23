@@ -188,6 +188,15 @@ data "aws_iam_policy_document" "s3_topic_policy" {
       ])
     }
   }
+  statement {
+    effect = "Allow"
+    principals  {
+      type        = "Service"
+      identifiers = ["events.amazonaws.com"]
+    }
+    actions   = ["SNS:Publish"]
+    resources = ["arn:aws:sns:*:*:s3-event-notification-topic"]
+  }
 }
 
 ## PROD CERT
