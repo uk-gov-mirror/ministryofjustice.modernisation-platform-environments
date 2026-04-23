@@ -357,3 +357,15 @@ resource "aws_sqs_queue_policy" "p1_creation_policy" {
   queue_url = aws_sqs_queue.p1_creation_queue.id
   policy    = data.aws_iam_policy_document.p1_create_export.json
 }
+
+
+resource "aws_lambda_event_source_mapping" "p1_creation_trigger" {
+  event_source_arn = aws_sqs_queue.p1_creation_queue.arn
+  function_name    = module.create_p1_export.lambda_function_name
+
+  batch_size = 10
+
+  scaling_config {
+    maximum_concurrency = 100
+  }
+}
