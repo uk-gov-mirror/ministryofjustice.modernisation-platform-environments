@@ -80,7 +80,7 @@ module "s3-bucket-sftp-bc" {
   replication_enabled = false
   # Below three variables and providers configuration are only relevant if 'replication_enabled' is set to true
   replication_region = "eu-west-2"
-  # replication_role_arn                     = module.s3-bucket-replication-role.role.arn
+  # replication_role_arn = module.s3-bucket-replication-role.role.arn
   providers = {
     # Here we use the default provider Region for replication. Destination buckets can be within the same Region as the
     # source bucket. On the other hand, if you need to enable cross-region replication, please contact the Modernisation
@@ -90,28 +90,22 @@ module "s3-bucket-sftp-bc" {
 
   lifecycle_rule = [
     {
-      id      = "delete-archive-folder-file-after-5-days"
+      id      = "delete-archive-folder-file-after-7-days"
       enabled = "Enabled"
-
-      filter = {
-        prefix = "archive/"
-      }
+      prefix  = "archive/"
 
       expiration = {
-        days = 7 # delete objects 5 days after creation
+        days = 7
       }
     },
     {
-      id      = "delete-noncurrent-versions-after-5-days"
+      id      = "delete-noncurrent-versions-after-7-days"
       enabled = "Enabled"
-
-      # No filter → applies to whole bucket
-      filter = {}
+      prefix  = ""
 
       noncurrent_version_expiration = {
         days = 7
       }
-
     }
   ]
 
@@ -130,8 +124,8 @@ resource "aws_s3_bucket_notification" "sftp_bc_bucket_notification" {
   eventbridge = true
 
   topic {
-    topic_arn     = data.aws_sns_topic.s3_topic.arn
-    events        = ["s3:ObjectCreated:*"]
+    topic_arn = data.aws_sns_topic.s3_topic.arn
+    events    = ["s3:ObjectCreated:*"]
   }
 
   # lambda_function {
@@ -139,7 +133,6 @@ resource "aws_s3_bucket_notification" "sftp_bc_bucket_notification" {
   #   events              = ["s3:ObjectCreated:*"]
   #   filter_prefix       = "inbound/"
   #   filter_suffix       = ".csv"
-
   # }
 
   depends_on = [module.s3-bucket-sftp-bc]
@@ -149,6 +142,7 @@ moved {
   from = aws_cloudwatch_event_rule.sftp_barclaycard_bucket_event_rule
   to   = aws_cloudwatch_event_rule.sftp_bc_bucket_event_rule
 }
+
 resource "aws_cloudwatch_event_rule" "sftp_bc_bucket_event_rule" {
   name        = "sftp-bc-bucket-event-rule"
   description = "Event rule to trigger on S3 Object Created events for the sftp-bc bucket"
