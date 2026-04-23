@@ -23,7 +23,7 @@ data "aws_iam_policy_document" "ecs_execution_policy" {
       "cloudwatch:*",
       "logs:*"
     ]
-    resources = [aws_ecs_cluster.emds-gdpr-cluster[0].name]
+    resources = [aws_ecs_cluster.emds-gdpr-cluster[0].arn]
   }
 
   statement {
@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "ecs_execution_policy" {
     actions = [
       "ecr:GetAuthorizationToken"
     ]
-    resources = [aws_ecs_cluster.emds-gdpr-cluster[0].name]
+    resources = [aws_ecs_cluster.emds-gdpr-cluster[0].arn]
   }
 
   statement {
@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "ecs_execution_policy" {
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage"
     ]
-    resources = [aws_ecs_cluster.emds-gdpr-cluster[0].name]
+    resources = [aws_ecs_cluster.emds-gdpr-cluster[0].arn]
   }
 }
 
