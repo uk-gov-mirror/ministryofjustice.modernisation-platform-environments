@@ -60,7 +60,7 @@ resource "aws_iam_policy" "bc_ecs_secrets_policy" {
     {
       "Effect": "Allow",
       "Action": ["secretsmanager:GetSecretValue"],
-      "Resource": ["arn:aws:secretsmanager:eu-west-2:${data.aws_region.current.id}:secret:${aws_secretsmanager_secret.sftp_bc_secrets.id}"]
+      "Resource": ["${aws_secretsmanager_secret.sftp_bc_secrets.id}"]
     },
     {
       "Effect": "Allow",
