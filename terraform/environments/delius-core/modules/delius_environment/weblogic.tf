@@ -211,17 +211,17 @@ resource "aws_security_group" "ecs_host_sg" {
 #   }
 # }
 
-# resource "aws_ecs_capacity_provider" "weblogic" {
-#   name = "weblogic-${var.env_name}-ec2-cp"
+resource "aws_ecs_capacity_provider" "weblogic" {
+  name = "weblogic-${var.env_name}-ec2-cp"
 
-#   auto_scaling_group_provider {
-#     auto_scaling_group_arn = aws_autoscaling_group.weblogic.arn
+  auto_scaling_group_provider {
+    auto_scaling_group_arn = aws_autoscaling_group.weblogic.arn
 
-#     managed_scaling {
-#       status          = "ENABLED"
-#       target_capacity = 100
-#     }
+    managed_scaling {
+      status          = "ENABLED"
+      target_capacity = 100
+    }
 
-#     managed_termination_protection = "ENABLED"
-#   }
-# }
+    managed_termination_protection = "DISABLED"
+  }
+}
