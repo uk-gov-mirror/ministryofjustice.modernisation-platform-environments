@@ -1,3 +1,8 @@
+variable "github_org" {
+  description = "The name of the github organization"
+  type        = string
+}
+
 variable "github_workflows" {
   description = "The scheduled github actions workflows"
   type = map(object({

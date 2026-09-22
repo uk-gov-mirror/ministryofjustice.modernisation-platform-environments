@@ -12,6 +12,7 @@ resource "aws_lambda_function" "github_workflow_trigger" {
   environment {
     variables = {
       GITHUB_APP_SECRET_ARN  = aws_secretsmanager_secret.github_app.arn
+      GITHUB_ORG             = var.github_org
     }
   }
 
